@@ -1,3 +1,10 @@
+/********************************** (C) COPYRIGHT *******************************
+ * File Name          : PS2Driver.h
+ * Author             : ChnMasterOG
+ * Version            : V1.0
+ * Date               : 2021/11/17
+ * Description        : PS/2驱动头文件
+ *******************************************************************************/
 
 #ifndef __PS2DRIVER_H
 	#define __PS2DRIVER_H
@@ -48,9 +55,12 @@
                 unsigned char YMovement : 8;
                 unsigned char ZMovement : 8;
             };
-        uint8_t data[3];
+        uint8_t data[4];
     }Mousestate;
-	
+
+    extern Mousestate PS2dat;
+    extern uint8_t PS2_byte_cnt, PS2_data_ready;
+
 	//declare functions
     uint8_t PS2_ReadByte(uint8_t* dat);
 	uint8_t PS2_WriteByte(uint8_t dat);
@@ -58,6 +68,7 @@
 	uint8_t PS2_Config(uint8_t reg, uint8_t res);
 	void PS2_En_Data_Report(void);
 	void PS2_Dis_Data_Report(void);
+	void PS2_IT_handler(void);
 	uint8_t PS2_Init(char* buf, BOOL is_IT);
 	
 #endif

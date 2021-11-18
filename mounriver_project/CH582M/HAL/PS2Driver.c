@@ -1,3 +1,10 @@
+/********************************** (C) COPYRIGHT *******************************
+ * File Name          : PS2Driver.c
+ * Author             : ChnMasterOG
+ * Version            : V1.0
+ * Date               : 2021/11/17
+ * Description        : PS/2驱动源文件
+ *******************************************************************************/
 
 #include "PS2Driver.h"
 #include <string.h>
@@ -5,6 +12,11 @@
 #define Delay_us    DelayUs
 #define Delay_ms    DelayMs
 
+uint8_t PS2_bit_cnt = 0,
+        PS2_byte_cnt = 0,
+        PS2_byte = 0,
+        PS2_high_cnt = 0,
+        PS2_data_ready = 0;
 Mousestate PS2dat;
 
 /* PS/2协议读一字节，成功返回0，失败返回1 */
@@ -117,6 +129,37 @@ void PS2_Dis_Data_Report(void)
 	PS2CLK_Clr();
 }
 
+//PS/2接口中断处理请求
+void PS2_IT_handler(void)
+{
+    if ( PS2CLK_GPIO_(ReadITFlagBit)( PS2CLK_Pin ) != 0 ) {
+        PS2CLK_GPIO_(ClearITFlagBit)( PS2CLK_Pin );
+        ++PS2_bit_cnt;
+        if (PS2_bit_cnt == 1) { //起始位
+            PS2_byte = 0;
+            PS2_high_cnt = 0;
+        }
+        else if (PS2_bit_cnt <= 9) {
+            PS2_byte >>= 1;
+            if (PS2DATA_State()) {
+                  PS2_byte |= 0x80;
+                ++PS2_high_cnt;
+            }
+        }
+        else if (PS2_bit_cnt == 10) {   //校验位
+//            if ((PS2_high_cnt & 1) == (PS2DATA_State() != 0)) {
+//                PS2_data_ready = 2;
+//            }
+        }
+        else if (PS2_bit_cnt == 11) {   //停止位
+            PS2dat.data[PS2_byte_cnt++] = PS2_byte;
+            PS2_Dis_Data_Report();
+            PS2_bit_cnt = 0;
+            PS2_data_ready = 1;
+        }
+    }
+}
+
 //初始化PS/2接口，成功返回0，失败返回1
 uint8_t PS2_Init(char* buf, BOOL is_IT)
 { 	
@@ -156,7 +199,7 @@ uint8_t PS2_Init(char* buf, BOOL is_IT)
     }
     if (is_IT) {
         PS2_En_Data_Report();
-        DelayMs(50);
+        DelayMs(10);   //等待稳定
         PS2CLK_GPIO_(ITModeCfg)( PS2CLK_Pin, GPIO_ITMode_FallEdge );
         PFIC_EnableIRQ( GPIO_B_IRQn );  //PS2CLK_GPIO
     }
@@ -164,3 +207,34 @@ uint8_t PS2_Init(char* buf, BOOL is_IT)
     return 0;
 }
 
+/****************************************************************
+ *
+ *  //初始化写法
+ *  if (PS2_Init(buf, 1) != 0) {
+ *      printf("%s\n", buf);
+ *      while (1);
+ *  } else printf("mouse ready\n");
+ *
+ *  //主循环中断写法
+ *  while (1) {
+ *      if (PS2_data_ready != 0) {
+ *          PS2_data_ready = 0;
+ *          if (PS2_byte_cnt == 3) {
+ *              PS2_byte_cnt = 0;
+ *              printf("%d %d %d %d\n", PS2dat.LeftBtn, PS2dat.RightBtn, PS2dat.XMovement, PS2dat.YMovement);
+ *          }
+ *          PS2_En_Data_Report();
+ *      }
+ *      DelayUs(50);
+ *  }
+ *
+ *  //主循环非中断写法
+ *  while (1) {
+ *      PS2_ReadMouseData(&PS2dat);
+ *      printf("%d %d %d %d\n", PS2dat.LeftBtn, PS2dat.RightBtn, PS2dat.XMovement, PS2dat.YMovement);
+ *  }
+ *
+ *  //外部中断调用
+ *  PS2_IT_handler();
+ *
+ ****************************************************************/

@@ -1,4 +1,4 @@
-src/Main.o: ../src/Main.c ../StdPeriphDriver/inc/CH58x_common.h \
+HAL/USBDriver.o: ../HAL/USBDriver.c ../StdPeriphDriver/inc/CH58x_common.h \
  ../StdPeriphDriver/inc/CH583SFR.h ../RVMSIS/core_riscv.h \
  ../StdPeriphDriver/inc/CH58x_clk.h ../StdPeriphDriver/inc/CH58x_uart.h \
  ../StdPeriphDriver/inc/CH58x_gpio.h ../StdPeriphDriver/inc/CH58x_i2c.h \
@@ -7,7 +7,6 @@ src/Main.o: ../src/Main.c ../StdPeriphDriver/inc/CH58x_common.h \
  ../StdPeriphDriver/inc/CH58x_sys.h ../StdPeriphDriver/inc/CH58x_timer.h \
  ../StdPeriphDriver/inc/CH58x_spi.h ../StdPeriphDriver/inc/CH58x_usbdev.h \
  ../StdPeriphDriver/inc/CH58x_usbhost.h ../StdPeriphDriver/inc/ISP583.h \
- ../HAL/include/PS2Driver.h ../HAL/include/UART1.h \
  ../HAL/include/USBDriver.h
 
 ../StdPeriphDriver/inc/CH58x_common.h:
@@ -43,9 +42,5 @@ src/Main.o: ../src/Main.c ../StdPeriphDriver/inc/CH58x_common.h \
 ../StdPeriphDriver/inc/CH58x_usbhost.h:
 
 ../StdPeriphDriver/inc/ISP583.h:
-
-../HAL/include/PS2Driver.h:
-
-../HAL/include/UART1.h:
 
 ../HAL/include/USBDriver.h:
