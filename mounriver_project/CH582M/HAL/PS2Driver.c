@@ -7,6 +7,7 @@
  *******************************************************************************/
 
 #include "PS2Driver.h"
+#include "USBDriver.h"
 #include <string.h>
 
 #define Delay_us    DelayUs
@@ -17,7 +18,7 @@ uint8_t PS2_bit_cnt = 0,
         PS2_byte = 0,
         PS2_high_cnt = 0,
         PS2_data_ready = 0;
-Mousestate PS2dat;
+Mousestate* const PS2dat = (Mousestate*)HIDMouse;
 
 /* PS/2协议读一字节，成功返回0，失败返回1 */
 uint8_t PS2_ReadByte(uint8_t* dat)
@@ -152,7 +153,9 @@ void PS2_IT_handler(void)
 //            }
         }
         else if (PS2_bit_cnt == 11) {   //停止位
-            PS2dat.data[PS2_byte_cnt++] = PS2_byte;
+            if ((PS2_byte_cnt == 0 && (PS2_byte & 0x8)) || PS2_byte_cnt > 0) {    //检查Always1位是否为1
+                PS2dat->data[PS2_byte_cnt++] = PS2_byte;
+            }
             PS2_Dis_Data_Report();
             PS2_bit_cnt = 0;
             PS2_data_ready = 1;

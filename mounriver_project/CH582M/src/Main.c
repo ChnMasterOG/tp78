@@ -10,6 +10,7 @@
 #include "PS2Driver.h"
 #include "UART1.h"
 #include "USBDriver.h"
+#include "KeyboardDriver.h"
 
 char buf[520];
 
@@ -50,13 +51,25 @@ int main()
           PS2_data_ready = 0;
           if (PS2_byte_cnt == 3) {
               PS2_byte_cnt = 0;
-              memcpy(pEP2_IN_DataBuf, &PS2dat, 4);
+              memcpy(pEP2_IN_DataBuf, PS2dat, 4);
               DevEP2_IN_Deal( 4 );
-//              printf("%d %d %d %d\n", PS2dat.LeftBtn, PS2dat.RightBtn, PS2dat.XMovement, PS2dat.YMovement);
+//              printf("%d %d %d %d\n", PS2dat->LeftBtn, PS2dat->RightBtn, PS2dat->XMovement, PS2dat->YMovement);
           }
           PS2_En_Data_Report();
       }
       DelayUs(50);
+//      Keyboarddat.Key1 = 0;
+//      memcpy(pEP1_IN_DataBuf, &Keyboarddat, 8);
+//      DevEP1_IN_Deal( 8 );
+//      Keyboarddat.Key1 = KEY_0;
+//      DelayMs(1000);
+//      memcpy(pEP1_IN_DataBuf, &Keyboarddat, 8);
+//      DevEP1_IN_Deal( 8 );
+//      Keyboarddat.Key1 = 0;
+//      DelayMs(10);
+//      memcpy(pEP1_IN_DataBuf, &Keyboarddat, 8);
+//      DevEP1_IN_Deal( 8 );
+//      DelayMs(1000);
   }
 
 }

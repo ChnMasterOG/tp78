@@ -4,16 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../HAL/KeyboardDriver.c \
 ../HAL/PS2Driver.c \
 ../HAL/UART1.c \
 ../HAL/USBDriver.c 
 
 OBJS += \
+./HAL/KeyboardDriver.o \
 ./HAL/PS2Driver.o \
 ./HAL/UART1.o \
 ./HAL/USBDriver.o 
 
 C_DEPS += \
+./HAL/KeyboardDriver.d \
 ./HAL/PS2Driver.d \
 ./HAL/UART1.d \
 ./HAL/USBDriver.d 

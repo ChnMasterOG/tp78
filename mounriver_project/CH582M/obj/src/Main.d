@@ -8,7 +8,7 @@ src/Main.o: ../src/Main.c ../StdPeriphDriver/inc/CH58x_common.h \
  ../StdPeriphDriver/inc/CH58x_spi.h ../StdPeriphDriver/inc/CH58x_usbdev.h \
  ../StdPeriphDriver/inc/CH58x_usbhost.h ../StdPeriphDriver/inc/ISP583.h \
  ../HAL/include/PS2Driver.h ../HAL/include/UART1.h \
- ../HAL/include/USBDriver.h
+ ../HAL/include/USBDriver.h ../HAL/include/KeyboardDriver.h
 
 ../StdPeriphDriver/inc/CH58x_common.h:
 
@@ -49,3 +49,5 @@ src/Main.o: ../src/Main.c ../StdPeriphDriver/inc/CH58x_common.h \
 ../HAL/include/UART1.h:
 
 ../HAL/include/USBDriver.h:
+
+../HAL/include/KeyboardDriver.h:

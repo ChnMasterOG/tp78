@@ -58,7 +58,7 @@
         uint8_t data[4];
     }Mousestate;
 
-    extern Mousestate PS2dat;
+    extern Mousestate* const PS2dat;
     extern uint8_t PS2_byte_cnt, PS2_data_ready;
 
 	//declare functions
