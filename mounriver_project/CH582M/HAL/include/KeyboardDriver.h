@@ -11,8 +11,14 @@
 
     #include "CH58x_common.h"
 
-    #define Row_GPIO    GPIOB
-    #define Colum_GPIO  GPIOA
+    #define Row_GPIO_(x)    GPIOB_ ## x
+    #define Colum_GPIO_(x)  GPIOA_ ## x
+
+    #define MAX_PRESS_COUNT 15   // 8个特殊键+6个一般键+1个Fn键
+
+    //special
+    #define KEY_None    0x00
+    #define KEY_Fn      0xFF
 
     //A~Z
     #define KEY_A   0x04
@@ -55,7 +61,7 @@
     #define KEY_0   0x27    //)
 
     //others
-    #define KEY_ENTER      0x28
+    #define KEY_ENTER       0x28
     #define KEY_ESCAPE      0x29
     #define KEY_BACKSPACE   0x2A
     #define KEY_TAB         0x2B
@@ -65,7 +71,7 @@
     #define KEY_LSbrackets  0x2F    //[ or {
     #define KEY_RSbrackets  0x30    //] or }
     #define KEY_Backslash   0x31    //\ or |
-    #define KEY_NonUS_WS   0x32
+    #define KEY_NonUS_WS    0x32
     #define KEY_Semicolon   0x33    //; or :
     #define KEY_Quotation   0x34    //' or "
     #define KEY_GraveAccent 0x35    //` or ~
@@ -118,24 +124,31 @@
 
     typedef union {
         struct {
-                unsigned char LeftCTRL : 1;
-                unsigned char LeftShift : 1;
-                unsigned char LeftAlt : 1;
-                unsigned char LeftGUI : 1;
-                unsigned char RightCTRL : 1;
-                unsigned char RightShift : 1;
-                unsigned char RightAlt : 1;
-                unsigned char RightGUI : 1;
-                unsigned char Reserved : 8;
-                unsigned char Key1 : 8;
-                unsigned char Key2 : 8;
-                unsigned char Key3 : 8;
-                unsigned char Key4 : 8;
-                unsigned char Key5 : 8;
-                unsigned char Key6 : 8;
+            unsigned char LeftCTRL : 1;
+            unsigned char LeftShift : 1;
+            unsigned char LeftAlt : 1;
+            unsigned char LeftGUI : 1;
+            unsigned char RightCTRL : 1;
+            unsigned char RightShift : 1;
+            unsigned char RightAlt : 1;
+            unsigned char RightGUI : 1;
+            unsigned char Reserved : 8;
+            unsigned char Key1 : 8;
+            unsigned char Key2 : 8;
+            unsigned char Key3 : 8;
+            unsigned char Key4 : 8;
+            unsigned char Key5 : 8;
+            unsigned char Key6 : 8;
             };
         uint8_t data[8];
     }Keyboardstate;
 
+    extern uint8_t KEY_data_ready;
     extern Keyboardstate* const Keyboarddat;
+
+    void KEY_Init(void);
+    void KEY_FallEdge_detection(void);
+    void KEY_RisingEdge_detection(void);
+    void KEY_EX_IT_handler(void);
+
 #endif

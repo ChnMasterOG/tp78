@@ -11,6 +11,7 @@ C_SRCS += \
 ../StdPeriphDriver/CH58x_pwr.c \
 ../StdPeriphDriver/CH58x_spi1.c \
 ../StdPeriphDriver/CH58x_sys.c \
+../StdPeriphDriver/CH58x_timer0.c \
 ../StdPeriphDriver/CH58x_uart0.c \
 ../StdPeriphDriver/CH58x_uart1.c \
 ../StdPeriphDriver/CH58x_usb2dev.c \
@@ -28,6 +29,7 @@ OBJS += \
 ./StdPeriphDriver/CH58x_pwr.o \
 ./StdPeriphDriver/CH58x_spi1.o \
 ./StdPeriphDriver/CH58x_sys.o \
+./StdPeriphDriver/CH58x_timer0.o \
 ./StdPeriphDriver/CH58x_uart0.o \
 ./StdPeriphDriver/CH58x_uart1.o \
 ./StdPeriphDriver/CH58x_usb2dev.o \
@@ -45,6 +47,7 @@ C_DEPS += \
 ./StdPeriphDriver/CH58x_pwr.d \
 ./StdPeriphDriver/CH58x_spi1.d \
 ./StdPeriphDriver/CH58x_sys.d \
+./StdPeriphDriver/CH58x_timer0.d \
 ./StdPeriphDriver/CH58x_uart0.d \
 ./StdPeriphDriver/CH58x_uart1.d \
 ./StdPeriphDriver/CH58x_usb2dev.d \

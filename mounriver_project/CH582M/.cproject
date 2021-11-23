@@ -123,15 +123,15 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074.2103661005" name="CH58x_usbhostClass.c" rcbsApplicability="disable" resourcePath="StdPeriphDriver/CH58x_usbhostClass.c" toolsToInvoke="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187.2051719573">
-						<tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187.2051719573" name="GNU RISC-V Cross C Compiler" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187"/>
+					<fileInfo id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.release.1008047074.1192990244" name="CH58x_timer0.c" rcbsApplicability="disable" resourcePath="StdPeriphDriver/CH58x_timer0.c" toolsToInvoke="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187.519709477">
+						<tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187.519709477" name="GNU RISC-V Cross C Compiler" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.c.compiler.1731377187"/>
 					</fileInfo>
 					<sourceEntries>
 						<entry excluding="Ld|RVMSIS|Startup|StdPeriphDriver" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Ld"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="RVMSIS"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
-						<entry excluding="CH58x_adc.c|CH58x_pwm.c|CH58x_spi0.c|CH58x_timer0.c|CH58x_timer1.c|CH58x_timer2.c|CH58x_timer3.c|CH58x_uart2.c|CH58x_uart3.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="StdPeriphDriver"/>
+						<entry excluding="CH58x_adc.c|CH58x_pwm.c|CH58x_spi0.c|CH58x_timer1.c|CH58x_timer2.c|CH58x_timer3.c|CH58x_uart2.c|CH58x_uart3.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="StdPeriphDriver"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
