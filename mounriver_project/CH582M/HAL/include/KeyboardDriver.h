@@ -147,8 +147,6 @@
     extern Keyboardstate* const Keyboarddat;
 
     void KEY_Init(void);
-    void KEY_FallEdge_detection(void);
-    void KEY_RisingEdge_detection(void);
-    void KEY_EX_IT_handler(void);
+    void KEY_detection(void);
 
 #endif

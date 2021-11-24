@@ -55,8 +55,10 @@ uint8_t PS2_WriteByte(uint8_t dat)
 {
     int i, high = 0;
 
-    PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeOut_PP_20mA );
-    PS2DATA_GPIO_(ModeCfg)( PS2DATA_Pin, GPIO_ModeOut_PP_20mA );
+    PS2CLK_GPIO_(SetBits)( PS2CLK_Pin );
+    PS2DATA_GPIO_(SetBits)( PS2DATA_Pin );
+    PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeOut_PP_5mA );
+    PS2DATA_GPIO_(ModeCfg)( PS2DATA_Pin, GPIO_ModeOut_PP_5mA );
 
     PS2CLK_Clr();
     Delay_us(120);
@@ -126,6 +128,7 @@ void PS2_En_Data_Report(void)
 //禁止接收数据
 void PS2_Dis_Data_Report(void)
 {
+    PS2CLK_GPIO_(SetBits)( PS2CLK_Pin );
     PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeOut_PP_20mA );
 	PS2CLK_Clr();
 }

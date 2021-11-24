@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : Main.c
  * Author             : TP87
- * Version            : V1.0
- * Date               : 2021/11/17
+ * Version            : V1.1
+ * Date               : 2021/11/23
  * Description 		  : USB键盘测试
  *******************************************************************************/
 
@@ -19,7 +19,6 @@
 #include "KeyboardDriver.h"
 
 char buf[520];
-const uint32_t aaa[] = {GPIO_Pin_12, GPIO_Pin_13, GPIO_Pin_14};
 
 int main()
 {
@@ -73,14 +72,13 @@ int main()
           }
           PS2_En_Data_Report();
       }
-      KEY_RisingEdge_detection();   //检查上升沿
+      KEY_detection();
       if (KEY_data_ready != 0) {    //USB发送键盘数据
           KEY_data_ready = 0;
           memcpy(pEP1_IN_DataBuf, Keyboarddat, 8);
           DevEP1_IN_Deal( 8 );
-          memset(Keyboarddat, 0, 8);
       }
-      KEY_FallEdge_detection(); //检查下降沿
+      DelayMs(10);
   }
 
 }
@@ -89,7 +87,7 @@ __INTERRUPT
 __HIGH_CODE
 void GPIOA_IRQHandler( void )   //GPIOA外部中断
 {
-    KEY_EX_IT_handler();
+
 }
 
 __INTERRUPT

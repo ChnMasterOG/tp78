@@ -30,14 +30,10 @@ const uint16_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/siz
         { KEY_Delete,   KEY_BACKSPACE,      KEY_Backslash,  KEY_ENTER,      KEY_RightShift, KEY_RightCTRL}, //14
 };
 uint16_t CustomKey[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)];
+uint8_t KeyMatrix[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = { 0 };
 uint32_t Row_Pin_ALL = 0, Colum_Pin_ALL = 0;
-/* 记录按下键的信息 */
-uint8_t press_row[MAX_PRESS_COUNT] = { 0xFF }, press_colum[MAX_PRESS_COUNT] = { 0xFF };
-uint8_t dataIndex_to_commonIndex[MAX_PRESS_COUNT] = { 0xFF };
 
-uint8_t is_press = 0,
-        KEY_data_index = 0,
-        KEY_common_index = 2,
+uint8_t KEY_data_index = 2,
         KEY_data_ready = 0,
         Fn_state = 0;
 Keyboardstate* const Keyboarddat = (Keyboardstate*)HIDKey;
@@ -47,82 +43,58 @@ void KEY_Init(void)
     uint8_t i;
     memcpy(CustomKey, KeyArrary, sizeof(KeyArrary));    // KeyArray是默认按键，初始为默认按键
     for (i = 0; i < sizeof(Row_Pin)/sizeof(uint32_t); i++) {
-        Row_GPIO_(ModeCfg)( Row_Pin[i], GPIO_ModeOut_PP_5mA );
         Row_Pin_ALL |= Row_Pin[i];
     }
     Row_GPIO_(SetBits)( Row_Pin_ALL );
+    Row_GPIO_(ModeCfg)( Row_Pin_ALL, GPIO_ModeOut_PP_20mA );
+    Row_GPIO_(SetBits)( Row_Pin_ALL & (~Row_Pin[0]) );
+
     for (i = 0; i < sizeof(Colum_Pin)/sizeof(uint32_t); i++) {
-        Colum_GPIO_(ModeCfg)( Colum_Pin[i], GPIO_ModeIN_PD );
         Colum_Pin_ALL |= Colum_Pin[i];
     }
-    R16_PA_INT_MODE |= Colum_Pin_ALL;
-    Colum_GPIO_(ITModeCfg)( Colum_Pin_ALL, GPIO_ITMode_RiseEdge );   // 只检测按下
-    PFIC_EnableIRQ( GPIO_A_IRQn );  // Colum_GPIO
+    Row_GPIO_(SetBits)( Colum_Pin_ALL );
+    Colum_GPIO_(ModeCfg)( Colum_Pin_ALL, GPIO_ModeIN_PU );
 }
 
-void KEY_FallEdge_detection(void)
+void KEY_detection(void)
 {
-    uint8_t press_count = KEY_data_index;
-    // 检查是否有键松开
-    for (int i = 0; i < press_count; i++) {
-        if (press_colum[i] != 0xFF && Colum_GPIO_(ReadPortPin)( Colum_Pin[press_colum[i]] ) == 0) {
-            KEY_data_ready = 1;
-            if (CustomKey[press_colum[i]][press_row[i]] == KEY_Fn) {  // 功能键
-                Fn_state = 0;
-            } else if (CustomKey[press_colum[i]][press_row[i]] >= KEY_LeftCTRL) {    // 特殊键
-                Keyboarddat->data[0] &= ~(1 << (CustomKey[press_colum[i]][press_row[i]] - KEY_LeftCTRL));
+    static uint8_t current_row = 0;
+    uint8_t current_colum, key_idx;
+    for (current_colum = 0; current_colum < sizeof(Colum_Pin)/sizeof(uint32_t); current_colum++) {    // 查询哪一列改变
+        if (KeyMatrix[current_colum][current_row] == 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) == 0) {  // 按下
+            if (KEY_data_index >= 8 && CustomKey[current_colum][current_row] < KEY_LeftCTRL) continue;    // 超过6个普通按键上限
+            KeyMatrix[current_colum][current_row] = 1;  // 矩阵状态变成按下
+            KEY_data_ready = 1; // 产生事件
+            if (CustomKey[current_colum][current_row] == KEY_Fn) {  // 功能键
+                Fn_state = 1;
+            } else if (CustomKey[current_colum][current_row] >= KEY_LeftCTRL) {    // 特殊键
+                Keyboarddat->data[0] |= 1 << (CustomKey[current_colum][current_row] - KEY_LeftCTRL);
             } else {
-                memcpy(&Keyboarddat->data[dataIndex_to_commonIndex[i]], &Keyboarddat->data[dataIndex_to_commonIndex[i]] + 1, 7 - dataIndex_to_commonIndex[i]);
-                Keyboarddat->Key6 = 0;
-                dataIndex_to_commonIndex[i] = 0;
-                KEY_common_index--;
+                Keyboarddat->data[KEY_data_index++] = CustomKey[current_colum][current_row];
             }
-            press_colum[i] = press_row[i] = 0xFF;
-            KEY_data_index--;
-        }
-    }
-}
-
-void KEY_RisingEdge_detection(void)
-{
-    uint8_t row_index, colum_index;
-    uint8_t state, mask;
-    if (is_press == 0) return;
-    is_press = 0;
-    R16_PA_INT_EN &= ~Colum_Pin_ALL; // 关中断
-    Row_GPIO_(ResetBits)( Row_Pin_ALL );
-    GPIOB_InverseBits( GPIO_Pin_0 );
-    for (row_index = 0; row_index < sizeof(Row_Pin)/sizeof(uint32_t); row_index++) {  // 扫描所有行
-        Row_GPIO_(SetBits)( Row_Pin[row_index] );
-        for (colum_index = 0; colum_index < sizeof(Colum_Pin)/sizeof(uint32_t); colum_index++) {    // 查询哪一列发生中断
-            if (Colum_GPIO_(ReadPortPin)( Colum_Pin[colum_index] )) {  // 上升沿
-                if (KEY_common_index >= 8 && CustomKey[colum_index][row_index] < KEY_LeftCTRL) continue;    // 超过6个按键上限
-                press_row[KEY_data_index] = row_index;
-                press_colum[KEY_data_index] = colum_index;
-                if (CustomKey[colum_index][row_index] == KEY_Fn) {  // 功能键
-                    Fn_state = 1;
-                } else if (CustomKey[colum_index][row_index] >= KEY_LeftCTRL) {    // 特殊键
-                    Keyboarddat->data[0] |= 1 << (CustomKey[colum_index][row_index] - KEY_LeftCTRL);
-                } else {
-                    dataIndex_to_commonIndex[KEY_data_index] = KEY_common_index;
-                    Keyboarddat->data[KEY_common_index++] = CustomKey[colum_index][row_index];
+        } else if (KeyMatrix[current_colum][current_row] != 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) != 0) {   // 弹起
+            KeyMatrix[current_colum][current_row] = 0;
+            KEY_data_ready = 1; // 产生事件
+            if (CustomKey[current_colum][current_row] == KEY_Fn) {  // 功能键
+                Fn_state = 0;
+            } else if (CustomKey[current_colum][current_row] >= KEY_LeftCTRL) {    // 特殊键
+                Keyboarddat->data[0] &= ~(1 << (CustomKey[current_colum][current_row] - KEY_LeftCTRL));
+            } else {
+                for (key_idx = 2; key_idx < 8; key_idx++) {
+                    if (Keyboarddat->data[key_idx] == CustomKey[current_colum][current_row]) {
+                        memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
+                        Keyboarddat->Key6 = 0;
+                    }
                 }
-                KEY_data_index++;
+                KEY_data_index--;
             }
         }
-        Row_GPIO_(ResetBits)( Row_Pin[row_index] );
     }
-    Row_GPIO_(SetBits)( Row_Pin_ALL );
-    R16_PA_INT_IF = Colum_Pin_ALL;
-    R16_PA_INT_EN |= Colum_Pin_ALL;  // 开中断
-    KEY_data_ready = 1;
+    Row_GPIO_(SetBits)( Row_Pin[current_row++] );
+    if (current_row >= sizeof(Row_Pin)/sizeof(uint32_t)) {
+        current_row = 0;
+    }
+    Row_GPIO_(ResetBits)( Row_Pin[current_row] );
 }
 
-void KEY_EX_IT_handler(void)
-{
-    if ( Colum_GPIO_(ReadITFlagBit)( Colum_Pin_ALL ) != 0 ) {  // 一行任意按键按下
-        Colum_GPIO_(ClearITFlagBit)( Colum_Pin_ALL );
-        is_press = 1;
-    }
-}
 
