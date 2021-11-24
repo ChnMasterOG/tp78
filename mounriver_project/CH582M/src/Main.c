@@ -18,7 +18,7 @@
 #include "OLEDDriver.h"
 #include "KeyboardDriver.h"
 
-char buf[520];
+char buf[128];
 
 int main()
 {
