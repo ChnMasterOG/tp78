@@ -9,9 +9,9 @@
 #include "KeyboardDriver.h"
 #include "USBDriver.h"
 
-const uint32_t Row_Pin[] = {GPIO_Pin_12, GPIO_Pin_13, GPIO_Pin_16, GPIO_Pin_17, GPIO_Pin_18, GPIO_Pin_19};   //6
-const uint32_t Colum_Pin[] = {GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3, GPIO_Pin_4, GPIO_Pin_5, GPIO_Pin_6,
-                              GPIO_Pin_7, GPIO_Pin_10, GPIO_Pin_11, GPIO_Pin_12, GPIO_Pin_13, GPIO_Pin_14, GPIO_Pin_15};   //14
+const uint32_t Row_Pin[] = {GPIO_Pin_7, GPIO_Pin_6, GPIO_Pin_5, GPIO_Pin_4, GPIO_Pin_3, GPIO_Pin_2};   //row 6
+const uint32_t Colum_Pin[] = {GPIO_Pin_4, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3,
+                              GPIO_Pin_15, GPIO_Pin_14, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_7, GPIO_Pin_8, GPIO_Pin_9};   //colum 14
 //row*colum = 6*14 = 84
 const uint16_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
         { KEY_ESCAPE,   KEY_GraveAccent,    KEY_TAB,        KEY_CapsLock,   KEY_LeftShift,  KEY_LeftCTRL }, //1

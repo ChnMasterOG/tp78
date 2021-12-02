@@ -18,9 +18,13 @@ void UART1_Init(void)
   UART1_DefInit();
 }
 
-__INTERRUPT
-__HIGH_CODE
-void UART1_IRQHandler( void )
+//重映射初始化串口1
+void UART1_Remap_Init(void)
 {
-
+  /* 配置串口1：先配置IO口模式，再配置串口 */
+  GPIOA_SetBits( GPIO_Pin_13 );
+  GPIOA_ModeCfg( GPIO_Pin_12, GPIO_ModeIN_PU );         // RXD-配置上拉输入
+  GPIOA_ModeCfg( GPIO_Pin_13, GPIO_ModeOut_PP_5mA );    // TXD-配置推挽输出，注意先让IO口输出高电平
+  GPIOPinRemap( ENABLE, RB_PIN_UART1 );
+  UART1_DefInit();
 }

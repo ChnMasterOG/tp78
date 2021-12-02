@@ -18,8 +18,8 @@
     #define Max_Column	128
     #define Brightness	0xFF
  
-    #define OLED_CLK_Pin        GPIO_Pin_8
-    #define OLED_SDA_Pin        GPIO_Pin_9
+    #define OLED_CLK_Pin        GPIO_Pin_9
+    #define OLED_SDA_Pin        GPIO_Pin_8
     #define OLED_CLK_GPIO_(x)   GPIOB_ ## x
     #define OLED_SDA_GPIO_(x)   GPIOB_ ## x
 

@@ -2,13 +2,14 @@
  * File Name          : Main.c
  * Author             : TP87
  * Version            : V1.1
- * Date               : 2021/11/23
+ * Date               : 2021/11/27
  * Description 		  : USB键盘测试
  *******************************************************************************/
 
 /********************************** (C) COPYRIGHT *******************************
-   *  引脚分配：PA8 & PA9 --- UART1; PB10 & PB11 --- USB1; PA0 ~ PA7 & PA10 ~ PA15 & PB12 ~ PB13 & PB16 ~ PB19 --- KeyBoard
- *          PB14 & PB15 --- PS/2 Mouse; PB8 & PB9 --- OLED; PB0 --- LED
+   *  引脚分配：PB10 & PB11 --- USB1; PA0 ~ PA9 & PA12 ~ PA15 & PB2 ~ PB7 --- KeyBoard
+ *          PB15 & PB14 --- PS/2 Mouse; PB9 & PB8 --- OLED; PB0 --- LED; PB1 --- KEY; PB16 --- W2812
+ *          PA8 & PA9 --- UART1 -- Remap --> PB12 & PB13;
  ********************************* (C) COPYRIGHT ********************************/
 
 #include "CH58x_common.h"
@@ -100,6 +101,13 @@ void GPIOB_IRQHandler( void )   //GPIOB外部中断
 __INTERRUPT
 __HIGH_CODE
 void TMR0_IRQHandler( void )    //TMR0定时中断
+{
+
+}
+
+__INTERRUPT
+__HIGH_CODE
+void UART1_IRQHandler( void )   //UART1串口中断
 {
 
 }
