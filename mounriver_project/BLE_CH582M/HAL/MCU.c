@@ -10,6 +10,7 @@
 /* 头文件包含 */
 #include "CH58x_common.h"
 #include "HAL.h"
+#include <string.h>
 
 tmosTaskID halTaskID;
 
@@ -190,6 +191,8 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     }
     return events ^ SYS_EVENT_MSG;
   }
+
+  // 板载LED闪烁事件
   if ( events & LED_BLINK_EVENT )
   {
 #if (defined HAL_LED) && (HAL_LED == TRUE)
@@ -197,14 +200,57 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
 #endif // HAL_LED
     return events ^ LED_BLINK_EVENT;
   }
-  if ( events & HAL_KEY_EVENT )
+
+  // 板载按键事件
+  if ( events & KEY_EVENT )
   {
 #if (defined HAL_KEY) && (HAL_KEY == TRUE)
     HAL_KeyPoll(); /* Check for keys */
-    tmos_start_task( halTaskID, HAL_KEY_EVENT, MS1_TO_SYSTEM_TIME(100) );
-    return events ^ HAL_KEY_EVENT;
+    tmos_start_task( halTaskID, KEY_EVENT, MS1_TO_SYSTEM_TIME(100) );
 #endif
+    return events ^ KEY_EVENT;
   }
+
+  // 蓝牙准备事件
+  if ( events & BLE_READY_EVENT )
+  {
+    BLE_Ready = TRUE;
+    return events ^ BLE_READY_EVENT;
+  }
+
+  // 定时主循环事件
+  if ( events & MAIN_CIRCULATION_EVENT)
+  {
+#if (defined HAL_PS2) && (HAL_PS2 == TRUE)
+    if (PS2_data_ready != 0) {    // 发送小红点鼠标数据
+        PS2_data_ready = 0;
+        if (PS2_byte_cnt == 3) {  // 接收完数据报
+            PS2_byte_cnt = 0;
+            if (USB_Ready == TRUE) {
+                tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
+            } else if (BLE_Ready == TRUE) {
+                tmos_start_task( hidEmuTaskId, START_MOUSE_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙鼠标事件 2ms处理
+            }
+        }
+        PS2_En_Data_Report();
+    }
+#endif
+#if (defined HAL_KEYBOARD) && (HAL_KEYBOARD == TRUE)
+    KEYBOARD_detection();
+    if (KEYBOARD_data_ready != 0) {    // 发送键盘数据
+        KEYBOARD_data_ready = 0;
+        if (USB_Ready == TRUE) {
+            tmos_start_task( usbTaskID, USB_KEYBOARD_EVENT, 2 );  // USB键盘事件
+        } else if (BLE_Ready == TRUE) {
+            tmos_start_task( hidEmuTaskId, START_KEYBOARD_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  // 蓝牙键盘事件 2ms处理
+        }
+    }
+#endif
+    tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, MS1_TO_SYSTEM_TIME(10) );
+    return events ^ MAIN_CIRCULATION_EVENT;
+  }
+
+  // 硬件初始化事件
   if ( events & HAL_REG_INIT_EVENT )
   {
 #if (defined BLE_CALIBRATION_ENABLE) && (BLE_CALIBRATION_ENABLE == TRUE)	// 校准任务，单次校准耗时小于10ms
@@ -216,12 +262,15 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     return events ^ HAL_REG_INIT_EVENT;
 #endif
   }
+
+  // 测试事件
   if ( events & HAL_TEST_EVENT )
   {
     PRINT( "*\n" );
     tmos_start_task( halTaskID, HAL_TEST_EVENT, MS1_TO_SYSTEM_TIME( 1000 ) );
     return events ^ HAL_TEST_EVENT;
   }
+
   return 0;
 }
 
@@ -242,21 +291,37 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
  */
 void HAL_Init()
 {
+  char debug_info[520];
   halTaskID = TMOS_ProcessEventRegister( HAL_ProcessEvent );
   HAL_TimeInit();
 #if (defined HAL_SLEEP) && (HAL_SLEEP == TRUE)
   HAL_SleepInit();
 #endif
-#if (defined HAL_LED) && (HAL_LED == TRUE)
-  HAL_LedInit( );
-#endif
 #if (defined HAL_KEY) && (HAL_KEY == TRUE)
   HAL_KeyInit( );
+#endif
+#if (defined HAL_USB) && (HAL_USB == TRUE)
+  HAL_USBInit( );
+#endif
+#if (defined HAL_PS2) && (HAL_PS2 == TRUE)
+  PS2_Init(debug_info, 1); // PS/2中断实现
+  PRINT("%s\n", debug_info);
+#endif
+#if (defined HAL_KEYBOARD) && (HAL_KEYBOARD == TRUE)
+  KEYBOARD_Init( );
+#endif
+#if (defined HAL_LED) && (HAL_LED == TRUE)
+  debug_info[7] = '\0';
+  if ( strcmp(debug_info, "[ERROR]") == 0 ) {
+    HAL_LedInit(1);
+  } else {
+    HAL_LedInit(0);
+  }
 #endif
 #if ( defined BLE_CALIBRATION_ENABLE ) && ( BLE_CALIBRATION_ENABLE == TRUE )
   tmos_start_task( halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME( BLE_CALIBRATION_PERIOD ) );    // 添加校准任务，单次校准耗时小于10ms
 #endif
-//  tmos_start_task( halTaskID, HAL_TEST_EVENT, 1600 );    // 添加一个测试任务
+//  tmos_start_task( halTaskID, HAL_TEST_EVENT, 1600 );    // 添加测试任务
 }
 
 /*******************************************************************************

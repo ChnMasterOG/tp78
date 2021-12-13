@@ -1,5 +1,4 @@
 Profile/hiddev.o: ../Profile/hiddev.c \
- Y:\tp78-main\mounriver_project\BLE_CH582M\APP\include/hidkbm.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\LIB/CH58xBLE_LIB.H \
  Y:\tp78-main\mounriver_project\BLE_CH582M\StdPeriphDriver\inc/CH58x_common.h \
@@ -23,8 +22,6 @@ Profile/hiddev.o: ../Profile/hiddev.c \
  Y:\tp78-main\mounriver_project\BLE_CH582M\Profile\include/scanparamservice.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\Profile\include/devinfoservice.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\Profile\include/hiddev.h
-
-Y:\tp78-main\mounriver_project\BLE_CH582M\APP\include/hidkbm.h:
 
 Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
 

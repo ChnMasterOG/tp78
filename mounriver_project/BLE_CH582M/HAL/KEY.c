@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : KEY.c
-* Author             : WCH
+* Author             : ChnMasterOG
 * Version            : V1.0
-* Date               : 2014/05/12
+* Date               : 2021/12/7
 * Description        : 
 *******************************************************************************/
 
@@ -28,6 +28,22 @@ static halKeyCBack_t pHalKeyProcessFunction;	    /* callback function */
 
 
 /**************************************************************************************************
+ * @fn      HALKeyInverseLED
+ *
+ * @brief   按键1控制反转LED状态
+ *
+ * @param   none
+ *
+ * @return  None
+ **************************************************************************************************/
+void HALKeyInverseLED( uint8 keys )
+{
+  if (keys & HAL_KEY_SW_1) {
+    HAL_INVERSE_LED1();
+  }
+}
+
+/**************************************************************************************************
  * @fn      HAL_KeyInit
  *
  * @brief   Initilize Key Service
@@ -43,9 +59,8 @@ void HAL_KeyInit( void )
   /* Initialize callback function */
   pHalKeyProcessFunction  = NULL;
   KEY1_DIR;
-  KEY1_PU;
-  KEY2_DIR;
-  KEY2_PU;
+  KEY1_PD;
+  HalKeyConfig( HALKeyInverseLED );
 }
 
 /**************************************************************************************************
@@ -62,7 +77,7 @@ void HalKeyConfig ( halKeyCBack_t cback)
 {
   /* Register the callback fucntion */
   pHalKeyProcessFunction = cback;
-	tmos_start_task( halTaskID, HAL_KEY_EVENT, HAL_KEY_POLLING_VALUE);    /* Kick off polling */
+	tmos_start_task( halTaskID, KEY_EVENT, HAL_KEY_POLLING_VALUE);    /* Kick off polling */
 }
 
 /**************************************************************************************************

@@ -10,9 +10,9 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define	ID_CH573							0x73
+#define	ID_CH582M							0x82
 
-#define CHIP_ID								ID_CH573
+#define CHIP_ID								ID_CH582M
 
 #ifdef CH57xBLE_ROM
 #include "CH58xBLE_ROM.H"
@@ -80,7 +80,16 @@
 #define HAL_KEY											FALSE
 #endif
 #ifndef HAL_LED
-#define HAL_LED											FALSE	
+#define HAL_LED											TRUE
+#endif
+#ifndef HAL_USB
+#define HAL_USB                     TRUE   // USB
+#endif
+#ifndef HAL_PS2
+#define HAL_PS2                     TRUE   // PS/2Ð¡ºìµã
+#endif
+#ifndef HAL_KEYBOARD
+#define HAL_KEYBOARD                TRUE   // ¼üÅÌ
 #endif
 #ifndef TEM_SAMPLE
 #define TEM_SAMPLE									TRUE

@@ -172,9 +172,12 @@ uint8_t PS2_Init(char* buf, BOOL is_IT)
     uint8_t res, sta;
 
     //IO
+    PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeIN_PU );
+    PS2DATA_GPIO_(ModeCfg)( PS2DATA_Pin, GPIO_ModeIN_PU );
 	PS2CLK_GPIO_(SetBits)( PS2CLK_Pin );
 	PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeOut_PP_20mA );
 	PS2_Dis_Data_Report();
+	PS2DATA_GPIO_(SetBits)( PS2DATA_Pin );
 	PS2DATA_GPIO_(ModeCfg)( PS2DATA_Pin, GPIO_ModeIN_PU );
 
 	//config

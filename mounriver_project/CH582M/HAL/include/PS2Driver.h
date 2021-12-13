@@ -11,8 +11,8 @@
  
 	#include "CH58x_common.h"
  
-	#define PS2CLK_Pin		    GPIO_Pin_15
-	#define PS2DATA_Pin 	    GPIO_Pin_14
+	#define PS2CLK_Pin		    GPIO_Pin_13
+	#define PS2DATA_Pin 	    GPIO_Pin_12
 	#define PS2CLK_GPIO_(x)     GPIOB_ ## x
 	#define PS2DATA_GPIO_(x)    GPIOB_ ## x
 	

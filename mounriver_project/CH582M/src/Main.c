@@ -7,9 +7,10 @@
  *******************************************************************************/
 
 /********************************** (C) COPYRIGHT *******************************
-   *  引脚分配：PB10 & PB11 --- USB1; PA0 ~ PA9 & PA12 ~ PA15 & PB2 ~ PB7 --- KeyBoard
- *          PB15 & PB14 --- PS/2 Mouse; PB9 & PB8 --- OLED; PB0 --- LED; PB1 --- KEY; PB16 --- W2812
- *          PA8 & PA9 --- UART1 -- Remap --> PB12 & PB13;
+ *  M.2引脚分配：    PB10 & PB11 --- USB1; PA0 ~ PA7 & PA10 ~ PA15 & PB2 ~ PB7 --- KeyBoard
+ *                PB13 & PB12 --- PS/2 Mouse; PB9 & PB8 --- OLED; PB14 --- W2812
+ *                PA8 & PA9 --- UART1(download)
+ *  核心板引脚：       PB0 --- LED; PB1 --- KEY
  ********************************* (C) COPYRIGHT ********************************/
 
 #include "CH58x_common.h"
@@ -21,18 +22,45 @@
 
 char buf[128];
 
+void Test_Circulation()
+{
+  uint8_t flag = 0;
+  while (1) {
+//      if (GPIOB_ReadPortPin( GPIO_Pin_1 ) != 0) {
+//          DelayMs(10);
+//          if (GPIOB_ReadPortPin( GPIO_Pin_1 ) == 0) continue;
+//          if (flag == 0) {
+//              GPIOB_InverseBits( GPIO_Pin_0 );
+//              flag = 1;
+//          }
+//      } else flag = 0;
+      HIDKey[2] = KEY_A;
+      memcpy(pEP1_IN_DataBuf, HIDKey, 8);
+      DevEP1_IN_Deal( 8 );
+      DelayMs(5);
+      HIDKey[2] = 0;
+      memcpy(pEP1_IN_DataBuf, HIDKey, 8);
+      DevEP1_IN_Deal( 8 );
+      DelayMs(2000);
+  }
+}
+
 int main()
 {
   Mousestate myData;
   uint8_t res;
 
   SetSysClock( CLK_SOURCE_PLL_60MHz );
+  RB_CLK_OSC32K_XT = 0; // 使用内部32k
 
-  //led
+  //mini board led
   GPIOB_SetBits( GPIO_Pin_0 );
   GPIOB_ModeCfg( GPIO_Pin_0, GPIO_ModeOut_PP_5mA );
 
-  //led off
+  //mini board key
+  GPIOB_SetBits( GPIO_Pin_1 );
+  GPIOB_ModeCfg( GPIO_Pin_1, GPIO_ModeIN_PD );
+
   GPIOB_ResetBits( GPIO_Pin_0 );
 
   //uart1
@@ -41,7 +69,6 @@ int main()
 
   //oled
   OLED_Init();
-  OLED_ShowString(64, 2, "hello");
 
   //Keyboard
   KEY_Init();
@@ -55,6 +82,8 @@ int main()
       printf("mouse ready\n");
   }
 
+  GPIOB_SetBits( GPIO_Pin_0 );
+
   //USB
   pEP0_RAM_Addr = EP0_Databuf;
   pEP1_RAM_Addr = EP1_Databuf;
@@ -62,6 +91,8 @@ int main()
   pEP3_RAM_Addr = EP3_Databuf;
   USB_DeviceInit();
   PFIC_EnableIRQ( USB_IRQn );
+
+  OLED_ShowString(0, 2, "All ready!");
 
   while (1) {
       if (PS2_data_ready != 0) {    //USB发送小红点鼠标数据

@@ -21,17 +21,23 @@ extern "C"
 #include "SLEEP.h"	
 #include "LED.h"
 #include "KEY.h"
-	
+#include "USB.h"
+#include "PS2.h"
+#include "BLE.h"
+#include "KEYBOARD.h"
+
 /* hal task Event */
 #define   LED_BLINK_EVENT                               0x0001
-#define   HAL_KEY_EVENT			                            0x0002
+#define   KEY_EVENT			                                0x0002
+#define   MAIN_CIRCULATION_EVENT                        0x0004
+#define   BLE_READY_EVENT                               0x0008
 #define   HAL_REG_INIT_EVENT		                        0x2000
 #define   HAL_TEST_EVENT		                            0x4000
 
 // hal sys_message
 #define MESSAGE_UART                0xA0    // UART message
-	#define UART0_MESSAGE             (MESSAGE_UART|0 )    // UART0 message
-	#define UART1_MESSAGE             (MESSAGE_UART|1 )    // UART1 message
+#define UART0_MESSAGE             (MESSAGE_UART|0 )    // UART0 message
+#define UART1_MESSAGE             (MESSAGE_UART|1 )    // UART1 message
 
 #define USB_MESSAGE              		0xB0    // USB message
 

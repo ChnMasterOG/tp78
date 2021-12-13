@@ -13,7 +13,6 @@
  */
 
 
-#include <hidkbm.h>
 #include "CONFIG.h"
 #include "CH58x_common.h"
 #include "battservice.h"

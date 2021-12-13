@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : LED.c
-* Author             : WCH
+* Author             : ChnMasterOG
 * Version            : V1.0
-* Date               : 2014/05/12
+* Date               : 2021/12/6
 * Description        : 
 *******************************************************************************/
 
@@ -53,17 +53,18 @@ void HalLedOnOff (uint8 leds, uint8 mode);
  *
  * @brief  : Initialize LED Service
  *
- * @param  : None
+ * @param  : Mode - 0 or 1(blink)
  *
  * @return : None
  */
-void HAL_LedInit (void)
+void HAL_LedInit (unsigned char Mode)
 {
   /* Initialize all LEDs to OFF */
   LED1_DDR;
   HalLedSet(HAL_LED_ALL, HAL_LED_MODE_OFF);
-// just test	
-	HalLedBlink( HAL_LED_1, 10, 30 , 4000);
+  if ( Mode == 1 ) {
+    HalLedBlink( HAL_LED_1, 10, 30 , 4000);
+  }
   /* Initialize sleepActive to FALSE */
   HalLedStatusControl.sleepActive = FALSE;
 }

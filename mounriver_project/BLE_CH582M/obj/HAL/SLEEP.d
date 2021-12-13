@@ -22,7 +22,12 @@ HAL/SLEEP.o: ../HAL/SLEEP.c \
  Y:\tp78-main\mounriver_project\BLE_CH582M\LIB/CH58xBLE_LIB.H \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/SLEEP.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/LED.h \
- Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEY.h
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEY.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/USB.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/PS2.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/BLE.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h
 
 Y:\tp78-main\mounriver_project\BLE_CH582M\StdPeriphDriver\inc/CH58x_common.h:
 
@@ -71,3 +76,13 @@ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/SLEEP.h:
 Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/LED.h:
 
 Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEY.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/USB.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/PS2.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/BLE.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h:

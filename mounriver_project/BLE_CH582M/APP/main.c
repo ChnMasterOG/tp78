@@ -6,13 +6,20 @@
 * Description        : TP78小红点+蓝牙键盘应用主函数及任务系统初始化
 *******************************************************************************/
 
-/******************************************************************************/
-/* 头文件包含 */
+/********************************** (C) COPYRIGHT *******************************
+ *  M.2引脚分配：    PB10 & PB11 --- USB1; PA0 ~ PA7 & PA10 ~ PA15 & PB2 ~ PB7 --- KeyBoard
+ *                PB13 & PB12 --- PS/2 Mouse; PB9 & PB8 --- OLED; PB14 --- W2812
+ *                PA8 & PA9 --- Battery / UART1(download)
+ *  核心板引脚：       PB0 --- LED; PB1 --- KEY
+********************************* (C) COPYRIGHT ********************************/
+
+/*********************************************************************
+ * INCLUDES
+ */
 #include "CONFIG.h"
 #include "CH58x_common.h"
 #include "HAL.h"
 #include "hiddev.h"
-#include "hidkbm.h"
 
 /*********************************************************************
  * GLOBAL TYPEDEFS
@@ -66,6 +73,7 @@ int main( void )
 	GAPRole_PeripheralInit( );
 	HidDev_Init( ); 
 	HidEmu_Init( );
+	tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, 10 );
   Main_Circulation();
 }
 
