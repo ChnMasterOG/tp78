@@ -10,9 +10,13 @@
 /*********************************************************************
  * INCLUDES
  */
+#include "CH58x_common.h"
 #include "CONFIG.h"
 #include "hiddev.h"
+#include "BATTERY.h"
 #include "battservice.h"
+//test
+#include "OLED.h"
 
 /*********************************************************************
  * MACROS
@@ -23,8 +27,11 @@
  */
 
 // ADC voltage levels
-#define BATT_ADC_LEVEL_3V           409
-#define BATT_ADC_LEVEL_2V           273
+#define BATT_ADC_LEVEL_3V           3949 //409
+#define BATT_ADC_LEVEL_2V           2974 //273
+
+#define BATT_ADC_LEVEL_3_6V         3396
+#define BATT_ADC_LEVEL_4_2V         3963 // 0.44*Vbat - ’‚¿Ô…ËVref=0.955V
 
 #define BATT_LEVEL_VALUE_IDX        2 // Position of battery level in attribute array
 #define BATT_LEVEL_VALUE_CCCD_IDX   3 // Position of battery level CCCD in attribute array
@@ -73,8 +80,8 @@ static battServiceTeardownCB_t battServiceTeardownCB = NULL;
 // Measurement calculation callback
 static battServiceCalcCB_t battServiceCalcCB = NULL;
 
-static uint16 battMinLevel = BATT_ADC_LEVEL_2V; // For VDD/3 measurements
-static uint16 battMaxLevel = BATT_ADC_LEVEL_3V; // For VDD/3 measurements
+static uint16 battMinLevel = BATT_ADC_LEVEL_3_6V;
+static uint16 battMaxLevel = BATT_ADC_LEVEL_4_2V;
 
 // Critical battery level setting
 static uint8 battCriticalLevel;
@@ -512,7 +519,8 @@ static uint8 battMeasure( void )
   }
 
   // Configure ADC and perform a read
-  adc = 300;
+  adc = BAT_adcVal;
+
   // Call measurement teardown callback
   if (battServiceTeardownCB != NULL)
   {
@@ -544,6 +552,8 @@ static uint8 battMeasure( void )
       percent = (uint8) ((((adc - battMinLevel) * 25) + (range - 1)) / range);
     }
   }
+
+  OLED_PRINT("ADC:%d, BAT:%d%%", adc, percent);
 
   return percent;
 }

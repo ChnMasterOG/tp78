@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : PS2.c
  * Author             : ChnMasterOG
- * Version            : V1.0
- * Date               : 2021/11/17
+ * Version            : V1.1
+ * Date               : 2022/1/13
  * Description        : PS/2驱动源文件
  *******************************************************************************/
 
@@ -19,48 +19,81 @@ uint8_t PS2_bit_cnt = 0,
         PS2_data_ready = 0;
 Mousestate* const PS2dat = (Mousestate*)HIDMouse;
 
-/* PS/2协议读一字节，成功返回0，失败返回1 */
+/*******************************************************************************
+* Function Name  : PS2_WaitCLKState
+* Description    : PS/2协议等待CLK状态变化
+* Input          : wait_high - TRUE:等待CLK从低变高
+*                              FALSE:等待CLK从高变低
+* Output         : None
+* Return         : 成功返回0, 失败返回1
+*******************************************************************************/
+uint8_t PS2_WaitCLKState( BOOL wait_high )
+{
+    uint32_t timeout = PS2_TIMEOUT;
+    if ( wait_high ) {
+      while (!PS2CLK_State()) {  //等待CLK高
+        if (timeout == 0) return 1;
+        timeout--;
+        DelayUs(1);
+      }
+    } else {
+      while (PS2CLK_State()) {  //等待CLK低
+        if (timeout == 0) return 1;
+        timeout--;
+        DelayUs(1);
+      }
+    }
+    return 0;
+}
+
+/*******************************************************************************
+* Function Name  : PS2_ReadByte
+* Description    : PS/2协议读一字节
+* Input          : dat - 将读取到的内容放到dat指针指向的空间中
+* Output         : None
+* Return         : 成功返回0, 失败返回1
+*******************************************************************************/
 uint8_t PS2_ReadByte(uint8_t* dat)
 {
     int i;
     uint8_t res = 0;
     uint8_t high = 0, parity;
-    uint32_t timeout = PS2_TIMEOUT;
 
     Delay_us(50);
     PS2_En_Data_Report();
     Delay_us(20);
-    while (PS2CLK_State()) {  //起始位
-      if (timeout == 0) return 1;
-      timeout--;
-      DelayUs(1);
-    }
+
+    if ( PS2_WaitCLKState(FALSE) ) return 1;  //起始位
     for (i = 0; i < 8; i++) {
-        while (!PS2CLK_State());
-        while (PS2CLK_State());	//等待一个下降沿
+        if ( PS2_WaitCLKState(TRUE) ) return 1;
+        if ( PS2_WaitCLKState(FALSE) ) return 1;	//等待一个下降沿
         res >>= 1;
         if (PS2DATA_State()) {
             res |= 0x80;
             ++high;
         }
     }
-    while (!PS2CLK_State());
-    while (PS2CLK_State());	//校验位
+    if ( PS2_WaitCLKState(TRUE) ) return 1;
+    if ( PS2_WaitCLKState(FALSE) ) return 1;	//校验位
     parity = PS2DATA_State();
-    while (!PS2CLK_State());
-    while (PS2CLK_State());	//停止位
+    if ( PS2_WaitCLKState(TRUE) ) return 1;
+    if ( PS2_WaitCLKState(FALSE) ) return 1;	//停止位
     PS2_Dis_Data_Report();
     //if ((high & 1) != (parity != 0)) return 1;
     *dat = res;
     return 0;
 }
 
-/* PS/2协议写一字节，成功返回0，失败返回1 */
+/*******************************************************************************
+* Function Name  : PS2_WriteByte
+* Description    : PS/2协议写一字节
+* Input          : dat - 要写入的值
+* Output         : None
+* Return         : 成功返回0, 失败返回1
+*******************************************************************************/
 uint8_t PS2_WriteByte(uint8_t dat)
 {
     int i, high = 0;
-    uint32_t timeout = PS2_TIMEOUT;
-
     PS2CLK_GPIO_(SetBits)( PS2CLK_Pin );
     PS2DATA_GPIO_(SetBits)( PS2DATA_Pin );
     PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeOut_PP_5mA );
@@ -72,11 +105,7 @@ uint8_t PS2_WriteByte(uint8_t dat)
     Delay_us(10);
     PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeIN_PU );	//释放时钟线
 
-    while (PS2CLK_State()) {
-      if (timeout == 0) return 1;
-      timeout--;
-      DelayUs(1);
-    }
+    if ( PS2_WaitCLKState(FALSE) ) return 1;
 
     for (i = 0; i < 8; i++) {
         if (dat & 0x01) {
@@ -85,29 +114,37 @@ uint8_t PS2_WriteByte(uint8_t dat)
         }
         else PS2DATA_Clr();
         dat >>= 1;
-        while (!PS2CLK_State());
-        while (PS2CLK_State());
+        if ( PS2_WaitCLKState(TRUE) ) return 1;
+        if ( PS2_WaitCLKState(FALSE) ) return 1;
     }
 
     //上升沿-校验位
     if (high & 0x01) PS2DATA_Clr();
     else PS2DATA_Set();
-    while (!PS2CLK_State());
+    if ( PS2_WaitCLKState(TRUE) ) return 1;
 
     //上升沿-停止位
-    while (PS2CLK_State());
+    if ( PS2_WaitCLKState(FALSE) ) return 1;
     PS2DATA_Set();
-    while (!PS2CLK_State());
+    if ( PS2_WaitCLKState(TRUE) ) return 1;
 
     PS2DATA_GPIO_(ModeCfg)( PS2DATA_Pin, GPIO_ModeIN_PU );	//释放数据线
-    while (PS2CLK_State());
+    if ( PS2_WaitCLKState(FALSE) ) return 1;
 
-    if (!PS2DATA_State()) while (!PS2CLK_State());
+    if (!PS2DATA_State()) {
+      if ( PS2_WaitCLKState(TRUE) ) return 1;
+    }
     else return 1;
     return 0;
 }
 
-/* PS/2协议接收一次鼠标数据，成功返回0，失败返回1 */
+/*******************************************************************************
+* Function Name  : PS2_ReadMouseData
+* Description    : PS/2协议接收一次鼠标数据
+* Input          : dat - 将接收到的内容放到dat指针指向的空间中(dat指向的空间应当占4byte)
+* Output         : None
+* Return         : 成功返回0, 失败返回1
+*******************************************************************************/
 uint8_t PS2_ReadMouseData(Mousestate* dat)
 {
     int i;
@@ -117,7 +154,13 @@ uint8_t PS2_ReadMouseData(Mousestate* dat)
     return 0;
 }
 
-/* 配置PS/2鼠标，成功返回0，失败返回1 */
+/*******************************************************************************
+* Function Name  : PS2_Config
+* Description    : 配置PS/2鼠标
+* Input          : reg - 配置值, res - 需要等待res的响应才算成功
+* Output         : None
+* Return         : 成功返回0, 失败返回1
+*******************************************************************************/
 uint8_t PS2_Config(uint8_t reg, uint8_t res)
 {
     uint8_t dat, sta;
@@ -128,14 +171,26 @@ uint8_t PS2_Config(uint8_t reg, uint8_t res)
     return 0;
 }
 
-//准备接收数据
+/*******************************************************************************
+* Function Name  : PS2_En_Data_Report
+* Description    : 使能PS/2数据传输
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void PS2_En_Data_Report(void)
 {
 	PS2CLK_Set();
 	PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeIN_PU );
 }
 
-//禁止接收数据
+/*******************************************************************************
+* Function Name  : PS2_Dis_Data_Report
+* Description    : 禁止PS/2数据传输
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void PS2_Dis_Data_Report(void)
 {
     PS2CLK_GPIO_(SetBits)( PS2CLK_Pin );
@@ -143,7 +198,13 @@ void PS2_Dis_Data_Report(void)
 	PS2CLK_Clr();
 }
 
-//PS/2接口中断处理请求
+/*******************************************************************************
+* Function Name  : PS2_IT_handler
+* Description    : PS/2中断处理函数
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void PS2_IT_handler(void)
 {
     if ( PS2CLK_GPIO_(ReadITFlagBit)( PS2CLK_Pin ) != 0 ) {
@@ -156,7 +217,7 @@ void PS2_IT_handler(void)
         else if (PS2_bit_cnt <= 9) {
             PS2_byte >>= 1;
             if (PS2DATA_State()) {
-                  PS2_byte |= 0x80;
+                PS2_byte |= 0x80;
                 ++PS2_high_cnt;
             }
         }
@@ -167,17 +228,23 @@ void PS2_IT_handler(void)
         }
         else if (PS2_bit_cnt == 11) {   //停止位
             if ((PS2_byte_cnt == 0 && (PS2_byte & 0x8)) || PS2_byte_cnt > 0) {    //检查Always1位是否为1
-                PS2dat->data[PS2_byte_cnt++] = PS2_byte;
+                if ( PS2_byte_cnt > 0 ) PS2dat->data[PS2_byte_cnt] = PS2_byte;  //小红点不接受按键信息
+                PS2_byte_cnt++;
             }
             PS2_Dis_Data_Report();
             PS2_bit_cnt = 0;
-            HIDMouse[0] = 0x0;  //小红点不接受按键信息
             PS2_data_ready = 1;
         }
     }
 }
 
-//初始化PS/2接口，成功返回0，失败返回1
+/*******************************************************************************
+* Function Name  : PS2_Init
+* Description    : 初始化PS/2鼠标
+* Input          : None
+* Output         : None
+* Return         : 成功返回0，失败返回1
+*******************************************************************************/
 uint8_t PS2_Init(char* buf, BOOL is_IT)
 { 	
   uint8_t res, sta;

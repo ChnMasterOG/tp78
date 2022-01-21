@@ -77,10 +77,10 @@
 #define WAKE_UP_RTC_MAX_TIME				45
 #endif
 #ifndef HAL_KEY
-#define HAL_KEY											FALSE
+#define HAL_KEY											FALSE  // °åÔØ°´¼ü
 #endif
 #ifndef HAL_LED
-#define HAL_LED											TRUE
+#define HAL_LED											FALSE   // °åÔØLED
 #endif
 #ifndef HAL_USB
 #define HAL_USB                     TRUE   // USB
@@ -90,6 +90,15 @@
 #endif
 #ifndef HAL_KEYBOARD
 #define HAL_KEYBOARD                TRUE   // ¼üÅÌ
+#endif
+#ifndef HAL_OLED
+#define HAL_OLED                    TRUE   // OLED
+#endif
+#ifndef HAL_BATTADC
+#define HAL_BATTADC                 TRUE   // µç³ØADC
+#endif
+#ifndef HAL_WS2812_PWM
+#define HAL_WS2812_PWM              TRUE   // WS2812 PWMÇý¶¯
 #endif
 #ifndef TEM_SAMPLE
 #define TEM_SAMPLE									TRUE
@@ -129,6 +138,12 @@
 #endif
 #ifndef CENTRAL_MAX_CONNECTION
 #define CENTRAL_MAX_CONNECTION			3
+#endif
+
+#ifdef HAL_OLED
+#define OLED_PRINT(X...)            OLED_printf(0, 0, X)
+#else
+#define OLED_PRINT(X...)
 #endif
 
 extern u32 MEM_BUF[BLE_MEMHEAP_SIZE / 4];

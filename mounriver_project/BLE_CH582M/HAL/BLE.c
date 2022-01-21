@@ -554,7 +554,7 @@ static uint8 hidEmuRptCB( uint8 id, uint8 type, uint16 uuid,
   // notifications enabled
   else if ( oper == HID_DEV_OPER_ENABLE )
   {
-    tmos_start_task( halTaskID, BLE_READY_EVENT, 500 );
+    BLE_Ready = TRUE;
 //    tmos_start_task( hidEmuTaskId, TEST_REPORT_EVT, 500 );  //≤‚ ‘report
   }
   return status;

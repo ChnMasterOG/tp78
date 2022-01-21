@@ -34,13 +34,15 @@ void Test_Circulation()
 //              flag = 1;
 //          }
 //      } else flag = 0;
-      HIDKey[2] = KEY_A;
-      memcpy(pEP1_IN_DataBuf, HIDKey, 8);
-      DevEP1_IN_Deal( 8 );
-      DelayMs(5);
-      HIDKey[2] = 0;
-      memcpy(pEP1_IN_DataBuf, HIDKey, 8);
-      DevEP1_IN_Deal( 8 );
+//      HIDKey[2] = KEY_A;
+//      memcpy(pEP1_IN_DataBuf, HIDKey, 8);
+//      DevEP1_IN_Deal( 8 );
+//      DelayMs(5);
+//      HIDKey[2] = 0;
+//      memcpy(pEP1_IN_DataBuf, HIDKey, 8);
+//      DevEP1_IN_Deal( 8 );
+//      DelayMs(2000);
+      GPIOB_InverseBits( GPIO_Pin_0 );
       DelayMs(2000);
   }
 }
@@ -51,7 +53,6 @@ int main()
   uint8_t res;
 
   SetSysClock( CLK_SOURCE_PLL_60MHz );
-  RB_CLK_OSC32K_XT = 0; // 使用内部32k
 
   //mini board led
   GPIOB_SetBits( GPIO_Pin_0 );
@@ -73,6 +74,8 @@ int main()
   //Keyboard
   KEY_Init();
 
+  OLED_ShowString(0, 2, "Wait PS/2!");
+
   //PS/2
   if (PS2_Init(buf, 1) != 0) {
       printf("%s\n", buf);
@@ -81,8 +84,6 @@ int main()
   else {
       printf("mouse ready\n");
   }
-
-  GPIOB_SetBits( GPIO_Pin_0 );
 
   //USB
   pEP0_RAM_Addr = EP0_Databuf;
@@ -94,22 +95,25 @@ int main()
 
   OLED_ShowString(0, 2, "All ready!");
 
+  GPIOB_SetBits( GPIO_Pin_0 );
+
   while (1) {
       if (PS2_data_ready != 0) {    //USB发送小红点鼠标数据
           PS2_data_ready = 0;
           if (PS2_byte_cnt == 3) {
               PS2_byte_cnt = 0;
-              memcpy(pEP2_IN_DataBuf, PS2dat, 4);
-              DevEP2_IN_Deal( 4 );
+              PRINT("%d, %d", PS2dat->data[1], PS2dat->data[2]);
+//              memcpy(pEP2_IN_DataBuf, PS2dat, 4);
+//              DevEP2_IN_Deal( 4 );
           }
           PS2_En_Data_Report();
       }
-      KEY_detection();
-      if (KEY_data_ready != 0) {    //USB发送键盘数据
-          KEY_data_ready = 0;
-          memcpy(pEP1_IN_DataBuf, Keyboarddat, 8);
-          DevEP1_IN_Deal( 8 );
-      }
+//      KEY_detection();
+//      if (KEY_data_ready != 0) {    //USB发送键盘数据
+//          KEY_data_ready = 0;
+//          memcpy(pEP1_IN_DataBuf, Keyboarddat, 8);
+//          DevEP1_IN_Deal( 8 );
+//      }
       DelayMs(10);
   }
 

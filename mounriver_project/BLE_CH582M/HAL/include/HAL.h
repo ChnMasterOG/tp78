@@ -25,12 +25,16 @@ extern "C"
 #include "PS2.h"
 #include "BLE.h"
 #include "KEYBOARD.h"
+#include "BATTERY.h"
+#include "OLED.h"
+#include "WS2812.h"
 
 /* hal task Event */
 #define   LED_BLINK_EVENT                               0x0001
 #define   KEY_EVENT			                                0x0002
 #define   MAIN_CIRCULATION_EVENT                        0x0004
-#define   BLE_READY_EVENT                               0x0008
+#define   BATTERY_EVENT                                 0x0008
+#define   WS2812_EVENT                                  0x0010
 #define   HAL_REG_INIT_EVENT		                        0x2000
 #define   HAL_TEST_EVENT		                            0x4000
 

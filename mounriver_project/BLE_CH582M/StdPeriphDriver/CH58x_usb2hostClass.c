@@ -134,7 +134,7 @@ UINT8 InitRootU2Device( void )
                 else if(dv_cls == USB_DEV_CLASS_HUB){ // 是HUB类设备,集线器等
                     s = CtrlGetU2HubDescr( );
                     if(s==ERR_SUCCESS){
-                        printf( "Max Port:%02X ",(((PXUSB_HUB_DESCR)U2Com_Buffer)->bNbrPorts) );
+                        PRINT( "Max Port:%02X ",(((PXUSB_HUB_DESCR)U2Com_Buffer)->bNbrPorts) );
                         s = CtrlSetUsb2Config( cfg );               // 设置USB设备配置
                         if(s == ERR_SUCCESS){
                             ThisUsb2Dev.DeviceStatus = ROOT_DEV_SUCCESS;

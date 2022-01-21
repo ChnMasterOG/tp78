@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : PS2.h
  * Author             : ChnMasterOG
- * Version            : V1.0
- * Date               : 2021/11/17
+ * Version            : V1.1
+ * Date               : 2021/1/13
  * Description        : PS/2驱动头文件
  *******************************************************************************/
 
@@ -24,15 +24,15 @@
 	#define PS2CLK_State()	PS2CLK_GPIO_(ReadPortPin)(PS2CLK_Pin)
 	#define PS2DATA_State()	PS2DATA_GPIO_(ReadPortPin)(PS2DATA_Pin)
 	
-  #define PS2_TIMEOUT         100000
+  #define PS2_TIMEOUT         100000    // PS2超时时间
 
-	#define PS_RESET			      0XFF //复位命令 回复0XFA
-	#define RESEND	     		    0XFE //再次发送
-	#define SET_DEFAULT	 		    0XF6 //使用默认设置 回应0XFA
-	#define DIS_DATA_REPORT   	0XF5 //禁用数据报告 回应0XFA
-	#define EN_DATA_REPORT    	0XF4 //使能数据报告 回应0XFA
-	#define SET_SAMPLE_RATE		  0XF3 //设置采用速率 回应0XFA
-	#define GET_DEVICE_ID       0XF2 //得到设备ID   回应0XFA+ID
+	#define PS_RESET			      0XFF      // 复位命令             回应0XFA
+	#define RESEND	     		    0XFE      // 再次发送
+	#define SET_DEFAULT	 		    0XF6      // 使用默认设置   回应0XFA
+	#define DIS_DATA_REPORT   	0XF5      // 禁用数据报告   回应0XFA
+	#define EN_DATA_REPORT    	0XF4      // 使能数据报告   回应0XFA
+	#define SET_SAMPLE_RATE		  0XF3      // 设置采用速率   回应0XFA
+	#define GET_DEVICE_ID       0XF2      // 得到设备ID   回应0XFA+ID
 	#define SET_REMOTE_MODE     0XF0
 	#define SET_WRAP_MODE       0XEE
 	#define RST_WRAP_MODE       0XEC

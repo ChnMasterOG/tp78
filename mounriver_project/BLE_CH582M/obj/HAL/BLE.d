@@ -28,6 +28,10 @@ HAL/BLE.o: ../HAL/BLE.c \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/BLE.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/BATTERY.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/OLED.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h \
+ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/WS2812.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\Profile\include/devinfoservice.h \
  Y:\tp78-main\mounriver_project\BLE_CH582M\Profile\include/battservice.h \
@@ -91,6 +95,14 @@ Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/BLE.h:
 Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
 
 Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/BATTERY.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/OLED.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h:
+
+Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/WS2812.h:
 
 Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
 

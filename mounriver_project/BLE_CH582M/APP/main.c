@@ -7,11 +7,11 @@
 *******************************************************************************/
 
 /********************************** (C) COPYRIGHT *******************************
- *  M.2引脚分配：    PB10 & PB11 --- USB1; PA0 ~ PA7 & PA10 ~ PA15 & PB2 ~ PB7 --- KeyBoard
- *                PB13 & PB12 --- PS/2 Mouse; PB9 & PB8 --- OLED; PB14 --- W2812
- *                PA8 & PA9 --- Battery / UART1(download)
- *  核心板引脚：       PB0 --- LED; PB1 --- KEY
-********************************* (C) COPYRIGHT ********************************/
+ *  key-board pins:   PB10 & PB11 --- USB1; [PA0 ~ PA7 & PA9 & PA11 ~ PA15] & [PB2 ~ PB7] --- KeyBoard
+ *                    PB13 & PB12 --- PS/2 Mouse; PB9 & PB8 --- OLED; PA10 --- W2812(TMR1)
+ *                    PA8 & PB14 --- Battery
+ *  core-board pins:  PB0 --- LED; PB1 --- KEY; PB20 & PB21 --- R/TXD3_
+ ********************************* (C) COPYRIGHT ********************************/
 
 /*********************************************************************
  * INCLUDES
@@ -40,6 +40,7 @@ u8C MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
 __HIGH_CODE
 void Main_Circulation()
 {
+  // 开启TMOS任务调度
   while(1){
     TMOS_SystemProcess( );
   }
@@ -63,17 +64,19 @@ int main( void )
   GPIOB_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );
 #endif
 #ifdef DEBUG
-  GPIOA_SetBits(bTXD1);
-  GPIOA_ModeCfg(bTXD1, GPIO_ModeOut_PP_5mA);
-  UART1_DefInit( );
-#endif   
+  GPIOB_SetBits(1<<21); // PB21
+  GPIOB_ModeCfg(1<<21, GPIO_ModeOut_PP_5mA);
+  GPIOPinRemap(ENABLE, RB_PIN_UART3);
+  UART3_DefInit( );
+#endif
   PRINT("%s\n",VER_LIB);
   CH57X_BLEInit( );
 	HAL_Init( );
 	GAPRole_PeripheralInit( );
 	HidDev_Init( ); 
 	HidEmu_Init( );
-	tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, 10 );
+  tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, 10 ); // 主循环
+  tmos_start_task( halTaskID, WS2812_EVENT, 10 );  // 背光控制
   Main_Circulation();
 }
 

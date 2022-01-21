@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : KEYBOARD.h
  * Author             : ChnMasterOG
- * Version            : V1.0
- * Date               : 2021/12/12
+ * Version            : V1.1
+ * Date               : 2021/12/23
  * Description        : 机械键盘驱动头文件
  *******************************************************************************/
 
@@ -70,8 +70,8 @@
     #define KEY_Equal       0x2E    //= or +
     #define KEY_LSbrackets  0x2F    //[ or {
     #define KEY_RSbrackets  0x30    //] or }
-    #define KEY_Backslash   0x31    //\ or |
-    #define KEY_NonUS_WS    0x32
+    #define KEY_Backslash   0x31
+    #define KEY_NonUS_WS    0x32    //\ or |
     #define KEY_Semicolon   0x33    //; or :
     #define KEY_Quotation   0x34    //' or "
     #define KEY_GraveAccent 0x35    //` or ~
@@ -122,6 +122,20 @@
     #define KEY_RightAlt    0xE6
     #define KEY_RightGUI    0xE7
 
+    //矮轴
+    #define KEY_MouseL      0xF0
+    #define KEY_MouseR      0xF1
+    #define KEY_MouseM      0xF2
+
+    //Fn功能
+    #define Fn_Mode_None        0x00
+    #define Fn_Mode_Reset       0x01
+    #define Fn_Mode_ChangeKey   0x02
+    #define Fn_Mode_PaintedEgg  0xE0
+    #define Fn_Mode_LED_Style1  0xF0
+    #define Fn_Mode_LED_Style2  0xF1
+    #define Fn_Mode_LED_Style3  0xF2
+
     typedef union {
         struct {
             unsigned char LeftCTRL : 1;
@@ -143,10 +157,11 @@
         uint8_t data[8];
     }Keyboardstate;
 
-    extern uint8_t KEYBOARD_data_ready;
+    extern uint8_t KEYBOARD_data_ready, KEYBOARD_mouse_ready, LED_Change_flag;
     extern Keyboardstate* const Keyboarddat;
 
-    void KEYBOARD_Init(void);
-    void KEYBOARD_detection(void);
+    UINT8 KEYBOARD_Custom_Function( void );
+    void KEYBOARD_Init( void );
+    void KEYBOARD_detection( void );
 
 #endif

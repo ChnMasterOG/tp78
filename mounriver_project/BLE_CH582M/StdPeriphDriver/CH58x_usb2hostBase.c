@@ -214,7 +214,7 @@ UINT8   USB2HostTransact( UINT8 endp_pid, UINT8 tog, UINT32 timeout )
         R8_USB2_INT_FG = RB_UIF_TRANSFER;
         for ( i = WAIT_USB_TOUT_200US; i != 0 && (R8_USB2_INT_FG&RB_UIF_TRANSFER) == 0; i -- );
         R8_U2H_EP_PID = 0x00;                                                          // 停止USB传输
-        if ( (R8_USB2_INT_FG&RB_UIF_TRANSFER) == 0 )     {printf("!!!!!!!!\n");return( ERR_USB_UNKNOWN );}
+        if ( (R8_USB2_INT_FG&RB_UIF_TRANSFER) == 0 )     {PRINT("!!!!!!!!\n");return( ERR_USB_UNKNOWN );}
 
         if ( R8_USB2_INT_FG & RB_UIF_DETECT ) {                                       // USB设备插拔事件
 //      mDelayuS( 200 );                                                       // 等待传输完成

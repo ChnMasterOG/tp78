@@ -31,11 +31,12 @@
 #define Debug_UART3        3
  
 #ifndef DEBUG
-#define DEBUG Debug_UART0
+#define DEBUG Debug_UART3
 #endif
-#ifdef DEBUG
+
+//#ifdef DEBUG
 #include <stdio.h>
-#endif
+//#endif
    
 #ifndef	 FREQ_SYS  
 #define  FREQ_SYS		60000000

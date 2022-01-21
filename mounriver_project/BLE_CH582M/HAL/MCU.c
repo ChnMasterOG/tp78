@@ -12,7 +12,8 @@
 #include "HAL.h"
 #include <string.h>
 
-tmosTaskID halTaskID;
+tmosTaskID halTaskID=INVALID_TASK_ID;
+BOOL connection_state[2] = { FALSE, FALSE };  // USB/BLE state
 
 /*******************************************************************************
  * @fn          Lib_Calibration_LSI
@@ -211,11 +212,13 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     return events ^ KEY_EVENT;
   }
 
-  // 蓝牙准备事件
-  if ( events & BLE_READY_EVENT )
+  // 电池ADC检测事件
+  if ( events & BATTERY_EVENT )
   {
-    BLE_Ready = TRUE;
-    return events ^ BLE_READY_EVENT;
+    BATTERY_ADC_Calculation( );
+    BATTERY_DMA_ENABLE( );
+//    OLED_PRINT("ADC_Val: %d", BAT_adcVal);
+    tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(1000) );  // 1s更新采样值
   }
 
   // 定时主循环事件
@@ -226,6 +229,7 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
         PS2_data_ready = 0;
         if (PS2_byte_cnt == 3) {  // 接收完数据报
             PS2_byte_cnt = 0;
+            HIDMouse[2] = -HIDMouse[2]; // 反转Y轴
             if (USB_Ready == TRUE) {
                 tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
             } else if (BLE_Ready == TRUE) {
@@ -239,15 +243,45 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     KEYBOARD_detection();
     if (KEYBOARD_data_ready != 0) {    // 发送键盘数据
         KEYBOARD_data_ready = 0;
-        if (USB_Ready == TRUE) {
-            tmos_start_task( usbTaskID, USB_KEYBOARD_EVENT, 2 );  // USB键盘事件
-        } else if (BLE_Ready == TRUE) {
-            tmos_start_task( hidEmuTaskId, START_KEYBOARD_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  // 蓝牙键盘事件 2ms处理
+        if ( KEYBOARD_Custom_Function() ) { // 带有Fn键处理信息则不产生键盘事件
+          if ( USB_Ready == TRUE ) {
+              tmos_start_task( usbTaskID, USB_KEYBOARD_EVENT, 2 );  // USB键盘事件
+          } else if (BLE_Ready == TRUE) {
+              tmos_start_task( hidEmuTaskId, START_KEYBOARD_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  // 蓝牙键盘事件 2ms处理
+          }
+        }
+        if (KEYBOARD_mouse_ready != 0) { // 发送键盘鼠标数据
+            KEYBOARD_mouse_ready = 0;
+            memset(&HIDMouse[1], 0, 3);   // 只按左中右键没有其他操作
+            if (USB_Ready == TRUE) {
+                tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
+            } else if (BLE_Ready == TRUE) {
+                tmos_start_task( hidEmuTaskId, START_MOUSE_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙鼠标事件 2ms处理
+            }
         }
     }
 #endif
-    tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, MS1_TO_SYSTEM_TIME(10) );
+    // 检测USB/蓝牙连接状态：连接状态改变OLED显示
+    if (connection_state[0] != USB_Ready) {
+      connection_state[0] = USB_Ready;
+      OLED_PRINT("USB: %d, BLE: %d", USB_Ready, BLE_Ready);
+    } else if (connection_state[1] != BLE_Ready) {
+      connection_state[1] = BLE_Ready;
+      OLED_PRINT("USB: %d, BLE: %d", USB_Ready, BLE_Ready);
+    }
+    tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, MS1_TO_SYSTEM_TIME(10) ); // 10ms周期
     return events ^ MAIN_CIRCULATION_EVENT;
+  }
+
+  if ( events & WS2812_EVENT )
+  {
+#if (defined HAL_WS2812_PWM) && (HAL_WS2812_PWM == TRUE)
+    if (USB_Ready == TRUE) {
+      WS2812_Send( );
+    }
+    tmos_start_task( halTaskID, WS2812_EVENT, MS1_TO_SYSTEM_TIME(60) ); // 60ms周期控制背光
+#endif
+    return events ^ WS2812_EVENT;
   }
 
   // 硬件初始化事件
@@ -291,7 +325,7 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
  */
 void HAL_Init()
 {
-  char debug_info[520];
+  char debug_info[520] = "All Ready!";
   halTaskID = TMOS_ProcessEventRegister( HAL_ProcessEvent );
   HAL_TimeInit();
 #if (defined HAL_SLEEP) && (HAL_SLEEP == TRUE)
@@ -300,15 +334,23 @@ void HAL_Init()
 #if (defined HAL_KEY) && (HAL_KEY == TRUE)
   HAL_KeyInit( );
 #endif
+#if (defined HAL_OLED) && (HAL_OLED == TRUE)
+  HAL_OLED_Init( );
+#endif
+#if (defined HAL_BATTADC) && (HAL_BATTADC == TRUE)
+  BATTERY_Init( );
+#endif
 #if (defined HAL_USB) && (HAL_USB == TRUE)
   HAL_USBInit( );
 #endif
 #if (defined HAL_PS2) && (HAL_PS2 == TRUE)
-  PS2_Init(debug_info, 1); // PS/2中断实现
-  PRINT("%s\n", debug_info);
+  PS2_Init(debug_info, TRUE); // PS/2中断实现
 #endif
 #if (defined HAL_KEYBOARD) && (HAL_KEYBOARD == TRUE)
   KEYBOARD_Init( );
+#endif
+#if (defined HAL_WS2812_PWM) && (HAL_WS2812_PWM == TRUE)
+  WS2812_PWM_Init( );
 #endif
 #if (defined HAL_LED) && (HAL_LED == TRUE)
   debug_info[7] = '\0';
@@ -321,6 +363,8 @@ void HAL_Init()
 #if ( defined BLE_CALIBRATION_ENABLE ) && ( BLE_CALIBRATION_ENABLE == TRUE )
   tmos_start_task( halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME( BLE_CALIBRATION_PERIOD ) );    // 添加校准任务，单次校准耗时小于10ms
 #endif
+PRINT("%s\n", debug_info);
+OLED_PRINT("%s", debug_info);
 //  tmos_start_task( halTaskID, HAL_TEST_EVENT, 1600 );    // 添加测试任务
 }
 

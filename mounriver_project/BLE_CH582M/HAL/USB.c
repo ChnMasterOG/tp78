@@ -259,6 +259,7 @@ void USB_DevTransProcess( void )
                 {
                   pDescr = MouseRepDesc;                                //数据准备上传
                   len = sizeof( MouseRepDesc );                         //如果有更多接口，该标准位应该在最后一个接口配置完成后有效
+                  USB_Ready = TRUE;
                 }
                 else
                   len = 0xff;                                           //本程序只有2个接口，这句话正常不可能执行
@@ -400,7 +401,7 @@ void USB_DevTransProcess( void )
     }    // 挂起
     else
     {
-      USB_Ready = TRUE;
+      ;
     }               // 唤醒
     R8_USB_INT_FG = RB_UIF_SUSPEND;
   }
