@@ -121,6 +121,9 @@
 #ifndef BLE_MEMHEAP_SIZE
 #define BLE_MEMHEAP_SIZE						(1024*6)
 #endif
+#ifndef BLE_DEVICE_NUM
+#define BLE_DEVICE_NUM              6             // 记住蓝牙主机设备数目
+#endif
 #ifndef BLE_BUFF_MAX_LEN
 #define BLE_BUFF_MAX_LEN						27
 #endif

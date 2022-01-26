@@ -14,7 +14,8 @@
     #define Row_GPIO_(x)    GPIOB_ ## x
     #define Colum_GPIO_(x)  GPIOA_ ## x
 
-    #define MAX_PRESS_COUNT 15   // 8个特殊键+6个一般键+1个Fn键
+    #define MAX_PRESS_COUNT 15    // 8个特殊键+6个一般键+1个Fn键
+    #define MAX_CHANGETIMES 30   // 按下Caplock改变键盘布局检测次数
 
     //special
     #define KEY_None    0x00
@@ -128,13 +129,24 @@
     #define KEY_MouseM      0xF2
 
     //Fn功能
-    #define Fn_Mode_None        0x00
-    #define Fn_Mode_Reset       0x01
-    #define Fn_Mode_ChangeKey   0x02
-    #define Fn_Mode_PaintedEgg  0xE0
-    #define Fn_Mode_LED_Style1  0xF0
-    #define Fn_Mode_LED_Style2  0xF1
-    #define Fn_Mode_LED_Style3  0xF2
+    #define Fn_Mode_None                  0x00
+    #define Fn_Mode_Reset                 0x01
+    #define Fn_Mode_ChangeKey             0x02
+    #define Fn_Mode_PaintedEgg            0xC0
+    #define Fn_Mode_SaveAddr              0xE0
+    #define Fn_Mode_SelectCasualDevice    0xE1
+    #define Fn_Mode_SelectDevice1         0xE2
+    #define Fn_Mode_SelectDevice2         0xE3
+    #define Fn_Mode_SelectDevice3         0xE4
+    #define Fn_Mode_SelectDevice4         0xE5
+    #define Fn_Mode_SelectDevice5         0xE6
+    #define Fn_Mode_SelectDevice6         0xE7  // Mode SaveAddr-SelectDevice6需连续
+    #define Fn_Mode_LED_Style1            0xF0
+    #define Fn_Mode_LED_Style2            0xF1
+    #define Fn_Mode_LED_Style3            0xF2
+    #define Fn_Mode_LED_Style4            0xF3
+    #define Fn_Mode_LED_Style5            0xF4
+    #define Fn_Mode_GiveUp                0xFF
 
     typedef union {
         struct {

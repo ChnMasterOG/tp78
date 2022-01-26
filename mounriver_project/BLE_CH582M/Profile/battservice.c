@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : battservice.c
-* Author             : WCH
+* Author             : ChnMasterOG
 * Version            : V1.0
-* Date               : 2018/12/10
+* Date               : 2022/1/23
 * Description        : 电池服务
             
 *******************************************************************************/
@@ -15,8 +15,6 @@
 #include "hiddev.h"
 #include "BATTERY.h"
 #include "battservice.h"
-//test
-#include "OLED.h"
 
 /*********************************************************************
  * MACROS
@@ -30,8 +28,8 @@
 #define BATT_ADC_LEVEL_3V           3949 //409
 #define BATT_ADC_LEVEL_2V           2974 //273
 
-#define BATT_ADC_LEVEL_3_6V         3396
-#define BATT_ADC_LEVEL_4_2V         3963 // 0.44*Vbat - 这里设Vref=0.955V
+#define BATT_ADC_LEVEL_3_4V         BAT_MINADCVAL
+#define BATT_ADC_LEVEL_4_2V         BAT_MAXADCVAL
 
 #define BATT_LEVEL_VALUE_IDX        2 // Position of battery level in attribute array
 #define BATT_LEVEL_VALUE_CCCD_IDX   3 // Position of battery level CCCD in attribute array
@@ -80,7 +78,7 @@ static battServiceTeardownCB_t battServiceTeardownCB = NULL;
 // Measurement calculation callback
 static battServiceCalcCB_t battServiceCalcCB = NULL;
 
-static uint16 battMinLevel = BATT_ADC_LEVEL_3_6V;
+static uint16 battMinLevel = BATT_ADC_LEVEL_3_4V;
 static uint16 battMaxLevel = BATT_ADC_LEVEL_4_2V;
 
 // Critical battery level setting
@@ -519,6 +517,7 @@ static uint8 battMeasure( void )
   }
 
   // Configure ADC and perform a read
+//  BATTERY_ADC_Convert( ); // 用DMA转换则注释本行
   adc = BAT_adcVal;
 
   // Call measurement teardown callback
@@ -552,8 +551,6 @@ static uint8 battMeasure( void )
       percent = (uint8) ((((adc - battMinLevel) * 25) + (range - 1)) / range);
     }
   }
-
-  OLED_PRINT("ADC:%d, BAT:%d%%", adc, percent);
 
   return percent;
 }

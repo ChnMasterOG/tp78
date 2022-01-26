@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : BLE.c
 * Author             : ChnMasterOG
-* Version            : V1.0
-* Date               : 2021/12/5
+* Version            : V1.1
+* Date               : 2022/1/25
 * Description        : 蓝牙键鼠应用程序，初始化广播连接参数，然后广播，直至连接主机
 *******************************************************************************/
 
@@ -58,22 +58,22 @@
 #define DEFAULT_DESIRED_CONN_TIMEOUT          500
 
 // Default passcode
-#define DEFAULT_PASSCODE                      0
+#define DEFAULT_PASSCODE                      202278
 
 // Default GAP pairing mode
 #define DEFAULT_PAIRING_MODE                  GAPBOND_PAIRING_MODE_WAIT_FOR_REQ
 
 // Default MITM mode (TRUE to require passcode or OOB when pairing)
-#define DEFAULT_MITM_MODE                     FALSE
+#define DEFAULT_MITM_MODE                     TRUE  //FALSE
 
 // Default bonding mode, TRUE to bond
 #define DEFAULT_BONDING_MODE                  TRUE
 
 // Default GAP bonding I/O capabilities
-#define DEFAULT_IO_CAPABILITIES               GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT
+#define DEFAULT_IO_CAPABILITIES               GAPBOND_IO_CAP_DISPLAY_ONLY //GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT
 
 // Battery level is critical when it is less than this %
-#define DEFAULT_BATT_CRITICAL_LEVEL           6
+#define DEFAULT_BATT_CRITICAL_LEVEL           10
 
 /*********************************************************************
  * TYPEDEFS
@@ -88,6 +88,12 @@ tmosTaskID hidEmuTaskId=INVALID_TASK_ID;
 
 // BLE ready flag
 BOOL BLE_Ready = FALSE;
+
+// BLE address of scanner devices
+uint8_t BLE_ScannerAddr[BLE_DEVICE_NUM+1][B_ADDR_LEN];
+
+// Select scanner (usual if 0)
+uint8_t BLE_SelectScannerIndex = 0;
 
 /*********************************************************************
  * EXTERNAL VARIABLES
@@ -162,6 +168,8 @@ static uint16 hidEmuConnHandle = GAP_CONNHANDLE_INIT;
  * LOCAL FUNCTIONS
  */
 
+static uint8_t hidEmu_WriteScannerAddr( void );
+static void hidEmu_ReadScannerAddr( void );
 static void hidEmu_ProcessTMOSMsg( tmos_event_hdr_t *pMsg );
 static void hidEmuSendMouseReport( uint8 buttons ,uint8 X_data ,uint8 Y_data );
 static void hidEmuSendKbdReport( uint8 keycode );
@@ -246,6 +254,9 @@ void HidEmu_Init( )
   // Register for HID Dev callback
   HidDev_Register( &hidEmuCfg, &hidEmuHidCBs );
 
+  // Read scanner address array from flash
+  hidEmu_ReadScannerAddr( );
+
   // Setup a delayed profile startup
   tmos_set_event( hidEmuTaskId, START_DEVICE_EVT );
 }
@@ -310,7 +321,16 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
     return ( events ^ START_PHY_UPDATE_EVT );
   }
 
-  if ( events & TEST_REPORT_EVT )
+  if ( events & DISCONNECT_EVT )  // 断开蓝牙
+  {
+    if ( hidEmuConnHandle != GAP_CONNHANDLE_INIT ) {
+      GAPRole_TerminateLink( hidEmuConnHandle );  // disconnect
+      hidEmuConnHandle = GAP_CONNHANDLE_INIT;
+    }
+    return ( events ^ DISCONNECT_EVT );
+  }
+
+  if ( events & TEST_REPORT_EVT ) // 测试事件
   {
     hidEmuSendKbdReport( send_char );
     send_char++;
@@ -336,6 +356,51 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
   }
 
   return 0;
+}
+
+/*********************************************************************
+ * @fn      hidEmu_SaveScannerAddr
+ *
+ * @brief   Save current scanner address array to flash
+ *
+ * @param   array index
+ *
+ * @return  success if 0
+ */
+uint8_t hidEmu_SaveScannerAddr( uint8_t index )
+{
+  tmos_memcpy(BLE_ScannerAddr[index], BLE_ScannerAddr[0], B_ADDR_LEN);
+  return hidEmu_WriteScannerAddr();
+}
+
+/*********************************************************************
+ * @fn      hidEmu_WriteScannerAddr
+ *
+ * @brief   Write scanner address array to flash
+ *
+ * @param   none
+ *
+ * @return  success if 0
+ */
+static uint8_t hidEmu_WriteScannerAddr( void )
+{
+  uint8_t s;
+  s = EEPROM_WRITE( 2048, BLE_ScannerAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
+  return s;
+}
+
+/*********************************************************************
+ * @fn      hidEmu_ReadScannerAddr
+ *
+ * @brief   Read scanner address array from flash
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+static void hidEmu_ReadScannerAddr( void )
+{
+  EEPROM_READ( 2048, BLE_ScannerAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
 }
 
 /*********************************************************************
@@ -431,7 +496,6 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
     case GAPROLE_ADVERTISING:
       if( pEvent->gap.opcode == GAP_MAKE_DISCOVERABLE_DONE_EVENT )
       {
-        BLE_Ready = FALSE;
         PRINT( "Advertising..\n" );
       }
       break;
@@ -443,9 +507,20 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
 
         // get connection handle
         hidEmuConnHandle = event->connectionHandle;
-        tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
-        tmos_start_task( hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY);
-        PRINT( "Connected..\n" );
+
+        // select scanner
+        if (BLE_SelectScannerIndex == 0 || (BLE_SelectScannerIndex != 0 &&
+            tmos_memcmp(BLE_ScannerAddr[BLE_SelectScannerIndex], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN) == TRUE)) {
+          // record scanner address, connection ok
+          tmos_memcpy(BLE_ScannerAddr[0], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN);
+          tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
+          tmos_start_task( hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY);
+          PRINT( "Connected..\n" );
+        } else {
+          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 1600 );
+          PRINT( "Refuse the device..\n" );
+        }
+
       }
       break;
 
@@ -463,7 +538,9 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
       }
       else if( pEvent->gap.opcode == GAP_LINK_TERMINATED_EVENT )
       {
+        BLE_Ready = FALSE;
         PRINT( "Disconnected.. Reason:%x\n",pEvent->linkTerminate.reason );
+        hidEmuConnHandle = GAP_CONNHANDLE_INIT;
       }
       else if( pEvent->gap.opcode == GAP_LINK_ESTABLISHED_EVENT )
       {

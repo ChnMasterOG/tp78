@@ -10,12 +10,21 @@
 
 __attribute__((aligned(2))) UINT16 BAT_abcBuff[ADC_MAXBUFLEN];
 UINT32 BAT_adcVal = 0;
+static UINT32 BAT_adcHistory = 0;
 static signed short RoughCalib_Value = 0;
 
+/*******************************************************************************
+* Function Name  : BATTERY_Init
+* Description    : 电池ADC初始化
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void BATTERY_Init( void )
 {
   uint8_t i;
-  RoughCalib_Value = ADC_DataCalib_Rough(); // 用于计算ADC内部偏差，记录到变量 RoughCalib_Value中
+//  ADC_InterTSSampInit();
+//  RoughCalib_Value = ADC_DataCalib_Rough(); // 用于计算ADC内部偏差，记录到变量 RoughCalib_Value中
   // adc init
   GPIOA_ModeCfg( GPIO_Pin_8, GPIO_ModeIN_Floating );
   ADC_ExtSingleChSampInit( SampleFreq_3_2, ADC_PGA_0 );
@@ -26,6 +35,13 @@ void BATTERY_Init( void )
   tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(1000) );  // 等待稳定：1s
 }
 
+/*******************************************************************************
+* Function Name  : BATTERY_DMA_ENABLE
+* Description    : 电池ADC DMA使能, 将转换结果通过DMA载入BAT_abcBuff中
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void BATTERY_DMA_ENABLE( void )
 {
   R16_ADC_DMA_BEG = (UINT16) (UINT32) &BAT_abcBuff[0];
@@ -33,14 +49,87 @@ void BATTERY_DMA_ENABLE( void )
   R8_ADC_CTRL_DMA = RB_ADC_DMA_ENABLE | RB_ADC_AUTO_EN | RB_ADC_CONT_EN; // 定时间隔自动连续ADC采样; ADC连续转换模式; DMA地址循环功能使能
 }
 
+/*******************************************************************************
+* Function Name  : BATTERY_ADC_Convert
+* Description    : 电池ADC连续转换读取电压值
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void BATTERY_ADC_Convert( void )
+{
+  uint8_t i;
+  for(i = 0; i < ADC_MAXBUFLEN; i++) {
+    BAT_abcBuff[i] = ADC_ExcutSingleConver();      // 连续采样ADC_MAXBUFLEN次
+  }
+  BATTERY_ADC_Calculation( );
+//  OLED_PRINT("ADC: %d", BAT_adcVal);
+}
+
+/*******************************************************************************
+* Function Name  : BATTERY_ADC_Calculation
+* Description    : 计算电池ADC电压值, 保存在BAT_adcVal中
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void BATTERY_ADC_Calculation( void )
 {
   uint8_t i;
   UINT32 BAT_adcVal_tmp = 0;
   for (i = 0; i < ADC_MAXBUFLEN; i++) {
-    BAT_adcVal_tmp += BAT_abcBuff[i];
+    BAT_adcVal_tmp += BAT_abcBuff[i] + RoughCalib_Value;
   }
   BAT_adcVal_tmp /= ADC_MAXBUFLEN;
-//  BAT_adcVal_tmp = BAT_adcVal_tmp + RoughCalib_Value;
+  BAT_adcHistory = BAT_adcVal;
   BAT_adcVal = BAT_adcVal_tmp;
+}
+
+/*******************************************************************************
+* Function Name  : BATTERY_ADC_GetLevel
+* Description    : 获取电池ADC等级(1:0%~25%, 2:25%~50%, 3:50%~75%, 4:75%~100%, 0和5代表超出范围)
+* Input          : ADC值
+* Output         : None
+* Return         : 0/1/2/3/4
+*******************************************************************************/
+static UINT8 BATTERY_ADC_GetLevel( UINT32 adc_val )
+{
+  if ( adc_val < BAT_MINADCVAL ) return 0;
+  else if ( adc_val < BAT_25PERCENT_VAL ) return 1;
+  else if ( adc_val < BAT_50PERCENT_VAL ) return 2;
+  else if ( adc_val < BAT_75PERCENT_VAL ) return 3;
+  else if ( adc_val < BAT_MAXADCVAL ) return 4;
+  else return 5;
+}
+
+/*******************************************************************************
+* Function Name  : BATTERY_DrawBMP
+* Description    : 绘制电池图案(仅电量等级改变才绘制)
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void BATTERY_DrawBMP( void )
+{
+  UINT8 i, j;
+  UINT8 BAT_level = BATTERY_ADC_GetLevel(BAT_adcVal);
+  if (BATTERY_ADC_GetLevel(BAT_adcHistory) != BAT_level) { // 电量等级变化
+//    OLED_Clear();
+    OLED_PRINT("%4d", BAT_adcVal); // 输出当前ADC采样值
+    OLED_DrawBMP(92, 0, 128, 4, (uint8_t*)EmptyBattery);  // 绘制空电池
+    OLED_Set_Pos(96, 1);
+    for (i = 0; i < BAT_level; i++) { // 绘制电量(上半部分)
+      for (j = 0; j < 4; j++) {
+        OLED_WR_Byte(0xFD, OLED_DATA);
+      }
+      OLED_WR_Byte(0x01, OLED_DATA);
+    }
+    OLED_Set_Pos(96, 2);
+    for (i = 0; i < BAT_level; i++) { // 绘制电量(下半部分)
+      for (j = 0; j < 4; j++) {
+        OLED_WR_Byte(0xBF, OLED_DATA);
+      }
+      OLED_WR_Byte(0x80, OLED_DATA);
+    }
+  }
 }

@@ -15,6 +15,7 @@ extern const unsigned char F8X16[];
 
 extern const unsigned char Hzk[][16];
 
+extern const unsigned char EmptyBattery[][16];
 extern const unsigned char PaintedEgg_Bmp[][16];
 
 #endif

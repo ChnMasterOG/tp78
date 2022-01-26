@@ -59,6 +59,7 @@ int main( void )
   PWR_DCDCCfg( ENABLE );
 #endif
   SetSysClock( CLK_SOURCE_PLL_60MHz );
+  FLASH_ROM_LOCK( 0 );  // unlock flsah
 #if (defined (HAL_SLEEP)) && (HAL_SLEEP == TRUE)
   GPIOA_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );
   GPIOB_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );

@@ -212,12 +212,12 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     return events ^ KEY_EVENT;
   }
 
-  // 电池ADC检测事件
+  // 电池ADC检测事件 - 使能DMA
   if ( events & BATTERY_EVENT )
   {
     BATTERY_ADC_Calculation( );
+    BATTERY_DrawBMP( );
     BATTERY_DMA_ENABLE( );
-//    OLED_PRINT("ADC_Val: %d", BAT_adcVal);
     tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(1000) );  // 1s更新采样值
   }
 
