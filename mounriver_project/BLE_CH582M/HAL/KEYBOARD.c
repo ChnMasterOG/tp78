@@ -2,7 +2,7 @@
  * File Name          : KEYBOARD.c
  * Author             : ChnMasterOG
  * Version            : V1.3
- * Date               : 2022/1/17
+ * Date               : 2022/1/27
  * Description        : 机械键盘驱动源文件
  *******************************************************************************/
 
@@ -241,18 +241,18 @@ UINT8 KEYBOARD_Custom_Function( void )
         break;
       case Fn_Mode_SelectCasualDevice:  // Fn+9开放键盘 能被任意设备连接
         Fn_Mode = Fn_Mode_None;
-        BLE_SelectScannerIndex = 0;
-        tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 1600 );
+        BLE_SelectHostIndex = 0;
+        tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 500 );
         OLED_PRINT("Open BLE");
         break;
       case Fn_Mode_SelectDevice1 ... Fn_Mode_SelectDevice6: // Fn+0后按Fn+1~6保存设备 直接按Fn+1~6切换设备
         if (Fn_cnt == 0x02) {   // 保存设备信息
           Fn_cnt = 0;
-          hidEmu_SaveScannerAddr( Fn_Mode-Fn_Mode_SelectCasualDevice );
+          hidEmu_SaveHostAddr( Fn_Mode-Fn_Mode_SelectCasualDevice );
           OLED_PRINT("Save Device: %d", Fn_Mode-Fn_Mode_SelectCasualDevice);
         } else {
-          BLE_SelectScannerIndex = Fn_Mode-Fn_Mode_SelectCasualDevice;
-          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 1600 );
+          BLE_SelectHostIndex = Fn_Mode-Fn_Mode_SelectCasualDevice;
+          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 500 );
         }
         Fn_Mode = Fn_Mode_None;
         break;

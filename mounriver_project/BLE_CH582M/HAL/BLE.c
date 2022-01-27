@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : BLE.c
 * Author             : ChnMasterOG
-* Version            : V1.1
-* Date               : 2022/1/25
+* Version            : V1.2
+* Date               : 2022/1/27
 * Description        : 蓝牙键鼠应用程序，初始化广播连接参数，然后广播，直至连接主机
 *******************************************************************************/
 
@@ -89,11 +89,11 @@ tmosTaskID hidEmuTaskId=INVALID_TASK_ID;
 // BLE ready flag
 BOOL BLE_Ready = FALSE;
 
-// BLE address of scanner devices
-uint8_t BLE_ScannerAddr[BLE_DEVICE_NUM+1][B_ADDR_LEN];
+// BLE address of host devices
+uint8_t BLE_HostAddr[BLE_DEVICE_NUM+1][B_ADDR_LEN];
 
-// Select scanner (usual if 0)
-uint8_t BLE_SelectScannerIndex = 0;
+// Select host device index (usual if 0)
+uint8_t BLE_SelectHostIndex = 0;
 
 /*********************************************************************
  * EXTERNAL VARIABLES
@@ -168,8 +168,8 @@ static uint16 hidEmuConnHandle = GAP_CONNHANDLE_INIT;
  * LOCAL FUNCTIONS
  */
 
-static uint8_t hidEmu_WriteScannerAddr( void );
-static void hidEmu_ReadScannerAddr( void );
+static uint8_t hidEmu_WriteHostAddr( void );
+static void hidEmu_ReadHostAddr( void );
 static void hidEmu_ProcessTMOSMsg( tmos_event_hdr_t *pMsg );
 static void hidEmuSendMouseReport( uint8 buttons ,uint8 X_data ,uint8 Y_data );
 static void hidEmuSendKbdReport( uint8 keycode );
@@ -254,8 +254,8 @@ void HidEmu_Init( )
   // Register for HID Dev callback
   HidDev_Register( &hidEmuCfg, &hidEmuHidCBs );
 
-  // Read scanner address array from flash
-  hidEmu_ReadScannerAddr( );
+  // Read host address array from flash
+  hidEmu_ReadHostAddr( );
 
   // Setup a delayed profile startup
   tmos_set_event( hidEmuTaskId, START_DEVICE_EVT );
@@ -359,48 +359,48 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
 }
 
 /*********************************************************************
- * @fn      hidEmu_SaveScannerAddr
+ * @fn      hidEmu_SaveHostAddr
  *
- * @brief   Save current scanner address array to flash
+ * @brief   Save current host address array to flash
  *
  * @param   array index
  *
  * @return  success if 0
  */
-uint8_t hidEmu_SaveScannerAddr( uint8_t index )
+uint8_t hidEmu_SaveHostAddr( uint8_t index )
 {
-  tmos_memcpy(BLE_ScannerAddr[index], BLE_ScannerAddr[0], B_ADDR_LEN);
-  return hidEmu_WriteScannerAddr();
+  tmos_memcpy(BLE_HostAddr[index], BLE_HostAddr[0], B_ADDR_LEN);
+  return hidEmu_WriteHostAddr();
 }
 
 /*********************************************************************
- * @fn      hidEmu_WriteScannerAddr
+ * @fn      hidEmu_WriteHostAddr
  *
- * @brief   Write scanner address array to flash
+ * @brief   Write host address array to flash
  *
  * @param   none
  *
  * @return  success if 0
  */
-static uint8_t hidEmu_WriteScannerAddr( void )
+static uint8_t hidEmu_WriteHostAddr( void )
 {
   uint8_t s;
-  s = EEPROM_WRITE( 2048, BLE_ScannerAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
+  s = EEPROM_WRITE( 2048, BLE_HostAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
   return s;
 }
 
 /*********************************************************************
- * @fn      hidEmu_ReadScannerAddr
+ * @fn      hidEmu_ReadHostAddr
  *
- * @brief   Read scanner address array from flash
+ * @brief   Read host address array from flash
  *
  * @param   none
  *
  * @return  none
  */
-static void hidEmu_ReadScannerAddr( void )
+static void hidEmu_ReadHostAddr( void )
 {
-  EEPROM_READ( 2048, BLE_ScannerAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
+  EEPROM_READ( 2048, BLE_HostAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
 }
 
 /*********************************************************************
@@ -508,16 +508,16 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
         // get connection handle
         hidEmuConnHandle = event->connectionHandle;
 
-        // select scanner
-        if (BLE_SelectScannerIndex == 0 || (BLE_SelectScannerIndex != 0 &&
-            tmos_memcmp(BLE_ScannerAddr[BLE_SelectScannerIndex], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN) == TRUE)) {
-          // record scanner address, connection ok
-          tmos_memcpy(BLE_ScannerAddr[0], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN);
+        // select host
+        if (BLE_SelectHostIndex == 0 || (BLE_SelectHostIndex != 0 &&
+            tmos_memcmp(BLE_HostAddr[BLE_SelectHostIndex], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN) == TRUE)) {
+          // record host address, connection ok
+          tmos_memcpy(BLE_HostAddr[0], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN);
           tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
           tmos_start_task( hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY);
           PRINT( "Connected..\n" );
         } else {
-          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 1600 );
+          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 500 );
           PRINT( "Refuse the device..\n" );
         }
 
@@ -632,6 +632,9 @@ static uint8 hidEmuRptCB( uint8 id, uint8 type, uint16 uuid,
   else if ( oper == HID_DEV_OPER_ENABLE )
   {
     BLE_Ready = TRUE;
+    /* disable advertising */
+    uint8 initial_advertising_disable = FALSE;
+    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_disable );
 //    tmos_start_task( hidEmuTaskId, TEST_REPORT_EVT, 500 );  //测试report
   }
   return status;

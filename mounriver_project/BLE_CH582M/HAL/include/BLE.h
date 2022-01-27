@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : BLE.h
 * Author             : ChnMasterOG
-* Version            : V1.0
-* Date               : 2021/12/11
+* Version            : V1.2
+* Date               : 2022/1/27
 * Description        : 
 *******************************************************************************/
 
@@ -54,14 +54,14 @@ extern void HidEmu_Init( void );
 extern uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events );
 
 /*
- * Save current scanner address array to flash
+ * Save current host address array to flash
  */
-uint8_t hidEmu_SaveScannerAddr( uint8_t index );
+uint8_t hidEmu_SaveHostAddr( uint8_t index );
 
 extern tmosTaskID hidEmuTaskId;
 extern BOOL BLE_Ready;
-extern uint8_t BLE_ScannerAddr[BLE_DEVICE_NUM+1][B_ADDR_LEN];
-extern uint8_t BLE_SelectScannerIndex;
+extern uint8_t BLE_HostAddr[BLE_DEVICE_NUM+1][B_ADDR_LEN];
+extern uint8_t BLE_SelectHostIndex;
 
 /*********************************************************************
 *********************************************************************/

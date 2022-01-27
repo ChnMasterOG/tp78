@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : MCU.c
- * Author             : WCH
- * Version            : V1.1
- * Date               : 2019/11/05
+ * Author             : ChnMasterOG
+ * Version            : V1.2
+ * Date               : 2022/1/26
  * Description        : 硬件任务处理函数及BLE和硬件初始化
  *******************************************************************************/
 
@@ -252,7 +252,7 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
         }
         if (KEYBOARD_mouse_ready != 0) { // 发送键盘鼠标数据
             KEYBOARD_mouse_ready = 0;
-            memset(&HIDMouse[1], 0, 3);   // 只按左中右键没有其他操作
+            tmos_memset(&HIDMouse[1], 0, 3);   // 只按左中右键没有其他操作
             if (USB_Ready == TRUE) {
                 tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
             } else if (BLE_Ready == TRUE) {

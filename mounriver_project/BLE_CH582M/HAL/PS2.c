@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : PS2.c
  * Author             : ChnMasterOG
- * Version            : V1.1
- * Date               : 2022/1/13
+ * Version            : V1.2
+ * Date               : 2022/1/26
  * Description        : PS/2驱动源文件
  *******************************************************************************/
 
@@ -180,8 +180,8 @@ uint8_t PS2_Config(uint8_t reg, uint8_t res)
 *******************************************************************************/
 void PS2_En_Data_Report(void)
 {
-	PS2CLK_Set();
-	PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeIN_PU );
+	  PS2CLK_Set();
+	  PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeIN_PU );
 }
 
 /*******************************************************************************
@@ -195,7 +195,7 @@ void PS2_Dis_Data_Report(void)
 {
     PS2CLK_GPIO_(SetBits)( PS2CLK_Pin );
     PS2CLK_GPIO_(ModeCfg)( PS2CLK_Pin, GPIO_ModeOut_PP_20mA );
-	PS2CLK_Clr();
+    PS2CLK_Clr();
 }
 
 /*******************************************************************************
