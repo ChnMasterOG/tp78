@@ -171,6 +171,7 @@
 
     extern uint8_t KEYBOARD_data_ready, KEYBOARD_mouse_ready, LED_Change_flag;
     extern Keyboardstate* const Keyboarddat;
+    extern BOOL PaintedEggMode;
 
     UINT8 KEYBOARD_Custom_Function( void );
     void KEYBOARD_Init( void );

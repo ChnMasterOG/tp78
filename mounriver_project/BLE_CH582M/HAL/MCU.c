@@ -12,8 +12,12 @@
 #include "HAL.h"
 #include <string.h>
 
+/* 彩蛋 */
+#include "snake.h"
+
 tmosTaskID halTaskID=INVALID_TASK_ID;
 BOOL connection_state[2] = { FALSE, FALSE };  // USB/BLE state
+uint32_t EP_counter = 0;  // 彩蛋计数器
 
 /*******************************************************************************
  * @fn          Lib_Calibration_LSI
@@ -224,6 +228,28 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
   // 定时主循环事件
   if ( events & MAIN_CIRCULATION_EVENT)
   {
+    /* 专属彩蛋模式 */
+    if ( PaintedEggMode == TRUE ) {
+      KEYBOARD_detection();
+      if (KEYBOARD_data_ready != 0) {
+        KEYBOARD_data_ready = 0;
+        if (KEYBOARD_Custom_Function() != 0) {
+          switch (Keyboarddat->Key1) {
+            case KEY_W: BodyDir[0] = DirUp; break;
+            case KEY_S: BodyDir[0] = DirDown; break;
+            case KEY_A: BodyDir[0] = DirLeft; break;
+            case KEY_D: BodyDir[0] = DirRight; break;
+          }
+        }
+      }
+      if (++EP_counter > 50) {  // 50次事件更新一次
+        EP_counter = 0;
+        MoveSnake();
+      }
+      tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, MS1_TO_SYSTEM_TIME(10) ); // 10ms周期
+      return events ^ MAIN_CIRCULATION_EVENT;
+    }
+    /**********/
 #if (defined HAL_PS2) && (HAL_PS2 == TRUE)
     if (PS2_data_ready != 0) {    // 发送小红点鼠标数据
         PS2_data_ready = 0;

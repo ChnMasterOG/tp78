@@ -47,6 +47,7 @@
   void WS2812_Style_Waterful( void );
   void WS2812_Style_Touch( void );
   void WS2812_Style_Rainbow( void );
+  void WS2812_Style_Custom( void );
   void WS2812_Send( void );
 
 #endif

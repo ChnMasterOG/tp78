@@ -241,6 +241,37 @@ void WS2812_Style_Rainbow( void )
 }
 
 /*******************************************************************************
+* Function Name  : WS2812_Style_Custom
+* Description    : PWM驱动WS2812自定义变化函数(先将RGB图案写入LED_BYTE_Buffer)
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void WS2812_Style_Custom( void )
+{
+  uint16_t i, j, memaddr = 0;
+  /* transfer data */
+  for (i = 0; i < LED_Number; i++)
+  {
+    for (j = 0; j < 8; j++) // GREEN data
+    {
+      LED_DMA_Buffer[memaddr] = ((LED_BYTE_Buffer[i][GREEN_INDEX]<<j) & 0x0080) ? TIMING_ONE:TIMING_ZERO;
+      memaddr++;
+    }
+    for (j = 0; j < 8; j++) // RED data
+    {
+      LED_DMA_Buffer[memaddr] = ((LED_BYTE_Buffer[i][RED_INDEX]<<j) & 0x0080) ? TIMING_ONE:TIMING_ZERO;
+      memaddr++;
+    }
+    for (j = 0; j < 8; j++) // BLUE data
+    {
+      LED_DMA_Buffer[memaddr] = ((LED_BYTE_Buffer[i][BLUE_INDEX]<<j) & 0x0080) ? TIMING_ONE:TIMING_ZERO;
+      memaddr++;
+    }
+  }
+}
+
+/*******************************************************************************
 * Function Name  : WS2812发送RGB数据
 * Description    : DMA+PWM驱动WS2812
 * Input          : None

@@ -8,9 +8,12 @@
 
 #include "HAL.h"
 
-const uint32_t Row_Pin[] = {GPIO_Pin_7, GPIO_Pin_6, GPIO_Pin_5, GPIO_Pin_4, GPIO_Pin_3, GPIO_Pin_2};   //row 6 - 其他键盘布局虚修改此处
+/* 彩蛋 */
+#include "snake.h"
+
+const uint32_t Row_Pin[] = {GPIO_Pin_7, GPIO_Pin_6, GPIO_Pin_5, GPIO_Pin_4, GPIO_Pin_3, GPIO_Pin_2};   //row 6 - 其它键盘布局需修改此处
 const uint32_t Colum_Pin[] = {GPIO_Pin_9, GPIO_Pin_7, GPIO_Pin_11, GPIO_Pin_12, GPIO_Pin_13, GPIO_Pin_4, GPIO_Pin_5,
-                              GPIO_Pin_6, GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3, GPIO_Pin_15, GPIO_Pin_14};   //colum 14 - 其他键盘布局虚修改此处
+                              GPIO_Pin_6, GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3, GPIO_Pin_15, GPIO_Pin_14};   //colum 14 - 其它键盘布局需修改此处
 //row*colum = 6*14 = 84
 const uint8_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
         { KEY_ESCAPE,   KEY_GraveAccent,    KEY_TAB,        KEY_CapsLock,   KEY_LeftShift,  KEY_LeftCTRL }, //1
@@ -27,7 +30,7 @@ const uint8_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/size
         { KEY_F11,      KEY_Subtraction,    KEY_LSbrackets, KEY_Quotation,  KEY_Slash,      KEY_RightGUI }, //12
         { KEY_F12,      KEY_Equal,          KEY_RSbrackets, KEY_None,       KEY_None,       KEY_Fn       }, //13
         { KEY_Delete,   KEY_BACKSPACE,      KEY_NonUS_WS,   KEY_ENTER,      KEY_RightShift, KEY_RightCTRL}, //14
-};  // 默认键盘布局 - 其他键盘布局虚修改此处
+};  // 默认键盘布局 - 其它键盘布局需修改此处
 const uint8_t Extra_KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //1
         { KEY_None,     KEY_None,           KEY_ESCAPE,     KEY_LeftArrow,  KEY_None,       KEY_None }, //2
@@ -43,7 +46,7 @@ const uint8_t Extra_KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //12
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //13
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //14
-};  // 额外默认键盘布局 - 其他键盘布局虚修改此处
+};  // 额外默认键盘布局 - 其它键盘布局需修改此处
 const uint8_t Key_To_LEDNumber[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
         { 61,   47,   33,   20,   8,    0   }, //1
         { 62,   48,   34,   21,   0xFF, 1   }, //2
@@ -72,6 +75,7 @@ uint8_t KEYBOARD_data_index = 2,
         LED_Change_flag = 0,
         Fn_state = 0;
 Keyboardstate* const Keyboarddat = (Keyboardstate*)HIDKey;
+BOOL PaintedEggMode = FALSE;
 static uint8_t (*KeyArr_Ptr)[sizeof(Row_Pin)/sizeof(uint32_t)] = CustomKey;
 static uint16_t KeyArr_ChangeTimes = 0;
 
@@ -235,9 +239,15 @@ UINT8 KEYBOARD_Custom_Function( void )
           KEYBOARD_ChangeKey( dst_key, src_key );
         }
         break;
-      case Fn_Mode_PaintedEgg:
+      case Fn_Mode_PaintedEgg:  // Fn+Delete彩蛋
         Fn_Mode = Fn_Mode_None;
-        OLED_DrawBMP(0, 0, 128, 4, (uint8_t*)PaintedEgg_Bmp);
+        if (PaintedEggMode == FALSE) {
+          OLED_DrawBMP(0, 0, 128, 4, (uint8_t*)PaintedEgg_Bmp);
+          LED_Change_flag = 1;
+          led_style_func = WS2812_Style_Custom; // 彩蛋背光
+          Snake_Init();
+        }
+        PaintedEggMode = !PaintedEggMode;
         break;
       case Fn_Mode_SelectCasualDevice:  // Fn+9开放键盘 能被任意设备连接
         Fn_Mode = Fn_Mode_None;
@@ -309,7 +319,7 @@ void KEYBOARD_Init( void )
 {
     uint8_t i;
     FLASH_Read_KeyArray( );   // Flash载入按键
-    CustomKey[12][5] = KEY_Fn;   // 保证上电Fn键在对应位置 - 其他键盘布局虚修改此处
+    CustomKey[12][5] = KEY_Fn;   // 保证上电Fn键在对应位置 - 其它键盘布局需修改此处
     for (i = 0; i < sizeof(Row_Pin)/sizeof(uint32_t); i++) {
         Row_Pin_ALL |= Row_Pin[i];
     }

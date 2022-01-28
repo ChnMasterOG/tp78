@@ -31,7 +31,8 @@ HAL/MCU.o: ../HAL/MCU.c \
  E:\tp78\mounriver_project\BLE_CH582M\HAL\include/BATTERY.h \
  E:\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h \
  E:\tp78\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h \
- E:\tp78\mounriver_project\BLE_CH582M\HAL\include/WS2812.h
+ E:\tp78\mounriver_project\BLE_CH582M\HAL\include/WS2812.h \
+ E:\tp78\mounriver_project\BLE_CH582M\APP\include/snake.h
 
 E:\tp78\mounriver_project\BLE_CH582M\StdPeriphDriver\inc/CH58x_common.h:
 
@@ -98,3 +99,5 @@ E:\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h:
 E:\tp78\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h:
 
 E:\tp78\mounriver_project\BLE_CH582M\HAL\include/WS2812.h:
+
+E:\tp78\mounriver_project\BLE_CH582M\APP\include/snake.h:
