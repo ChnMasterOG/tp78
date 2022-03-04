@@ -36,7 +36,7 @@ uint32_t EP_counter = 0;  // 彩蛋计数器
  */
 void Lib_Calibration_LSI( void )
 {
-  Calibration_LSI( Level_64 );
+  Calibration_LSI( Level_128 ); // Level_64
 }
 
 #if (defined (BLE_SNV)) && (BLE_SNV == TRUE)
@@ -222,7 +222,7 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     BATTERY_ADC_Calculation( );
     BATTERY_DrawBMP( );
     BATTERY_DMA_ENABLE( );
-    tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(1000) );  // 1s更新采样值
+    tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(10000) );  // 10s更新采样值
   }
 
   // 定时主循环事件
@@ -230,7 +230,7 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
   {
     /* 专属彩蛋模式 */
     if ( PaintedEggMode == TRUE ) {
-      KEYBOARD_detection();
+      KEYBOARD_Detection();
       if (KEYBOARD_data_ready != 0) {
         KEYBOARD_data_ready = 0;
         if (KEYBOARD_Custom_Function() != 0) {
@@ -266,23 +266,33 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     }
 #endif
 #if (defined HAL_KEYBOARD) && (HAL_KEYBOARD == TRUE)
-    KEYBOARD_detection();
+    KEYBOARD_Detection();
     if (KEYBOARD_data_ready != 0) {    // 发送键盘数据
         KEYBOARD_data_ready = 0;
-        if ( KEYBOARD_Custom_Function() ) { // 带有Fn键处理信息则不产生键盘事件
-          if ( USB_Ready == TRUE ) {
-              tmos_start_task( usbTaskID, USB_KEYBOARD_EVENT, 2 );  // USB键盘事件
-          } else if (BLE_Ready == TRUE) {
-              tmos_start_task( hidEmuTaskId, START_KEYBOARD_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  // 蓝牙键盘事件 2ms处理
-          }
+        if ( EnterPasskey_flag == TRUE ) { // 处理输入配对密码
+            uint8_t res;
+            res = KEYBOARD_EnterPasskey( &BLE_Passkey );
+            if ( res == 0 ) {
+                EnterPasskey_flag = FALSE;
+                tmos_start_task( hidEmuTaskId, START_SEND_PASSKEY_EVT, 400 );
+            }
         }
-        if (KEYBOARD_mouse_ready != 0) { // 发送键盘鼠标数据
-            KEYBOARD_mouse_ready = 0;
-            tmos_memset(&HIDMouse[1], 0, 3);   // 只按左中右键没有其他操作
-            if (USB_Ready == TRUE) {
-                tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
-            } else if (BLE_Ready == TRUE) {
-                tmos_start_task( hidEmuTaskId, START_MOUSE_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙鼠标事件 2ms处理
+        else {
+            if ( KEYBOARD_Custom_Function() ) { // 带有Fn键处理信息则不产生键盘事件
+                if ( USB_Ready == TRUE ) {
+                    tmos_start_task( usbTaskID, USB_KEYBOARD_EVENT, 2 );  // USB键盘事件
+                } else if (BLE_Ready == TRUE) {
+                    tmos_start_task( hidEmuTaskId, START_KEYBOARD_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  // 蓝牙键盘事件 2ms处理
+                }
+            }
+            if (KEYBOARD_mouse_ready != 0) { // 发送键盘鼠标数据
+                KEYBOARD_mouse_ready = 0;
+                tmos_memset(&HIDMouse[1], 0, 3);   // 只按左中右键没有其他操作
+                if (USB_Ready == TRUE) {
+                    tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
+                } else if (BLE_Ready == TRUE) {
+                    tmos_start_task( hidEmuTaskId, START_MOUSE_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙鼠标事件 2ms处理
+                }
             }
         }
     }
@@ -293,6 +303,7 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
       OLED_PRINT("USB: %d, BLE: %d", USB_Ready, BLE_Ready);
     } else if (connection_state[1] != BLE_Ready) {
       connection_state[1] = BLE_Ready;
+      HalLedSet(HAL_LED_1, BLE_Ready);
       OLED_PRINT("USB: %d, BLE: %d", USB_Ready, BLE_Ready);
     }
     tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, MS1_TO_SYSTEM_TIME(10) ); // 10ms周期
@@ -389,8 +400,8 @@ void HAL_Init()
 #if ( defined BLE_CALIBRATION_ENABLE ) && ( BLE_CALIBRATION_ENABLE == TRUE )
   tmos_start_task( halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME( BLE_CALIBRATION_PERIOD ) );    // 添加校准任务，单次校准耗时小于10ms
 #endif
-PRINT("%s\n", debug_info);
-OLED_PRINT("%s", debug_info);
+  PRINT("%s\n", debug_info);
+  OLED_PRINT("%s", debug_info);
 //  tmos_start_task( halTaskID, HAL_TEST_EVENT, 1600 );    // 添加测试任务
 }
 

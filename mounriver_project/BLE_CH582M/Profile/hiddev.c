@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : hiddev.c
-* Author             : WCH
-* Version            : V1.0
-* Date               : 2018/12/10
+* Author             : ChnMasterOG
+* Version            : V1.1
+* Date               : 2022/2/27
 * Description        : HID 设备任务处理程序
             
 *******************************************************************************/
@@ -12,13 +12,14 @@
  * INCLUDES
  */
 
-
+#include "OLED.h"
 #include "CONFIG.h"
 #include "CH58x_common.h"
 #include "battservice.h"
 #include "scanparamservice.h"
 #include "devinfoservice.h"
 #include "hiddev.h"
+#include "BLE.h"
 
 /*********************************************************************
  * MACROS
@@ -893,11 +894,16 @@ static void hidDevPasscodeCB( uint8 *deviceAddr, uint16 connectionHandle,
   }
   else
   {
-    uint32 passkey; 
-    GAPBondMgr_GetParameter( GAPBOND_PERI_DEFAULT_PASSCODE, &passkey );
-    
-    // Send passcode response
-    GAPBondMgr_PasscodeRsp( connectionHandle, SUCCESS, passkey );
+//    uint32 passkey;
+//    GAPBondMgr_GetParameter( GAPBOND_PERI_DEFAULT_PASSCODE, &passkey );
+//
+//    // Send passcode response
+//    GAPBondMgr_PasscodeRsp( connectionHandle, SUCCESS, passkey );
+
+    if ( uiInputs != 0 ) {
+      // 开启按键输入密码
+      tmos_start_task( hidEmuTaskId, START_ENTER_PASSKEY_EVT, 400 );
+    }
   }
 }
 

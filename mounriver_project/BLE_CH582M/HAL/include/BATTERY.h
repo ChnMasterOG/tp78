@@ -11,12 +11,12 @@
 
   #define ADC_MAXBUFLEN       10
 
-  #define BAT_MINADCVAL       3087
-  #define BAT_MAXADCVAL       3813  // 0.43*Vbat, Vref=0.97V
+  #define BAT_MINADCVAL       3413  // 3.5V/2
+  #define BAT_MAXADCVAL       4096  // 4.2V/2
 
-  #define BAT_25PERCENT_VAL   3269  // 25%
-  #define BAT_50PERCENT_VAL   3450  // 50%
-  #define BAT_75PERCENT_VAL   3632  // 75%
+  #define BAT_25PERCENT_VAL   3583  // 25%
+  #define BAT_50PERCENT_VAL   3754  // 50%
+  #define BAT_75PERCENT_VAL   3925  // 75%
 
   void BATTERY_Init( void );
   void BATTERY_DMA_ENABLE( void );

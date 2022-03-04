@@ -1,9 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : BLE.c
 * Author             : ChnMasterOG
-* Version            : V1.2
-* Date               : 2022/1/27
+* Version            : V1.3
+* Date               : 2022/2/26
 * Description        : 蓝牙键鼠应用程序，初始化广播连接参数，然后广播，直至连接主机
+* Ref                : https://software-dl.ti.com/lprf/simplelink_cc2640r2_latest/docs/blestack/ble_user_guide/html/ble-stack-3.x-guide/index.html
 *******************************************************************************/
 
 
@@ -46,31 +47,31 @@
 #define DEFAULT_HID_IDLE_TIMEOUT              60000
 
 // Minimum connection interval (units of 1.25ms)
-#define DEFAULT_DESIRED_MIN_CONN_INTERVAL     8
+#define DEFAULT_DESIRED_MIN_CONN_INTERVAL     16
 
 // Maximum connection interval (units of 1.25ms)
-#define DEFAULT_DESIRED_MAX_CONN_INTERVAL     8
+#define DEFAULT_DESIRED_MAX_CONN_INTERVAL     16
 
 // Slave latency to use if parameter update request
 #define DEFAULT_DESIRED_SLAVE_LATENCY         0
 
 // Supervision timeout value (units of 10ms)
-#define DEFAULT_DESIRED_CONN_TIMEOUT          500
+#define DEFAULT_DESIRED_CONN_TIMEOUT          1000  // 10s
 
 // Default passcode
-#define DEFAULT_PASSCODE                      202278
+#define DEFAULT_PASSCODE                      0
 
 // Default GAP pairing mode
 #define DEFAULT_PAIRING_MODE                  GAPBOND_PAIRING_MODE_WAIT_FOR_REQ
 
 // Default MITM mode (TRUE to require passcode or OOB when pairing)
-#define DEFAULT_MITM_MODE                     TRUE  //FALSE
+#define DEFAULT_MITM_MODE                     TRUE
 
 // Default bonding mode, TRUE to bond
 #define DEFAULT_BONDING_MODE                  TRUE
 
 // Default GAP bonding I/O capabilities
-#define DEFAULT_IO_CAPABILITIES               GAPBOND_IO_CAP_DISPLAY_ONLY //GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT
+#define DEFAULT_IO_CAPABILITIES               GAPBOND_IO_CAP_KEYBOARD_ONLY //GAPBOND_IO_CAP_KEYBOARD_ONLY
 
 // Battery level is critical when it is less than this %
 #define DEFAULT_BATT_CRITICAL_LEVEL           10
@@ -89,11 +90,17 @@ tmosTaskID hidEmuTaskId=INVALID_TASK_ID;
 // BLE ready flag
 BOOL BLE_Ready = FALSE;
 
-// BLE address of host devices
-uint8_t BLE_HostAddr[BLE_DEVICE_NUM+1][B_ADDR_LEN];
-
 // Select host device index (usual if 0)
 uint8_t BLE_SelectHostIndex = 0;
+
+// BLE Device address
+uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE4, 0x78, 0x01, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
+
+// Enter Passkey flag
+BOOL EnterPasskey_flag = FALSE;
+
+// Enter Passkey flag
+uint32_t BLE_Passkey = 0;
 
 /*********************************************************************
  * EXTERNAL VARIABLES
@@ -118,9 +125,9 @@ static uint8 scanRspData[] =
   '8',
   0x05,   // length of this data
   GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-  LO_UINT16( DEFAULT_DESIRED_MIN_CONN_INTERVAL ),   // 100ms
+  LO_UINT16( DEFAULT_DESIRED_MIN_CONN_INTERVAL ),
   HI_UINT16( DEFAULT_DESIRED_MIN_CONN_INTERVAL ),
-  LO_UINT16( DEFAULT_DESIRED_MAX_CONN_INTERVAL ),   // 1s
+  LO_UINT16( DEFAULT_DESIRED_MAX_CONN_INTERVAL ),
   HI_UINT16( DEFAULT_DESIRED_MAX_CONN_INTERVAL ),
 
   // service UUIDs
@@ -168,8 +175,6 @@ static uint16 hidEmuConnHandle = GAP_CONNHANDLE_INIT;
  * LOCAL FUNCTIONS
  */
 
-static uint8_t hidEmu_WriteHostAddr( void );
-static void hidEmu_ReadHostAddr( void );
 static void hidEmu_ProcessTMOSMsg( tmos_event_hdr_t *pMsg );
 static void hidEmuSendMouseReport( uint8 buttons ,uint8 X_data ,uint8 Y_data );
 static void hidEmuSendKbdReport( uint8 keycode );
@@ -216,13 +221,20 @@ void HidEmu_Init( )
   // Setup the GAP Peripheral Role Profile
   {
     uint8 initial_advertising_enable = TRUE;
-
+//    uint16 min_conn_interval = DEFAULT_DESIRED_MIN_CONN_INTERVAL;
+//    uint16 max_conn_interval = DEFAULT_DESIRED_MAX_CONN_INTERVAL;
+//
+//    GAP_SetParamValue(TGAP_CONN_EST_INT_MIN, min_conn_interval);
+//    GAP_SetParamValue(TGAP_CONN_EST_INT_MAX, max_conn_interval);
 
     // Set the GAP Role Parameters
     GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_enable );
 
     GAPRole_SetParameter( GAPROLE_ADVERT_DATA, sizeof( advertData ), advertData );
     GAPRole_SetParameter( GAPROLE_SCAN_RSP_DATA, sizeof ( scanRspData ), scanRspData );
+
+//    GAPRole_SetParameter( GAPROLE_MIN_CONN_INTERVAL, sizeof ( uint16 ), &min_conn_interval );
+//    GAPRole_SetParameter( GAPROLE_MAX_CONN_INTERVAL, sizeof ( uint16 ), &max_conn_interval );
   }
 
   // Set the GAP Characteristics
@@ -253,9 +265,6 @@ void HidEmu_Init( )
 
   // Register for HID Dev callback
   HidDev_Register( &hidEmuCfg, &hidEmuHidCBs );
-
-  // Read host address array from flash
-  hidEmu_ReadHostAddr( );
 
   // Setup a delayed profile startup
   tmos_set_event( hidEmuTaskId, START_DEVICE_EVT );
@@ -308,7 +317,6 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
                                           DEFAULT_DESIRED_SLAVE_LATENCY,
                                           DEFAULT_DESIRED_CONN_TIMEOUT,
                                           hidEmuTaskId);
-
     return (events ^ START_PARAM_UPDATE_EVT);
   }
 
@@ -317,17 +325,30 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
     // start phy update
     PRINT("Send Phy Update %x...\n",GAPRole_UpdatePHY( hidEmuConnHandle, 0, GAP_PHY_BIT_LE_2M,
                                                 GAP_PHY_BIT_LE_2M, 0 ) );
-
     return ( events ^ START_PHY_UPDATE_EVT );
   }
 
-  if ( events & DISCONNECT_EVT )  // 断开蓝牙
+  if ( events & CHANGE_ADDR_EVT )  // 切换蓝牙设备地址
   {
-    if ( hidEmuConnHandle != GAP_CONNHANDLE_INIT ) {
-      GAPRole_TerminateLink( hidEmuConnHandle );  // disconnect
-      hidEmuConnHandle = GAP_CONNHANDLE_INIT;
+    /* disable advertising */
+    uint8 param = FALSE;
+    bStatus_t status;
+    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &param );
+    status = GAP_ConfigDeviceAddr( ADDRTYPE_STATIC, DeviceAddress );
+    if ( status == SUCCESS ) {
+      OLED_PRINT("[S]Current Device: %d", DeviceAddress[5]);
+      BLE_SelectHostIndex = DeviceAddress[5] - 1;
+      if ( hidEmuConnHandle != GAP_CONNHANDLE_INIT ) {
+        GAPRole_TerminateLink( hidEmuConnHandle );  // disconnect
+        hidEmuConnHandle = GAP_CONNHANDLE_INIT;
+      }
+    } else {
+      DeviceAddress[5] = BLE_SelectHostIndex + 1;
+      OLED_PRINT("[Error]Status: %d", status);
     }
-    return ( events ^ DISCONNECT_EVT );
+    param = TRUE;
+    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &param );
+    return ( events ^ CHANGE_ADDR_EVT );
   }
 
   if ( events & TEST_REPORT_EVT ) // 测试事件
@@ -355,52 +376,22 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
     return ( events ^ START_KEYBOARD_REPORT_EVT );
   }
 
+  if ( events & START_ENTER_PASSKEY_EVT )
+  {
+    OLED_PRINT("Passkey = ?");
+    EnterPasskey_flag = TRUE;
+
+    return ( events ^ START_ENTER_PASSKEY_EVT );
+  }
+
+  if ( events & START_SEND_PASSKEY_EVT )
+  {
+    GAPBondMgr_PasscodeRsp( hidEmuConnHandle, SUCCESS, BLE_Passkey ); // 发送密码
+
+    return ( events ^ START_SEND_PASSKEY_EVT );
+  }
+
   return 0;
-}
-
-/*********************************************************************
- * @fn      hidEmu_SaveHostAddr
- *
- * @brief   Save current host address array to flash
- *
- * @param   array index
- *
- * @return  success if 0
- */
-uint8_t hidEmu_SaveHostAddr( uint8_t index )
-{
-  tmos_memcpy(BLE_HostAddr[index], BLE_HostAddr[0], B_ADDR_LEN);
-  return hidEmu_WriteHostAddr();
-}
-
-/*********************************************************************
- * @fn      hidEmu_WriteHostAddr
- *
- * @brief   Write host address array to flash
- *
- * @param   none
- *
- * @return  success if 0
- */
-static uint8_t hidEmu_WriteHostAddr( void )
-{
-  uint8_t s;
-  s = EEPROM_WRITE( 2048, BLE_HostAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
-  return s;
-}
-
-/*********************************************************************
- * @fn      hidEmu_ReadHostAddr
- *
- * @brief   Read host address array from flash
- *
- * @param   none
- *
- * @return  none
- */
-static void hidEmu_ReadHostAddr( void )
-{
-  EEPROM_READ( 2048, BLE_HostAddr[1], BLE_DEVICE_NUM*B_ADDR_LEN );
 }
 
 /*********************************************************************
@@ -486,9 +477,7 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
   {
     case GAPROLE_STARTED:
       {
-        uint8 ownAddr[6];
-        GAPRole_GetParameter( GAPROLE_BD_ADDR, ownAddr );
-        GAP_ConfigDeviceAddr( ADDRTYPE_STATIC, ownAddr);
+        GAP_ConfigDeviceAddr( ADDRTYPE_STATIC, DeviceAddress );
         PRINT( "Initialized..\n" );
       }
       break;
@@ -508,19 +497,10 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
         // get connection handle
         hidEmuConnHandle = event->connectionHandle;
 
-        // select host
-        if (BLE_SelectHostIndex == 0 || (BLE_SelectHostIndex != 0 &&
-            tmos_memcmp(BLE_HostAddr[BLE_SelectHostIndex], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN) == TRUE)) {
-          // record host address, connection ok
-          tmos_memcpy(BLE_HostAddr[0], pEvent->scanReqEvt.scannerAddr, B_ADDR_LEN);
-          tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
-          tmos_start_task( hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY);
-          PRINT( "Connected..\n" );
-        } else {
-          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 500 );
-          PRINT( "Refuse the device..\n" );
-        }
-
+//        tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
+//        tmos_start_task( hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY); // 这里不注释连接会有问题
+        BLE_Ready = TRUE;
+        PRINT( "Connected..\n" );
       }
       break;
 
@@ -631,10 +611,9 @@ static uint8 hidEmuRptCB( uint8 id, uint8 type, uint16 uuid,
   // notifications enabled
   else if ( oper == HID_DEV_OPER_ENABLE )
   {
-    BLE_Ready = TRUE;
     /* disable advertising */
-    uint8 initial_advertising_disable = FALSE;
-    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_disable );
+    uint8 advertising_disable = FALSE;
+    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &advertising_disable );
 //    tmos_start_task( hidEmuTaskId, TEST_REPORT_EVT, 500 );  //测试report
   }
   return status;

@@ -119,17 +119,17 @@ void BATTERY_DrawBMP( void )
     OLED_DrawBMP(92, 0, 128, 4, (uint8_t*)EmptyBattery);  // 绘制空电池
     OLED_Set_Pos(96, 1);
     for (i = 0; i < BAT_level; i++) { // 绘制电量(上半部分)
+      OLED_WR_Byte(0x01, OLED_DATA);
       for (j = 0; j < 4; j++) {
         OLED_WR_Byte(0xFD, OLED_DATA);
       }
-      OLED_WR_Byte(0x01, OLED_DATA);
     }
     OLED_Set_Pos(96, 2);
     for (i = 0; i < BAT_level; i++) { // 绘制电量(下半部分)
+      OLED_WR_Byte(0x80, OLED_DATA);
       for (j = 0; j < 4; j++) {
         OLED_WR_Byte(0xBF, OLED_DATA);
       }
-      OLED_WR_Byte(0x80, OLED_DATA);
     }
   }
 }

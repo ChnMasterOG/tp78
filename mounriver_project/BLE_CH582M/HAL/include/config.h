@@ -80,7 +80,7 @@
 #define HAL_KEY											FALSE  // ∞Â‘ÿ∞¥º¸
 #endif
 #ifndef HAL_LED
-#define HAL_LED											FALSE   // ∞Â‘ÿLED
+#define HAL_LED											FALSE  // ∞Â‘ÿLED
 #endif
 #ifndef HAL_USB
 #define HAL_USB                     TRUE   // USB

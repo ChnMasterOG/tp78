@@ -2,7 +2,7 @@
  * File Name          : KEYBOARD.c
  * Author             : ChnMasterOG
  * Version            : V1.3
- * Date               : 2022/1/27
+ * Date               : 2022/2/26
  * Description        : 机械键盘驱动源文件
  *******************************************************************************/
 
@@ -33,7 +33,7 @@ const uint8_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/size
 };  // 默认键盘布局 - 其它键盘布局需修改此处
 const uint8_t Extra_KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //1
-        { KEY_None,     KEY_None,           KEY_ESCAPE,     KEY_LeftArrow,  KEY_None,       KEY_None }, //2
+        { KEY_None,     KEY_None,           KEY_BACKSPACE,  KEY_LeftArrow,  KEY_None,       KEY_None }, //2
         { KEY_None,     KEY_None,           KEY_UpArrow,    KEY_DownArrow,  KEY_None,       KEY_None }, //3
         { KEY_None,     KEY_None,           KEY_Delete,     KEY_RightArrow, KEY_None,       KEY_None }, //4
         { KEY_None,     KEY_None,           KEY_PageUp,     KEY_PageDown,   KEY_Home,       KEY_None }, //5
@@ -164,19 +164,9 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Fn_Mode == Fn_Mode_ChangeKey ) {  // 设置改键 - 按Fn+src和Fn+dst
       if ( Fn_cnt == 0x04 ) src_key = Keyboarddat->Key1;
       else if ( Fn_cnt == 0x08 ) dst_key = Keyboarddat->Key1;
-    } else if ( Fn_Mode == Fn_Mode_SaveAddr ) {  // 保存设备 - 按Fn+1~6
-      if ( Keyboarddat->Key1 >= KEY_1 && Keyboarddat->Key1 <= KEY_6 ) Fn_Mode = Fn_Mode_SelectDevice1 + Keyboarddat->Key1 - KEY_1;
-      else Fn_Mode = Fn_Mode_GiveUp;
-      Fn_cnt = 0x02;  // 标记 - 保存设备信息
     } else if ( Keyboarddat->Key1 == KEY_C && Fn_Mode != Fn_Mode_ChangeKey ) { // 设置改键 - 先按Fn+C
       Fn_Mode = Fn_Mode_ChangeKey;
       Fn_cnt &= 0x0C;
-    } else if ( Keyboarddat->Key1 == KEY_0 && Fn_Mode != Fn_Mode_SaveAddr ) { // 记住设备 - 先按Fn+0
-      Fn_Mode = Fn_Mode_SaveAddr;
-      Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_9 && Fn_Mode != Fn_Mode_SelectCasualDevice ) { // 开放键盘 - 能被任意设备连接
-      Fn_Mode = Fn_Mode_SelectCasualDevice;
-      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_Delete && Fn_Mode != Fn_Mode_PaintedEgg ) { // 彩蛋模式
       Fn_Mode = Fn_Mode_PaintedEgg;
       Fn_cnt = 0;
@@ -186,16 +176,16 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_2 && Fn_Mode != Fn_Mode_SelectDevice2 ) { // 切换至设备2
       Fn_Mode = Fn_Mode_SelectDevice2;
       Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_2 && Fn_Mode != Fn_Mode_SelectDevice3 ) { // 切换至设备3
+    } else if ( Keyboarddat->Key1 == KEY_3 && Fn_Mode != Fn_Mode_SelectDevice3 ) { // 切换至设备3
       Fn_Mode = Fn_Mode_SelectDevice3;
       Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_2 && Fn_Mode != Fn_Mode_SelectDevice4 ) { // 切换至设备4
+    } else if ( Keyboarddat->Key1 == KEY_4 && Fn_Mode != Fn_Mode_SelectDevice4 ) { // 切换至设备4
       Fn_Mode = Fn_Mode_SelectDevice4;
       Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_2 && Fn_Mode != Fn_Mode_SelectDevice5 ) { // 切换至设备5
+    } else if ( Keyboarddat->Key1 == KEY_5 && Fn_Mode != Fn_Mode_SelectDevice5 ) { // 切换至设备5
       Fn_Mode = Fn_Mode_SelectDevice5;
       Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_2 && Fn_Mode != Fn_Mode_SelectDevice6 ) { // 切换至设备6
+    } else if ( Keyboarddat->Key1 == KEY_6 && Fn_Mode != Fn_Mode_SelectDevice6 ) { // 切换至设备6
       Fn_Mode = Fn_Mode_SelectDevice6;
       Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_F1 && Fn_Mode != Fn_Mode_LED_Style1 ) { // 呼吸灯模式1
@@ -249,22 +239,10 @@ UINT8 KEYBOARD_Custom_Function( void )
         }
         PaintedEggMode = !PaintedEggMode;
         break;
-      case Fn_Mode_SelectCasualDevice:  // Fn+9开放键盘 能被任意设备连接
+      case Fn_Mode_SelectDevice1 ... Fn_Mode_SelectDevice6: // 按Fn+1~6切换设备
+        DeviceAddress[5] = Fn_Mode - Fn_Mode_SelectDevice1 + 1;
         Fn_Mode = Fn_Mode_None;
-        BLE_SelectHostIndex = 0;
-        tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 500 );
-        OLED_PRINT("Open BLE");
-        break;
-      case Fn_Mode_SelectDevice1 ... Fn_Mode_SelectDevice6: // Fn+0后按Fn+1~6保存设备 直接按Fn+1~6切换设备
-        if (Fn_cnt == 0x02) {   // 保存设备信息
-          Fn_cnt = 0;
-          hidEmu_SaveHostAddr( Fn_Mode-Fn_Mode_SelectCasualDevice );
-          OLED_PRINT("Save Device: %d", Fn_Mode-Fn_Mode_SelectCasualDevice);
-        } else {
-          BLE_SelectHostIndex = Fn_Mode-Fn_Mode_SelectCasualDevice;
-          tmos_start_task( hidEmuTaskId, DISCONNECT_EVT, 500 );
-        }
-        Fn_Mode = Fn_Mode_None;
+        tmos_start_task( hidEmuTaskId, CHANGE_ADDR_EVT, 500 );
         break;
       case Fn_Mode_LED_Style1:
         Fn_Mode = Fn_Mode_None;
@@ -335,13 +313,13 @@ void KEYBOARD_Init( void )
 }
 
 /*******************************************************************************
-* Function Name  : KEYBOARD_detection
+* Function Name  : KEYBOARD_Detection
 * Description    : 键盘检测按键信息函数
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void KEYBOARD_detection( void )
+void KEYBOARD_Detection( void )
 {
     static uint8_t current_row = 0;
     uint8_t current_colum, key_idx;
@@ -410,4 +388,39 @@ void KEYBOARD_detection( void )
     Row_GPIO_(ResetBits)( Row_Pin[current_row] );
 }
 
+/*******************************************************************************
+* Function Name  : KEYBOARD_EnterPasskey
+* Description    : 键盘输入配对码
+* Input          : 指向配对码值的指针
+* Output         : None
+* Return         : 返回0表示输入完成
+*******************************************************************************/
+uint8_t KEYBOARD_EnterPasskey( uint32_t* key )
+{
+  static uint8_t idx = 0;
+  static uint32_t passkey = 0;
+  static char passkey_str[7] = { '\0' };
+  const uint8_t keyhash[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+  if ( Keyboarddat->Key1 == KEY_BACKSPACE ) { // 退格单独处理
+      if ( idx > 0 ) {
+          passkey_str[--idx] = '\0';
+          passkey /= 10;
+      }
+      if ( passkey_str[0] == '\0' ) OLED_PRINT("Passkey = ?");
+      else OLED_PRINT("Passkey = %s", passkey_str);
+  } else if ( idx == 6 ) {  // 最后一个按键是Enter则结束
+      if ( Keyboarddat->Key1 == KEY_ENTER ) {
+          OLED_PRINT("Enter passkey OK");
+          *key = passkey;
+          passkey = idx = passkey_str[0] = 0;
+          return 0;
+      }
+  } else if ( Keyboarddat->Key1 >= KEY_1 && Keyboarddat->Key1 <= KEY_0 ){
+      passkey = passkey * 10 + keyhash[Keyboarddat->Key1 - KEY_1];
+      passkey_str[idx++] = keyhash[Keyboarddat->Key1 - KEY_1] + 0x30;
+      passkey_str[idx] = '\0';
+      OLED_PRINT("Passkey = %s", passkey_str);
+  }
+  return 1;
+}
 

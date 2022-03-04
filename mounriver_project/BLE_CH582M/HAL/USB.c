@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : USB.c
  * Author             : ChnMasterOG
- * Version            : V1.0
- * Date               : 2022/2/11
+ * Version            : V1.1
+ * Date               : 2022/2/24
  * Description        : USB驱动源文件
  *******************************************************************************/
 
@@ -12,28 +12,20 @@
 // 设备描述符
 const UINT8 MyDevDescr[] = { 0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DevEP0SIZE,
                              0x4A, 0x43,  // idVender=0x434A
-                             0x39, 0x55,  // idProduct=0x5539
-                             0x00, 0x00,  // bcdDevice=0
+                             0x40, 0x55,  // idProduct=0x5540
+                             0x01, 0x01,  // bcdDevice=0x0101
                              0x01, 0x02, 0x00, 0x01
                            };
+
 // 配置描述符
-//const UINT8 MyCfgDescr[] = {
-//  0x09, 0x02, 0x3b, 0x00, 0x02, 0x01, 0x00, 0xA0, 0x32,             //配置描述符: 2个接口
-//  0x09, 0x04, 0x00, 0x00, 0x01, 0x03, 0x01, 0x01, 0x00,             //接口描述符,键盘：接口编号0
-//  0x09, 0x21, 0x11, 0x01, 0x00, 0x01, 0x22, 0x3e, 0x00,             //HID类描述符
-//  0x07, 0x05, 0x81, 0x03, 0x08, 0x00, 0x0A,                         //端点描述符：端点地址0x81 即端点1
-//  0x09, 0x04, 0x01, 0x00, 0x01, 0x03, 0x01, 0x02, 0x00,             //接口描述符,鼠标：接口编号1
-//  0x09, 0x21, 0x10, 0x01, 0x00, 0x01, 0x22, 0x34, 0x00,             //HID类描述符
-//  0x07, 0x05, 0x82, 0x03, 0x04, 0x00, 0x0a,                         //端点描述符：端点地址0x82 即端点2
-//};
-const UINT8 MyCfgDescr[] = { 0x09, 0x02, 0x52, 0x00, 0x03, 0x01, 0x00, 0xA0, 0x32,            //配置描述符: 3个接口
+const UINT8 MyCfgDescr[] = { 0x09, 0x02, 0x52, 0x00, 0x03, 0x01, 0x00, 0x80, 0x32,            //配置描述符: 3个接口
                              0x09, 0x04, 0x00, 0x00, 0x01, 0x03, 0x01, 0x01, 0x00,            //接口描述符,键盘：接口编号0
-                             0x09, 0x21, 0x11, 0x01, 0x00, 0x01, 0x22, 0x3e, 0x00,            //HID类描述符
+                             0x09, 0x21, 0x11, 0x01, 0x00, 0x01, 0x22, 0x3e, 0x00,            //HID类描述符：下级描述符KeyRepDesc
                              0x07, 0x05, 0x81, 0x03, 0x08, 0x00, 0x0A,                        //端点描述符：端点地址0x81 即端点1
                              0x09, 0x04, 0x01, 0x00, 0x01, 0x03, 0x01, 0x02, 0x00,            //接口描述符,鼠标：接口编号1
-                             0x09, 0x21, 0x10, 0x01, 0x00, 0x01, 0x22, 0x34, 0x00,            //HID类描述符
+                             0x09, 0x21, 0x10, 0x01, 0x00, 0x01, 0x22, 0x34, 0x00,            //HID类描述符：下级描述符MouseRepDesc
                              0x07, 0x05, 0x82, 0x03, 0x04, 0x00, 0x0A,                        //端点描述符：端点地址0x82 即端点2
-                             0x09, 0x04, 0x02, 0x00, 0x02, 0xFF, 0x00, 0x00, 0x00,            //接口描述符,自定义：接口编号2
+                             0x09, 0x04, 0x02, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,            //接口描述符,自定义：接口编号2
                              0x07, 0x05, 0x83, 0x02, 0x40, 0x00, 0x00,                        //端点描述符：端点地址0x83
                              0x07, 0x05, 0x03, 0x02, 0x40, 0x00, 0x00,                        //端点描述符：端点地址0x03
                              //端点地址 Bit 3…0: The endpoint number Bit 6…4: Reserved, reset to zero
@@ -63,6 +55,10 @@ const UINT8 *pDescr;
 /*鼠标键盘数据*/
 UINT8 HIDMouse[4] = { 0x0, 0x0, 0x0, 0x0 };
 UINT8 HIDKey[8] = { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
+
+extern uint8_t CustomKey[14][6];  // 其它键盘布局需修改此处
+extern uint8_t Extra_CustomKey[14][6];   // 其它键盘布局需修改此处
+
 /******** 用户自定义分配端点RAM ****************************************/
 __attribute__((aligned(4)))  UINT8 EP0_Databuf[64 + 64 + 64];   //ep0(64)+ep4_out(64)+ep4_in(64)
 __attribute__((aligned(4)))  UINT8 EP1_Databuf[64 + 64];        //ep1_out(64)+ep1_in(64)
@@ -74,6 +70,13 @@ tmosTaskID usbTaskID=INVALID_TASK_ID;
 // USB ready flag
 BOOL USB_Ready = FALSE;
 
+/*******************************************************************************
+* Function Name  : USB_ProcessEvent
+* Description    : USB处理事件
+* Input          : task_id： 任务id, events: USB事件
+* Output         : None
+* Return         : tmosEvents
+*******************************************************************************/
 tmosEvents USB_ProcessEvent( tmosTaskID task_id, tmosEvents events )
 {
   if ( events & START_USB_EVENT )
@@ -101,6 +104,8 @@ tmosEvents USB_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     HIDMouse[1] = HIDMouse[2] = 2;
     memcpy(pEP2_IN_DataBuf, HIDMouse, 4);
     DevEP2_IN_Deal( 4 );
+//    pEP3_IN_DataBuf[0] = 'A';
+//    DevEP3_IN_Deal( 1 );
     tmos_start_task(usbTaskID, USB_TEST_EVENT, MS1_TO_SYSTEM_TIME(500));
     return events ^ USB_TEST_EVENT;
   }
@@ -108,6 +113,13 @@ tmosEvents USB_ProcessEvent( tmosTaskID task_id, tmosEvents events )
   return 0;
 }
 
+/*******************************************************************************
+* Function Name  : HAL_USBInit
+* Description    : USB初始化
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void HAL_USBInit( void )
 {
   usbTaskID = TMOS_ProcessEventRegister( USB_ProcessEvent );
@@ -119,6 +131,13 @@ void HAL_USBInit( void )
   tmos_start_task( usbTaskID, START_USB_EVENT, 0 );
 }
 
+/*******************************************************************************
+* Function Name  : USB_DevTransProcess
+* Description    : USB中断传输处理
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void USB_DevTransProcess( void )
 {
   UINT8 len, chtype;
@@ -284,10 +303,11 @@ void USB_DevTransProcess( void )
                   pDescr = MouseRepDesc;                                //数据准备上传
                   len = sizeof( MouseRepDesc );                         //如果有更多接口，该标准位应该在最后一个接口配置完成后有效
                   USB_Ready = TRUE;
+//                  tmos_start_task(usbTaskID, USB_TEST_EVENT, MS1_TO_SYSTEM_TIME(500));
                 }
                 else
                 {
-                  len = 0xff;                                           //本程序只有2个接口，这句话正常不可能执行
+                  len = 0xff;                                           //本程序只有3个接口，这句话正常不可能执行
                 }
               }
                 break;
@@ -437,9 +457,15 @@ void USB_DevTransProcess( void )
   }
 }
 
-/* 不开放 */
+/*******************************************************************************
+* Function Name  : DevEP1_OUT_Deal
+* Description    : 端点1数据处理(HID键盘-不使用)
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void DevEP1_OUT_Deal( UINT8 l )
-{ /* 用户可自定义 */
+{
   UINT8 i;
 
   for ( i = 0; i < l; i++ )
@@ -449,9 +475,15 @@ void DevEP1_OUT_Deal( UINT8 l )
   DevEP1_IN_Deal( l );
 }
 
-/* 不开放 */
+/*******************************************************************************
+* Function Name  : DevEP2_OUT_Deal
+* Description    : 端点2数据处理(HID鼠标-不使用)
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void DevEP2_OUT_Deal( UINT8 l )
-{ /* 用户可自定义 */
+{
   UINT8 i;
 
   for ( i = 0; i < l; i++ )
@@ -461,20 +493,72 @@ void DevEP2_OUT_Deal( UINT8 l )
   DevEP2_IN_Deal( l );
 }
 
-/* USB数据传输端点处理 */
+/*******************************************************************************
+* Function Name  : DevEP3_OUT_Deal
+* Description    : 端点3数据处理(与上位机通信)
+* Input          : None
+* Output         : None
+* Return         : None
+* Protocol       : address[0] 输入数据长度
+*                  address[1] 传输类型：E-错误 S-成功 C-改变按键层 X-改变额外按键层
+*                  address[2] 选中列数(address[1]为E或S则保留)
+*                  address[3] 数据1
+*                  address[4] 数据2
+*                  ...
+*******************************************************************************/
 void DevEP3_OUT_Deal( UINT8 l )
-{ /* 用户可自定义 */
+{
   UINT8 i;
+  UINT8 length = 0;
 
-  for ( i = 0; i < l; i++ )
-  {
-    pEP3_IN_DataBuf[i] = ~pEP3_OUT_DataBuf[i];
+  if (pEP3_OUT_DataBuf[0] != l) { // 接收长度错误
+    pEP3_IN_DataBuf[0] = 4;
+    pEP3_IN_DataBuf[1] = 'E';
+    pEP3_IN_DataBuf[3] = USB_ERR_LENGTH;
+    DevEP3_IN_Deal( 4 );
+    return;
   }
-  DevEP3_IN_Deal( l );
+
+  switch (pEP3_OUT_DataBuf[1]) {
+    case 'E':
+      break;
+    case 'S':
+      break;
+    case 'C':
+      for (i = 0; i < l-3; i++) {
+        CustomKey[pEP3_OUT_DataBuf[2]][i] = pEP3_OUT_DataBuf[i+3];
+      }
+      FLASH_Write_KeyArray( );
+      pEP3_IN_DataBuf[0] = 2;
+      pEP3_IN_DataBuf[1] = 'S';
+      DevEP3_IN_Deal( 2 );    // 发送-成功
+      break;
+    case 'X':
+      for (i = 0; i < l-3; i++) {
+        Extra_CustomKey[pEP3_OUT_DataBuf[2]][i] = pEP3_OUT_DataBuf[i+3];
+      }
+      FLASH_Write_KeyArray( );
+      pEP3_IN_DataBuf[0] = 2;
+      pEP3_IN_DataBuf[1] = 'S';
+      DevEP3_IN_Deal( 2 );    // 发送-成功
+      break;
+    default:
+      pEP3_IN_DataBuf[0] = 4;
+      pEP3_IN_DataBuf[1] = 'E';
+      pEP3_IN_DataBuf[3] = USB_ERR_UNKNOWN;
+      DevEP3_IN_Deal( 4 );
+  }
 }
 
+/*******************************************************************************
+* Function Name  : DevEP4_OUT_Deal
+* Description    : 端点4数据处理(保留)
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void DevEP4_OUT_Deal( UINT8 l )
-{ /* 用户可自定义 */
+{
   UINT8 i;
 
   for ( i = 0; i < l; i++ )

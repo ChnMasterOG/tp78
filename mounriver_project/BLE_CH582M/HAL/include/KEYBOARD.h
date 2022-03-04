@@ -133,14 +133,12 @@
     #define Fn_Mode_Reset                 0x01
     #define Fn_Mode_ChangeKey             0x02
     #define Fn_Mode_PaintedEgg            0xC0
-    #define Fn_Mode_SaveAddr              0xE0
-    #define Fn_Mode_SelectCasualDevice    0xE1
-    #define Fn_Mode_SelectDevice1         0xE2
-    #define Fn_Mode_SelectDevice2         0xE3
-    #define Fn_Mode_SelectDevice3         0xE4
-    #define Fn_Mode_SelectDevice4         0xE5
-    #define Fn_Mode_SelectDevice5         0xE6
-    #define Fn_Mode_SelectDevice6         0xE7  // Mode SaveAddr-SelectDevice6需连续
+    #define Fn_Mode_SelectDevice1         0xE1
+    #define Fn_Mode_SelectDevice2         0xE2
+    #define Fn_Mode_SelectDevice3         0xE3
+    #define Fn_Mode_SelectDevice4         0xE4
+    #define Fn_Mode_SelectDevice5         0xE5
+    #define Fn_Mode_SelectDevice6         0xE6  // Mode SaveAddr-SelectDevice6需连续
     #define Fn_Mode_LED_Style1            0xF0
     #define Fn_Mode_LED_Style2            0xF1
     #define Fn_Mode_LED_Style3            0xF2
@@ -173,8 +171,10 @@
     extern Keyboardstate* const Keyboarddat;
     extern BOOL PaintedEggMode;
 
+    UINT8 FLASH_Write_KeyArray( void );
     UINT8 KEYBOARD_Custom_Function( void );
     void KEYBOARD_Init( void );
-    void KEYBOARD_detection( void );
+    void KEYBOARD_Detection( void );
+    uint8_t KEYBOARD_EnterPasskey( uint32_t* key );
 
 #endif
