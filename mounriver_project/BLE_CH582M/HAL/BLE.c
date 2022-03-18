@@ -44,13 +44,13 @@
 #define START_PHY_UPDATE_DELAY                1600
 
 // HID idle timeout in msec; set to zero to disable timeout
-#define DEFAULT_HID_IDLE_TIMEOUT              60000
+#define DEFAULT_HID_IDLE_TIMEOUT              0 // 60000
 
 // Minimum connection interval (units of 1.25ms)
 #define DEFAULT_DESIRED_MIN_CONN_INTERVAL     16
 
 // Maximum connection interval (units of 1.25ms)
-#define DEFAULT_DESIRED_MAX_CONN_INTERVAL     16
+#define DEFAULT_DESIRED_MAX_CONN_INTERVAL     80
 
 // Slave latency to use if parameter update request
 #define DEFAULT_DESIRED_SLAVE_LATENCY         0
@@ -94,7 +94,7 @@ BOOL BLE_Ready = FALSE;
 uint8_t BLE_SelectHostIndex = 0;
 
 // BLE Device address
-uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE4, 0x78, 0x01, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
+uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE5, 0x78, 0x01, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
 
 // Enter Passkey flag
 BOOL EnterPasskey_flag = FALSE;
@@ -331,9 +331,12 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
   if ( events & CHANGE_ADDR_EVT )  // «–ªª¿∂—¿…Ë±∏µÿ÷∑
   {
     /* disable advertising */
-    uint8 param = FALSE;
+    uint8 param = FALSE, is_adv;
     bStatus_t status;
-    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &param );
+    GAPRole_GetParameter( GAPROLE_ADVERT_ENABLED, &is_adv );
+    if ( is_adv == TRUE ) {
+      GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &param );
+    }
     status = GAP_ConfigDeviceAddr( ADDRTYPE_STATIC, DeviceAddress );
     if ( status == SUCCESS ) {
       OLED_PRINT("[S]Current Device: %d", DeviceAddress[5]);
@@ -346,8 +349,10 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
       DeviceAddress[5] = BLE_SelectHostIndex + 1;
       OLED_PRINT("[Error]Status: %d", status);
     }
-    param = TRUE;
-    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &param );
+    if ( is_adv == TRUE ) { // ª÷∏¥π„≤•
+      param = TRUE;
+      GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &param );
+    }
     return ( events ^ CHANGE_ADDR_EVT );
   }
 

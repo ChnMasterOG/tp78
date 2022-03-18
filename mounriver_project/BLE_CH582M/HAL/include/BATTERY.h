@@ -18,6 +18,8 @@
   #define BAT_50PERCENT_VAL   3754  // 50%
   #define BAT_75PERCENT_VAL   3925  // 75%
 
+  #define BAT_FLOATING_VAL    80    // ADC浮动超过该值则警告
+
   void BATTERY_Init( void );
   void BATTERY_DMA_ENABLE( void );
   void BATTERY_ADC_Convert( void );

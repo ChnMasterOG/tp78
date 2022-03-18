@@ -206,11 +206,11 @@ uint32_t oled_pow(uint8_t m,uint8_t n)
 
 /**
   * @brief  显示1个数字
-  * @param  uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t size
+  * @param  uint8_t x, uint8_t y, uint32_t num, uint8_t len
   *         (x为列坐标，取值0~127；y为页坐标，取值0~7；num为所要显示的数字；len为数字长度；size为显示字体大小,默认填16)
   * @retval 无
   */
-void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t size)
+void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len)
 {         	
 	uint8_t t, temp;
 	uint8_t enshow = 0;
@@ -221,11 +221,13 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t size)
 		{
 			if(temp == 0)
 			{
-				OLED_ShowChar(x +(SIZE / 2) * t, y, ' ');	//将开头为0的位略成' '    
+			  if ( SIZE == 16 ) OLED_ShowChar(x + 8 * t, y, ' ');
+			  else OLED_ShowChar(x + 6 * t, y, ' '); //将开头为0的位略成' '
 				continue;
 			}else enshow = 1; 
 		}
-	 	OLED_ShowChar(x + (SIZE / 2) * t, y, temp + '0');	//打印数字
+		if ( SIZE == 16 ) OLED_ShowChar(x + 8 * t, y, temp + '0');	//打印数字
+		else OLED_ShowChar(x + 6 * t, y, temp + '0'); //打印数字
 	}
 } 
 
@@ -241,7 +243,8 @@ void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr)
 	while(chr[j]!='\0')                         //该位不为空则打印
 	{	
 		OLED_ShowChar(x, y, chr[j]);        			//从第x列第y页打印字符
-		x+=8;                                     //字宽8列 打印完跳8列
+		if ( SIZE == 16 ) x += 8;                 //字宽8列 打印完跳8列
+		else x += 6;                              //字宽6列 打印完跳6列
 		if(x > 120){x = 0; y+=2;}                 //打印完2页则跳2页
 			j++;
 	}

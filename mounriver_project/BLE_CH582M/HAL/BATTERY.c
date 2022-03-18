@@ -90,7 +90,7 @@ void BATTERY_ADC_Calculation( void )
 * Description    : 获取电池ADC等级(1:0%~25%, 2:25%~50%, 3:50%~75%, 4:75%~100%, 0和5代表超出范围)
 * Input          : ADC值
 * Output         : None
-* Return         : 0/1/2/3/4
+* Return         : 0/1/2/3/4/5
 *******************************************************************************/
 static UINT8 BATTERY_ADC_GetLevel( UINT32 adc_val )
 {
@@ -111,25 +111,45 @@ static UINT8 BATTERY_ADC_GetLevel( UINT32 adc_val )
 *******************************************************************************/
 void BATTERY_DrawBMP( void )
 {
+  const UINT8 BMP_StartX = 91;
   UINT8 i, j;
   UINT8 BAT_level = BATTERY_ADC_GetLevel(BAT_adcVal);
+  BOOL isFloating = ABS((long)BAT_adcHistory - (long)BAT_adcVal) >= BAT_FLOATING_VAL;
   if (BATTERY_ADC_GetLevel(BAT_adcHistory) != BAT_level) { // 电量等级变化
-//    OLED_Clear();
-    OLED_PRINT("%4d", BAT_adcVal); // 输出当前ADC采样值
-    OLED_DrawBMP(92, 0, 128, 4, (uint8_t*)EmptyBattery);  // 绘制空电池
-    OLED_Set_Pos(96, 1);
-    for (i = 0; i < BAT_level; i++) { // 绘制电量(上半部分)
-      OLED_WR_Byte(0x01, OLED_DATA);
+    OLED_DrawBMP(BMP_StartX, 0, BMP_StartX + 32, 3, (uint8_t*)EmptyBattery);  // 绘制空电池
+    OLED_Set_Pos(BMP_StartX + 2, 0);
+    for (i = 0; i < BAT_level; i++) { // 绘制电量(1)
+      OLED_WR_Byte(0x10, OLED_DATA);
       for (j = 0; j < 4; j++) {
-        OLED_WR_Byte(0xFD, OLED_DATA);
+        OLED_WR_Byte(0xD0, OLED_DATA);
       }
     }
-    OLED_Set_Pos(96, 2);
-    for (i = 0; i < BAT_level; i++) { // 绘制电量(下半部分)
-      OLED_WR_Byte(0x80, OLED_DATA);
+    OLED_Set_Pos(BMP_StartX + 2, 1);
+    for (i = 0; i < BAT_level; i++) { // 绘制电量(2)
+      OLED_WR_Byte(0x00, OLED_DATA);
       for (j = 0; j < 4; j++) {
-        OLED_WR_Byte(0xBF, OLED_DATA);
+        OLED_WR_Byte(0xFF, OLED_DATA);
+      }
+    }
+    OLED_Set_Pos(BMP_StartX + 2, 2);
+    for (i = 0; i < BAT_level; i++) { // 绘制电量(下半部分)
+      OLED_WR_Byte(0x08, OLED_DATA);
+      for (j = 0; j < 4; j++) {
+        OLED_WR_Byte(0x0B, OLED_DATA);
       }
     }
   }
+  // 无论电量等级是否变化都给出电量是否浮动
+  if ( isFloating ) {
+    OLED_Set_Pos(BMP_StartX + 29, 0);
+    OLED_WR_Byte(0xE1, OLED_DATA);
+    OLED_WR_Byte(0x0B, OLED_DATA);
+  } else {
+    OLED_Set_Pos(BMP_StartX + 29, 0);
+    OLED_WR_Byte(0xE0, OLED_DATA);
+    OLED_WR_Byte(0x00, OLED_DATA);
+  }
+  // 无论电量等级是否变化都输出ADC值
+  OLED_Set_Pos(BMP_StartX + 4, 3);
+  OLED_ShowNum(BMP_StartX + 4, 3, BAT_adcVal, 4);
 }

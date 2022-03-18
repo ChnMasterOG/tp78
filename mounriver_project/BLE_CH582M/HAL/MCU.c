@@ -220,9 +220,11 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
   if ( events & BATTERY_EVENT )
   {
     BATTERY_ADC_Calculation( );
-    BATTERY_DrawBMP( );
+    if ( EnterPasskey_flag == FALSE ) {
+      BATTERY_DrawBMP( );
+    }
     BATTERY_DMA_ENABLE( );
-    tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(10000) );  // 10s更新采样值
+    tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(5000) );  // 5s更新采样值
   }
 
   // 定时主循环事件
