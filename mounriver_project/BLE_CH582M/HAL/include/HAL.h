@@ -35,6 +35,7 @@ extern "C"
 #define   MAIN_CIRCULATION_EVENT                        0x0004
 #define   BATTERY_EVENT                                 0x0008
 #define   WS2812_EVENT                                  0x0010
+#define   OLED_EVENT                                    0x0020
 #define   HAL_REG_INIT_EVENT		                        0x2000
 #define   HAL_TEST_EVENT		                            0x4000
 

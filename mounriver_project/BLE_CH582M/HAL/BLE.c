@@ -339,7 +339,8 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
     }
     status = GAP_ConfigDeviceAddr( ADDRTYPE_STATIC, DeviceAddress );
     if ( status == SUCCESS ) {
-      OLED_PRINT("[S]Current Device: %d", DeviceAddress[5]);
+//      OLED_PRINT("[S]Current Device: %d", DeviceAddress[5]);
+      OLED_ShowNum(13, 2, DeviceAddress[5], 1);
       BLE_SelectHostIndex = DeviceAddress[5] - 1;
       if ( hidEmuConnHandle != GAP_CONNHANDLE_INIT ) {
         GAPRole_TerminateLink( hidEmuConnHandle );  // disconnect
@@ -347,7 +348,7 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
       }
     } else {
       DeviceAddress[5] = BLE_SelectHostIndex + 1;
-      OLED_PRINT("[Error]Status: %d", status);
+//      OLED_PRINT("[Error]Status: %d", status);
     }
     if ( is_adv == TRUE ) { // »Ö¸´¹ã²¥
       param = TRUE;
@@ -383,7 +384,8 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
 
   if ( events & START_ENTER_PASSKEY_EVT )
   {
-    OLED_PRINT("Passkey = ?");
+//    OLED_PRINT("Passkey = ?");
+    OLED_ShowString(0, 2, "  ?   ");
     EnterPasskey_flag = TRUE;
 
     return ( events ^ START_ENTER_PASSKEY_EVT );

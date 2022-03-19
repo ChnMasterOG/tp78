@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : OLED.c
  * Author             : ChnMasterOG
- * Version            : V1.0
- * Date               : 2021/11/21
+ * Version            : V1.1
+ * Date               : 2022/3/18
  * Description        : OLED 9.1寸 I2C驱动源文件
  *******************************************************************************/
 
@@ -173,8 +173,12 @@ void OLED_ShowChar(uint8_t x, uint8_t y, uint8_t chr)
 {      	
 	unsigned char c=0,i=0;	
 	c = chr - ' ';                             //得到偏移后的值(对应ASCII码)			
-	if(x > Max_Column - 1){x = 0; y+=2;}
-	if(SIZE ==16)                              //一个字符占8列16行(2页) 一块128*64像素屏一行能显示16个字符 能显示4行
+	if(x > Max_Column - 1) {
+	  x = 0;
+	  if (SIZE == 16) y += 2;
+	  else y++;
+	}
+	if (SIZE == 16)                            //一个字符占8列16行(2页) 一块128*64像素屏一行能显示16个字符 能显示4行
 	{
 		OLED_Set_Pos(x, y);	                     //开始写第一页
 			                                       //写入字符前64列(第一页先列后行)
@@ -187,7 +191,7 @@ void OLED_ShowChar(uint8_t x, uint8_t y, uint8_t chr)
 	}
 	else
 	{	
-		OLED_Set_Pos(x, y + 1);
+		OLED_Set_Pos(x, y);
 		for(i = 0; i < 6; i++) OLED_WR_Byte(F6x8[c][i], OLED_DATA);
 	}
 }
@@ -325,6 +329,21 @@ uint8_t OLED_Midx(uint8_t size)
 {
 	if(size * 8 > 128) return 0;
 	return (128 - size * 8) / 2;
+}
+
+/**
+  * @brief  OLED显示OK(打勾)
+  * @param  x坐标, y坐标, 显示打勾或取消打勾
+  * @retval 无
+  */
+void OLED_ShowOK(uint8_t x, uint8_t y, uint8_t s)
+{
+  uint8_t i;
+  OLED_Set_Pos(x, y);
+  if (SIZE == 8) {
+    if (s != 0) for(i = 0; i < 6; i++) OLED_WR_Byte(F6x8[92][i], OLED_DATA);
+    else for(i = 0; i < 6; i++) OLED_WR_Byte(0x00, OLED_DATA);
+  }
 }
 
 /**

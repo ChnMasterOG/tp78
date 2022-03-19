@@ -302,16 +302,19 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     // 检测USB/蓝牙连接状态：连接状态改变OLED显示
     if (connection_state[0] != USB_Ready) {
       connection_state[0] = USB_Ready;
-      OLED_PRINT("USB: %d, BLE: %d", USB_Ready, BLE_Ready);
+      if ( USB_Ready ) OLED_ShowString(7, 0, "USB");
+      else OLED_ShowString(7, 0, "   ");
     } else if (connection_state[1] != BLE_Ready) {
       connection_state[1] = BLE_Ready;
-      HalLedSet(HAL_LED_1, BLE_Ready);
-      OLED_PRINT("USB: %d, BLE: %d", USB_Ready, BLE_Ready);
+//      HalLedSet(HAL_LED_1, BLE_Ready);
+      if ( BLE_Ready ) OLED_ShowString(7, 1, "BLE");
+      else OLED_ShowString(7, 1, "   ");
     }
     tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, MS1_TO_SYSTEM_TIME(10) ); // 10ms周期
     return events ^ MAIN_CIRCULATION_EVENT;
   }
 
+  // WS2812控制事件
   if ( events & WS2812_EVENT )
   {
 #if (defined HAL_WS2812_PWM) && (HAL_WS2812_PWM == TRUE)
@@ -321,6 +324,13 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     tmos_start_task( halTaskID, WS2812_EVENT, MS1_TO_SYSTEM_TIME(60) ); // 60ms周期控制背光
 #endif
     return events ^ WS2812_EVENT;
+  }
+
+  // OLED取消打勾事件
+  if ( events & OLED_EVENT )
+  {
+    OLED_ShowOK(0, 0, 0);
+    return events ^ OLED_EVENT;
   }
 
   // 硬件初始化事件
@@ -403,7 +413,12 @@ void HAL_Init()
   tmos_start_task( halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME( BLE_CALIBRATION_PERIOD ) );    // 添加校准任务，单次校准耗时小于10ms
 #endif
   PRINT("%s\n", debug_info);
-  OLED_PRINT("%s", debug_info);
+  // 初始化OLED UI
+  OLED_ShowNum(13, 2, DeviceAddress[5], 1);
+  OLED_ShowString(1, 3, "L1");
+  OLED_ShowString(19, 3, "S0");
+  OLED_DrawBMP(91, 0, 91 + 32, 3, (uint8_t*)EmptyBattery);  // 绘制空电池
+//  OLED_PRINT("%s", debug_info);
 //  tmos_start_task( halTaskID, HAL_TEST_EVENT, 1600 );    // 添加测试任务
 }
 

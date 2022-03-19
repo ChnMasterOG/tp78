@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : KEYBOARD.c
  * Author             : ChnMasterOG
- * Version            : V1.3
- * Date               : 2022/2/26
+ * Version            : V1.5
+ * Date               : 2022/3/19
  * Description        : 机械键盘驱动源文件
  *******************************************************************************/
 
@@ -217,7 +217,8 @@ UINT8 KEYBOARD_Custom_Function( void )
           Fn_cnt = 0;
           Fn_Mode = Fn_Mode_None;
           KEYBOARD_ResetKey( );
-          OLED_PRINT("Reset Keyboard OK!");
+          OLED_ShowOK(0, 0, 1);
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         }
         break;
       case Fn_Mode_ChangeKey:
@@ -225,7 +226,8 @@ UINT8 KEYBOARD_Custom_Function( void )
         if ( Fn_cnt == 0x0C ) {
           Fn_cnt = 0;
           Fn_Mode = Fn_Mode_None;
-          OLED_PRINT("Change Key: %d<->%d", src_key, dst_key);
+          OLED_ShowOK(0, 0, 1);
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
           KEYBOARD_ChangeKey( dst_key, src_key );
         }
         break;
@@ -247,31 +249,31 @@ UINT8 KEYBOARD_Custom_Function( void )
       case Fn_Mode_LED_Style1:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_PRINT("LED Off");
+        OLED_ShowString(19, 3, "S0");
         led_style_func = WS2812_Style_Off;  // Fn+1 - 关闭背光
         break;
       case Fn_Mode_LED_Style2:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_PRINT("LED Style 1");
+        OLED_ShowString(19, 3, "S1");
         led_style_func = WS2812_Style_Breath;  // Fn+2 - 背光使用呼吸灯模式
         break;
       case Fn_Mode_LED_Style3:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_PRINT("LED Style 2");
+        OLED_ShowString(19, 3, "S2");
         led_style_func = WS2812_Style_Waterful;  // Fn+3 - 背光使用流水灯模式
         break;
       case Fn_Mode_LED_Style4:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_PRINT("LED Style 3");
+        OLED_ShowString(19, 3, "S3");
         led_style_func = WS2812_Style_Touch;  // Fn+4 - 背光使用触控呼吸灯模式
         break;
       case Fn_Mode_LED_Style5:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_PRINT("LED Style 4");
+        OLED_ShowString(19, 3, "S4");
         led_style_func = WS2812_Style_Rainbow;  // Fn+5 - 背光使用彩虹灯模式
         break;
       case Fn_Mode_GiveUp:
@@ -322,13 +324,23 @@ void KEYBOARD_Init( void )
 void KEYBOARD_Detection( void )
 {
     static uint8_t current_row = 0;
+    static BOOL press_Capslock = FALSE;
     uint8_t current_colum, key_idx;
     if (KeyArr_ChangeTimes > 0 && KeyArr_ChangeTimes <= MAX_CHANGETIMES) {  // 进入CapsLock键盘布局改变计数等待
         if (KeyArr_ChangeTimes == MAX_CHANGETIMES) { // 计数值到达MAX_CHANGETIMES改变键盘布局
             KeyArr_Ptr = Extra_CustomKey;
-            OLED_PRINT("Layer 2");
+            OLED_ShowString(1, 3, "L2");
         }
         ++KeyArr_ChangeTimes; // 键盘计数值递增
+    } else if (press_Capslock) {  // CapsLock被按下
+        press_Capslock = FALSE;
+        for (key_idx = 2; key_idx < 8; key_idx++) {
+            if (Keyboarddat->data[key_idx] == KEY_CapsLock) {
+                memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
+                Keyboarddat->Key6 = 0;
+            }
+        }
+        KEYBOARD_data_index--;
     }
     for (current_colum = 0; current_colum < sizeof(Colum_Pin)/sizeof(uint32_t); current_colum++) {    // 查询哪一列改变
         if (KeyMatrix[current_colum][current_row] == 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) == 0) {  // 按下
@@ -348,9 +360,10 @@ void KEYBOARD_Detection( void )
             } else if (KeyArr_Ptr[current_colum][current_row] >= KEY_LeftCTRL) {    // 特殊键
                 Keyboarddat->data[0] |= 1 << (KeyArr_Ptr[current_colum][current_row] - KEY_LeftCTRL);
             } else {
-                Keyboarddat->data[KEYBOARD_data_index++] = KeyArr_Ptr[current_colum][current_row];
                 if (CustomKey[current_colum][current_row] == KEY_CapsLock) {  // 长按大小写键进入Extra_CustomKey层
                     KeyArr_ChangeTimes = 1; // 键盘布局转换-开始计数
+                } else {
+                    Keyboarddat->data[KEYBOARD_data_index++] = KeyArr_Ptr[current_colum][current_row];
                 }
             }
         } else if (KeyMatrix[current_colum][current_row] != 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) != 0) {   // 弹起
@@ -367,17 +380,25 @@ void KEYBOARD_Detection( void )
                 if (CustomKey[current_colum][current_row] == KEY_CapsLock) {  // 弹起大小写键离开Extra_CustomKey层
                     if (KeyArr_ChangeTimes > MAX_CHANGETIMES) {
                         KeyArr_Ptr = CustomKey;
-                        OLED_PRINT("Layer 1");
+                        OLED_ShowString(1, 3, "L1");
+                    } else {
+                        if (KEYBOARD_data_index < 8) {
+                            press_Capslock = TRUE;
+                            Keyboarddat->data[KEYBOARD_data_index++] = KEY_CapsLock;
+                        }
                     }
                     KeyArr_ChangeTimes = 0;
-                }
-                for (key_idx = 2; key_idx < 8; key_idx++) {
-                    if (Keyboarddat->data[key_idx] == KeyArr_Ptr[current_colum][current_row]) {
-                        memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
-                        Keyboarddat->Key6 = 0;
+                } else {
+                    for (key_idx = 2; key_idx < 8; key_idx++) {
+//                        if (Keyboarddat->data[key_idx] == KeyArr_Ptr[current_colum][current_row]) {
+                        if (Keyboarddat->data[key_idx] == CustomKey[current_colum][current_row] ||
+                            Keyboarddat->data[key_idx] == Extra_CustomKey[current_colum][current_row]) {  // 弹起按键2层都清除
+                            memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
+                            Keyboarddat->Key6 = 0;
+                        }
                     }
+                    KEYBOARD_data_index--;
                 }
-                KEYBOARD_data_index--;
             }
         }
     }
@@ -406,11 +427,16 @@ uint8_t KEYBOARD_EnterPasskey( uint32_t* key )
           passkey_str[--idx] = '\0';
           passkey /= 10;
       }
-      if ( passkey_str[0] == '\0' ) OLED_PRINT("Passkey = ?");
-      else OLED_PRINT("Passkey = %s", passkey_str);
+      if ( passkey_str[0] == '\0' ) {
+          OLED_ShowString(0, 2, "  ?   ");
+      } else {
+          OLED_ShowString(0, 2, "      ");
+          OLED_ShowString(0, 2, passkey_str);
+      }
   } else if ( idx == 6 ) {  // 最后一个按键是Enter则结束
       if ( Keyboarddat->Key1 == KEY_ENTER ) {
-          OLED_PRINT("Enter passkey OK");
+          OLED_ShowString(0, 2, "      ");
+          OLED_ShowNum(13, 2, DeviceAddress[5], 1);
           *key = passkey;
           passkey = idx = passkey_str[0] = 0;
           return 0;
@@ -419,7 +445,8 @@ uint8_t KEYBOARD_EnterPasskey( uint32_t* key )
       passkey = passkey * 10 + keyhash[Keyboarddat->Key1 - KEY_1];
       passkey_str[idx++] = keyhash[Keyboarddat->Key1 - KEY_1] + 0x30;
       passkey_str[idx] = '\0';
-      OLED_PRINT("Passkey = %s", passkey_str);
+      OLED_ShowString(0, 2, "      ");
+      OLED_ShowString(0, 2, passkey_str);
   }
   return 1;
 }

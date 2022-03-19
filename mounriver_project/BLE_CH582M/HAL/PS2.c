@@ -255,40 +255,40 @@ uint8_t PS2_Init(char* buf, BOOL is_IT)
 	PS2_Dis_Data_Report();
 	PS2DATA_GPIO_(ModeCfg)( PS2DATA_Pin, GPIO_ModeIN_PU );
 
-	//config
+	// config
 	sta = PS2_Config(PS_RESET, 0xFA);
 	if (sta != 0) {
 	    strcpy(buf, "[ERROR]PS_RESET STEP1");
 	    return 1;
 	}
 	sta = PS2_ReadByte(&res);   //AA
-    if (sta != 0 || res != 0xAA) {
-        strcpy(buf, "[ERROR]PS_RESET STEP2");
-        return 1;
-    }
-    sta = PS2_ReadByte(&res);   //ID号：0
-    if (sta != 0 || res != 0x00) {
-        strcpy(buf, "[ERROR]PS_RESET STEP3");
-        return 1;
-    }
-    sta = PS2_Config(SET_DEFAULT, 0xFA);
-    if (sta != 0) {
-        strcpy(buf, "[ERROR]SET_DEFAULT");
-        return 1;
-    }
-    sta = PS2_Config(EN_DATA_REPORT, 0xFA);
-    if (sta != 0) {
-        strcpy(buf, "[ERROR]EN_DATA_REPORT");
-        return 1;
-    }
-    if (is_IT) {
-        PS2_En_Data_Report();
-        DelayMs(10);   //等待稳定
-        PS2CLK_GPIO_(ITModeCfg)( PS2CLK_Pin, GPIO_ITMode_FallEdge );
-        PFIC_EnableIRQ( GPIO_B_IRQn );  //PS2CLK_GPIO
-    }
-    strcpy(buf, "[READY]Mouse");
-    return 0;
+  if (sta != 0 || res != 0xAA) {
+      strcpy(buf, "[ERROR]PS_RESET STEP2");
+      return 1;
+  }
+  sta = PS2_ReadByte(&res);   //ID号：0
+  if (sta != 0 || res != 0x00) {
+      strcpy(buf, "[ERROR]PS_RESET STEP3");
+      return 1;
+  }
+  sta = PS2_Config(SET_DEFAULT, 0xFA);
+  if (sta != 0) {
+      strcpy(buf, "[ERROR]SET_DEFAULT");
+      return 1;
+  }
+  sta = PS2_Config(EN_DATA_REPORT, 0xFA);
+  if (sta != 0) {
+      strcpy(buf, "[ERROR]EN_DATA_REPORT");
+      return 1;
+  }
+  if (is_IT) {
+      PS2_En_Data_Report();
+      DelayMs(10);   //等待稳定
+      PS2CLK_GPIO_(ITModeCfg)( PS2CLK_Pin, GPIO_ITMode_FallEdge );
+      PFIC_EnableIRQ( GPIO_B_IRQn );  //PS2CLK_GPIO
+  }
+  strcpy(buf, "[READY]Mouse");
+  return 0;
 }
 
 __INTERRUPT
