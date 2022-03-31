@@ -14,8 +14,8 @@
     #define Row_GPIO_(x)    GPIOB_ ## x
     #define Colum_GPIO_(x)  GPIOA_ ## x
 
-    #define MAX_PRESS_COUNT 15    // 8个特殊键+6个一般键+1个Fn键
-    #define MAX_CHANGETIMES 30   // 按下Caplock改变键盘布局检测次数
+    #define MAX_PRESS_COUNT 15   // 8个特殊键+6个一般键+1个Fn键
+    #define MAX_CHANGETIMES 18   // 按下Caplock改变键盘布局检测次数
 
     //special
     #define KEY_None    0x00
@@ -133,6 +133,7 @@
     #define Fn_Mode_Reset                 0x01
     #define Fn_Mode_ChangeKey             0x02
     #define Fn_Mode_PaintedEgg            0xC0
+    #define Fn_Mode_PriorityUSBorBLE      0xE0
     #define Fn_Mode_SelectDevice1         0xE1
     #define Fn_Mode_SelectDevice2         0xE2
     #define Fn_Mode_SelectDevice3         0xE3

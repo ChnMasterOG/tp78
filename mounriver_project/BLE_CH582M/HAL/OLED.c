@@ -2,7 +2,7 @@
  * File Name          : OLED.c
  * Author             : ChnMasterOG
  * Version            : V1.1
- * Date               : 2022/3/18
+ * Date               : 2022/3/20
  * Description        : OLED 9.1寸 I2C驱动源文件
  *******************************************************************************/
 
@@ -237,8 +237,8 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len)
 
 /**
   * @brief  显示字符串
-  * @param  uint8_t x, uint8_t y, uint8_t *chr, uint8_t SIZE
-  *		    (x为列坐标，取值0~127；y为页坐标，取值0~7；*chr指针型存放chr[](所要输出的字符串)数组指针；SIZE为字体大小)
+  * @param  uint8_t x, uint8_t y, uint8_t *chr
+  *		    (x为列坐标，取值0~127；y为页坐标，取值0~3/7；*chr指针型存放chr[]
   * @retval 无
   */
 void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr)
@@ -252,6 +252,23 @@ void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr)
 		if(x > 120){x = 0; y+=2;}                 //打印完2页则跳2页
 			j++;
 	}
+}
+
+/**
+  * @brief  输出信息
+  * @param  uint8_t *chr
+  * @retval 无
+  */
+void OLED_TP78Info(uint8_t *chr)
+{
+  // 清空原有信息
+  uint8_t i;
+  OLED_Set_Pos(0, 3);
+  for (i = 0; i < 64; i++) {
+    OLED_WR_Byte(0x00, OLED_DATA);
+  }
+  // 定义左下角输出信息
+  OLED_ShowString(OLED_Midx(strlen(chr), 0, 64), 3, chr);
 }
 
 /**
@@ -322,13 +339,14 @@ void OLED_Fill(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
 
 /**
   * @brief  OLED计算字符串/数字居中位置x坐标
-  * @param  无
+  * @param  文字长度，显示区域起点/终点
   * @retval x坐标
   */
-uint8_t OLED_Midx(uint8_t size)
+uint8_t OLED_Midx(uint8_t length, uint8_t xstart, uint8_t xend)
 {
-	if(size * 8 > 128) return 0;
-	return (128 - size * 8) / 2;
+  uint8_t w = SIZE == 16 ? 8 : 6;
+	if(length * w > xend - xstart) return 0;
+	return xstart + (xend - xstart - length * w) / 2;
 }
 
 /**
@@ -347,6 +365,21 @@ void OLED_ShowOK(uint8_t x, uint8_t y, uint8_t s)
 }
 
 /**
+  * @brief  OLED显示Capslock(大小写)
+  * @param  x坐标, y坐标, 显示大小写被按下或不显示
+  * @retval 无
+  */
+void OLED_ShowCapslock(uint8_t x, uint8_t y, uint8_t s)
+{
+  uint8_t i;
+  OLED_Set_Pos(x, y);
+  if (SIZE == 8) {
+    if (s != 0) for(i = 0; i < 6; i++) OLED_WR_Byte(F6x8[93][i], OLED_DATA);
+    else for(i = 0; i < 6; i++) OLED_WR_Byte(F6x8[94][i], OLED_DATA);
+  }
+}
+
+/**
   * @brief  OLED printf重定向函数
   * @param  x坐标, y坐标, 输出...
   * @retval 输出长度
@@ -361,8 +394,9 @@ int OLED_printf(uint8_t x, uint8_t y, char *pFormat, ...)
   res = vsprintf((char*)pStr, pFormat, ap);
   va_end(ap);
 
-  OLED_Clear();
-  OLED_ShowString(x, y, pStr);
+//  OLED_Clear();
+//  OLED_ShowString(x, y, pStr);
+  OLED_TP78Info(pStr);
 
   /* 记录至历史 */
   if (strlen(pStr) > OLED_HIS_DLEN) { // 截取长度

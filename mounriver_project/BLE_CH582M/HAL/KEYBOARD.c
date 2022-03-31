@@ -170,7 +170,10 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_Delete && Fn_Mode != Fn_Mode_PaintedEgg ) { // 彩蛋模式
       Fn_Mode = Fn_Mode_PaintedEgg;
       Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_1 && Fn_Mode != Fn_Mode_SelectDevice1 ) { // 切换至设备1
+    } else if ( Keyboarddat->Key1 == KEY_0 && Fn_Mode != Fn_Mode_PriorityUSBorBLE ) { // 设置优先蓝牙或USB
+      Fn_Mode = Fn_Mode_PriorityUSBorBLE;
+      Fn_cnt = 0;
+    }  else if ( Keyboarddat->Key1 == KEY_1 && Fn_Mode != Fn_Mode_SelectDevice1 ) { // 切换至设备1
       Fn_Mode = Fn_Mode_SelectDevice1;
       Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_2 && Fn_Mode != Fn_Mode_SelectDevice2 ) { // 切换至设备2
@@ -217,7 +220,7 @@ UINT8 KEYBOARD_Custom_Function( void )
           Fn_cnt = 0;
           Fn_Mode = Fn_Mode_None;
           KEYBOARD_ResetKey( );
-          OLED_ShowOK(0, 0, 1);
+          OLED_PRINT("Reset OK!");
           tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         }
         break;
@@ -226,7 +229,7 @@ UINT8 KEYBOARD_Custom_Function( void )
         if ( Fn_cnt == 0x0C ) {
           Fn_cnt = 0;
           Fn_Mode = Fn_Mode_None;
-          OLED_ShowOK(0, 0, 1);
+          OLED_PRINT("Change OK!");
           tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
           KEYBOARD_ChangeKey( dst_key, src_key );
         }
@@ -234,12 +237,23 @@ UINT8 KEYBOARD_Custom_Function( void )
       case Fn_Mode_PaintedEgg:  // Fn+Delete彩蛋
         Fn_Mode = Fn_Mode_None;
         if (PaintedEggMode == FALSE) {
-          OLED_DrawBMP(0, 0, 128, 4, (uint8_t*)PaintedEgg_Bmp);
           LED_Change_flag = 1;
           led_style_func = WS2812_Style_Custom; // 彩蛋背光
           Snake_Init();
         }
         PaintedEggMode = !PaintedEggMode;
+        break;
+      case Fn_Mode_PriorityUSBorBLE:  // Fn+0优先蓝牙或USB切换
+        Fn_Mode = Fn_Mode_None;
+        extern BOOL priority_USB;
+        priority_USB = !priority_USB;
+        if ( USB_Ready && BLE_Ready ) {
+          OLED_ShowOK(26 + priority_USB * 30, 0, FALSE);
+          OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);
+        }
+        if ( priority_USB ) OLED_PRINT("PRI USB");
+        else OLED_PRINT("PRI BLE");
+        tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         break;
       case Fn_Mode_SelectDevice1 ... Fn_Mode_SelectDevice6: // 按Fn+1~6切换设备
         DeviceAddress[5] = Fn_Mode - Fn_Mode_SelectDevice1 + 1;
@@ -249,31 +263,31 @@ UINT8 KEYBOARD_Custom_Function( void )
       case Fn_Mode_LED_Style1:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_ShowString(19, 3, "S0");
+        OLED_ShowString(20, 1, "S0");
         led_style_func = WS2812_Style_Off;  // Fn+1 - 关闭背光
         break;
       case Fn_Mode_LED_Style2:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_ShowString(19, 3, "S1");
+        OLED_ShowString(20, 1, "S1");
         led_style_func = WS2812_Style_Breath;  // Fn+2 - 背光使用呼吸灯模式
         break;
       case Fn_Mode_LED_Style3:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_ShowString(19, 3, "S2");
+        OLED_ShowString(20, 1, "S2");
         led_style_func = WS2812_Style_Waterful;  // Fn+3 - 背光使用流水灯模式
         break;
       case Fn_Mode_LED_Style4:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_ShowString(19, 3, "S3");
+        OLED_ShowString(20, 1, "S3");
         led_style_func = WS2812_Style_Touch;  // Fn+4 - 背光使用触控呼吸灯模式
         break;
       case Fn_Mode_LED_Style5:
         Fn_Mode = Fn_Mode_None;
         LED_Change_flag = 1;
-        OLED_ShowString(19, 3, "S4");
+        OLED_ShowString(20, 1, "S4");
         led_style_func = WS2812_Style_Rainbow;  // Fn+5 - 背光使用彩虹灯模式
         break;
       case Fn_Mode_GiveUp:
@@ -329,7 +343,7 @@ void KEYBOARD_Detection( void )
     if (KeyArr_ChangeTimes > 0 && KeyArr_ChangeTimes <= MAX_CHANGETIMES) {  // 进入CapsLock键盘布局改变计数等待
         if (KeyArr_ChangeTimes == MAX_CHANGETIMES) { // 计数值到达MAX_CHANGETIMES改变键盘布局
             KeyArr_Ptr = Extra_CustomKey;
-            OLED_ShowString(1, 3, "L2");
+            OLED_ShowString(2, 1, "L2");
         }
         ++KeyArr_ChangeTimes; // 键盘计数值递增
     } else if (press_Capslock) {  // CapsLock被按下
@@ -341,6 +355,8 @@ void KEYBOARD_Detection( void )
             }
         }
         KEYBOARD_data_index--;
+        KEYBOARD_data_ready = 1;  // 产生事件
+        return;
     }
     for (current_colum = 0; current_colum < sizeof(Colum_Pin)/sizeof(uint32_t); current_colum++) {    // 查询哪一列改变
         if (KeyMatrix[current_colum][current_row] == 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) == 0) {  // 按下
@@ -380,7 +396,7 @@ void KEYBOARD_Detection( void )
                 if (CustomKey[current_colum][current_row] == KEY_CapsLock) {  // 弹起大小写键离开Extra_CustomKey层
                     if (KeyArr_ChangeTimes > MAX_CHANGETIMES) {
                         KeyArr_Ptr = CustomKey;
-                        OLED_ShowString(1, 3, "L1");
+                        OLED_ShowString(2, 1, "L1");
                     } else {
                         if (KEYBOARD_data_index < 8) {
                             press_Capslock = TRUE;
@@ -428,15 +444,14 @@ uint8_t KEYBOARD_EnterPasskey( uint32_t* key )
           passkey /= 10;
       }
       if ( passkey_str[0] == '\0' ) {
-          OLED_ShowString(0, 2, "  ?   ");
+        OLED_PRINT("Passkey=?");
       } else {
-          OLED_ShowString(0, 2, "      ");
-          OLED_ShowString(0, 2, passkey_str);
+        OLED_PRINT("%s", passkey_str);
       }
   } else if ( idx == 6 ) {  // 最后一个按键是Enter则结束
       if ( Keyboarddat->Key1 == KEY_ENTER ) {
-          OLED_ShowString(0, 2, "      ");
-          OLED_ShowNum(13, 2, DeviceAddress[5], 1);
+          OLED_PRINT("Send!");
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
           *key = passkey;
           passkey = idx = passkey_str[0] = 0;
           return 0;
@@ -445,8 +460,7 @@ uint8_t KEYBOARD_EnterPasskey( uint32_t* key )
       passkey = passkey * 10 + keyhash[Keyboarddat->Key1 - KEY_1];
       passkey_str[idx++] = keyhash[Keyboarddat->Key1 - KEY_1] + 0x30;
       passkey_str[idx] = '\0';
-      OLED_ShowString(0, 2, "      ");
-      OLED_ShowString(0, 2, passkey_str);
+      OLED_PRINT("%s", passkey_str);
   }
   return 1;
 }

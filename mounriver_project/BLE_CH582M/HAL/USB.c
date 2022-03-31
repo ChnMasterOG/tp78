@@ -181,6 +181,10 @@ void USB_DevTransProcess( void )
           len = R8_USB_RX_LEN;
           if ( SetupReqCode == 0x09 )
           {
+            if ( pEP0_DataBuf[1] )
+              USB_CapsLock_LEDOn = FALSE;    // Light off Caps Lock LED
+            else if ( pEP0_DataBuf[1] == 0 )
+              USB_CapsLock_LEDOn = TRUE;     // Light on Caps Lock LED
           }
         }
           break;

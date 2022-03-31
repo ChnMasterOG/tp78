@@ -52,6 +52,7 @@ extern "C"
  * GLOBAL VARIABLES
  */
 extern tmosTaskID halTaskID;
+extern BOOL USB_CapsLock_LEDOn, BLE_CapsLock_LEDOn;
 
 typedef struct  tag_uart_package
 {
@@ -67,7 +68,6 @@ extern tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events );
 extern void CH57X_BLEInit( void );
 extern uint16 HAL_GetInterTempValue( void );
 extern void Lib_Calibration_LSI( void );
-
 
 /*********************************************************************
 *********************************************************************/

@@ -258,27 +258,31 @@ uint8_t PS2_Init(char* buf, BOOL is_IT)
 	// config
 	sta = PS2_Config(PS_RESET, 0xFA);
 	if (sta != 0) {
-	    strcpy(buf, "[ERROR]PS_RESET STEP1");
+	    strcpy(buf, "[ERR-1]PS_RESET STEP1");
 	    return 1;
 	}
 	sta = PS2_ReadByte(&res);   //AA
   if (sta != 0 || res != 0xAA) {
-      strcpy(buf, "[ERROR]PS_RESET STEP2");
+      strcpy(buf, "[ERR-2]PS_RESET STEP2");
       return 1;
+  } else if (res != 0xAA) {
+      strcpy(buf, "[WAR-2] PS_RESET STEP2");
   }
   sta = PS2_ReadByte(&res);   //IDºÅ£º0
-  if (sta != 0 || res != 0x00) {
-      strcpy(buf, "[ERROR]PS_RESET STEP3");
+  if (sta != 0) {
+      strcpy(buf, "[ERR-3]PS_RESET STEP3");
       return 1;
+  } else if (res != 0x00) {
+    strcpy(buf, "[WAR-3] PS_RESET STEP3");
   }
   sta = PS2_Config(SET_DEFAULT, 0xFA);
   if (sta != 0) {
-      strcpy(buf, "[ERROR]SET_DEFAULT");
+      strcpy(buf, "[ERR-4]SET_DEFAULT");
       return 1;
   }
   sta = PS2_Config(EN_DATA_REPORT, 0xFA);
   if (sta != 0) {
-      strcpy(buf, "[ERROR]EN_DATA_REPORT");
+      strcpy(buf, "[ERR-5]EN_DATA_REPORT");
       return 1;
   }
   if (is_IT) {

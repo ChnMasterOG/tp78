@@ -50,12 +50,14 @@
     uint32_t oled_pow(uint8_t m,uint8_t n);
     void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len);
     void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr);
+    void OLED_TP78Info(uint8_t *chr);
     void OLED_ShowCHinese(uint8_t x, uint8_t y, uint8_t no);
     void OLED_DrawBMP(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t* BMP);
     void OLED_Fill(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
     void OLED_ShowOK(uint8_t x, uint8_t y, uint8_t s);
+    void OLED_ShowCapslock(uint8_t x, uint8_t y, uint8_t s);
     int OLED_printf(uint8_t x, uint8_t y, char *pFormat, ...);
-    uint8_t OLED_Midx(uint8_t size);
+    uint8_t OLED_Midx(uint8_t length, uint8_t xstart, uint8_t xend);
     void HAL_OLED_Init(void);
 
     extern uint8_t OLED_printf_history[OLED_HIS_LEN][OLED_HIS_DLEN+1];

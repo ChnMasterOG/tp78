@@ -94,7 +94,7 @@ BOOL BLE_Ready = FALSE;
 uint8_t BLE_SelectHostIndex = 0;
 
 // BLE Device address
-uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE5, 0x78, 0x01, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
+uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE5, 0x78, 0x03, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
 
 // Enter Passkey flag
 BOOL EnterPasskey_flag = FALSE;
@@ -340,7 +340,7 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
     status = GAP_ConfigDeviceAddr( ADDRTYPE_STATIC, DeviceAddress );
     if ( status == SUCCESS ) {
 //      OLED_PRINT("[S]Current Device: %d", DeviceAddress[5]);
-      OLED_ShowNum(13, 2, DeviceAddress[5], 1);
+      OLED_ShowNum(44, 1, DeviceAddress[5], 1);
       BLE_SelectHostIndex = DeviceAddress[5] - 1;
       if ( hidEmuConnHandle != GAP_CONNHANDLE_INIT ) {
         GAPRole_TerminateLink( hidEmuConnHandle );  // disconnect
@@ -384,8 +384,7 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
 
   if ( events & START_ENTER_PASSKEY_EVT )
   {
-//    OLED_PRINT("Passkey = ?");
-    OLED_ShowString(0, 2, "  ?   ");
+    OLED_PRINT("Passkey=?");
     EnterPasskey_flag = TRUE;
 
     return ( events ^ START_ENTER_PASSKEY_EVT );
@@ -602,6 +601,7 @@ static uint8 hidEmuRptCB( uint8 id, uint8 type, uint16 uuid,
       if ( type == HID_REPORT_TYPE_OUTPUT )
       {
         status = hidEmuRcvReport( *pLen, pData );
+        if (status == SUCCESS) BLE_CapsLock_LEDOn = *pData & 0x02;
       }
     }
 
