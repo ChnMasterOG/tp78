@@ -17,7 +17,6 @@ static signed short RoughCalib_Value = 0;
 * Function Name  : BATTERY_Init
 * Description    : 电池ADC初始化
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void BATTERY_Init( void )
@@ -39,7 +38,6 @@ void BATTERY_Init( void )
 * Function Name  : BATTERY_DMA_ENABLE
 * Description    : 电池ADC DMA使能, 将转换结果通过DMA载入BAT_abcBuff中
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void BATTERY_DMA_ENABLE( void )
@@ -53,7 +51,6 @@ void BATTERY_DMA_ENABLE( void )
 * Function Name  : BATTERY_ADC_Convert
 * Description    : 电池ADC连续转换读取电压值
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void BATTERY_ADC_Convert( void )
@@ -70,7 +67,6 @@ void BATTERY_ADC_Convert( void )
 * Function Name  : BATTERY_ADC_Calculation
 * Description    : 计算电池ADC电压值, 保存在BAT_adcVal中
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void BATTERY_ADC_Calculation( void )
@@ -81,6 +77,7 @@ void BATTERY_ADC_Calculation( void )
     BAT_adcVal_tmp += BAT_abcBuff[i] + RoughCalib_Value;
   }
   BAT_adcVal_tmp /= ADC_MAXBUFLEN;
+  if ( BAT_adcHistory > 4 * BAT_FLOATING_VAL + BAT_adcVal_tmp ) return;  // 突然掉电
   BAT_adcHistory = BAT_adcVal;
   BAT_adcVal = BAT_adcVal_tmp;
 }
@@ -89,7 +86,6 @@ void BATTERY_ADC_Calculation( void )
 * Function Name  : BATTERY_ADC_GetLevel
 * Description    : 获取电池ADC等级(1:0%~25%, 2:25%~50%, 3:50%~75%, 4:75%~100%, 0和5代表超出范围)
 * Input          : ADC值
-* Output         : None
 * Return         : 0/1/2/3/4/5
 *******************************************************************************/
 static UINT8 BATTERY_ADC_GetLevel( UINT32 adc_val )
@@ -106,7 +102,6 @@ static UINT8 BATTERY_ADC_GetLevel( UINT32 adc_val )
 * Function Name  : BATTERY_DrawBMP
 * Description    : 绘制电池图案(仅电量等级改变才绘制)
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void BATTERY_DrawBMP( void )

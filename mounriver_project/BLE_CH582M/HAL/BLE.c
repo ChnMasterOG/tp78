@@ -94,7 +94,7 @@ BOOL BLE_Ready = FALSE;
 uint8_t BLE_SelectHostIndex = 0;
 
 // BLE Device address
-uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE5, 0x78, 0x03, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
+uint8_t DeviceAddress[6] = {0x84, 0xC2, 0xE5, 0x78, 0x73, 0x01}; // DeviceAddress[5] = 0x01 ~ 0x06
 
 // Enter Passkey flag
 BOOL EnterPasskey_flag = FALSE;
@@ -199,6 +199,30 @@ static hidDevCB_t hidEmuHidCBs =
 /*********************************************************************
  * PUBLIC FUNCTIONS
  */
+
+/*******************************************************************************
+* Function Name  : FLASH_Read_DeviceID
+* Description    : 从Flash读取设备ID
+* Input          : None
+* Return         : None
+*******************************************************************************/
+void FLASH_Read_DeviceID( void )
+{
+  uint8_t DeviceID;
+  EEPROM_READ( 2049, &DeviceID, 1 );
+  DeviceAddress[5] = DeviceID - 1 >= 6 ? 1 : DeviceID;
+}
+
+/*******************************************************************************
+* Function Name  : FLASH_Write_DeviceID
+* Description    : 将设备ID写入Flash
+* Input          : DeviceID
+* Return         : None
+*******************************************************************************/
+void FLASH_Write_DeviceID( uint8_t DeviceID )
+{
+  EEPROM_WRITE( 2049, &DeviceID, 1 );
+}
 
 /*********************************************************************
  * @fn      HidEmu_Init

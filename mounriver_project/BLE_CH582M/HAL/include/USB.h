@@ -22,6 +22,7 @@
     #define USB_TEST_EVENT        0x1000
 
     #define USB_ERR_LENGTH        0x01
+    #define USB_DAT_INVALID       0x02
     #define USB_ERR_UNKNOWN       0x10
 
     extern const UINT8 MyDevDescr[];

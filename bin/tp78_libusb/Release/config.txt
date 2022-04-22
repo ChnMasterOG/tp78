@@ -1,0 +1,31 @@
+TP78Configuration
+Row6	Col14
+LED_Style0	BLE_Device0
+KEY_ESCAPE	KEY_GraveAccent	KEY_TAB	KEY_CapsLock	KEY_LeftShift	KEY_LeftCTRL
+KEY_F1	KEY_1	KEY_Q	KEY_A	KEY_None	KEY_LeftGUI
+KEY_F2	KEY_2	KEY_W	KEY_S	KEY_Z	KEY_LeftAlt
+KEY_F3	KEY_3	KEY_E	KEY_D	KEY_X	KEY_MouseL
+KEY_F4	KEY_4	KEY_R	KEY_F	KEY_C	KEY_MouseM
+KEY_F5	KEY_5	KEY_T	KEY_G	KEY_V	KEY_MouseR
+KEY_F6	KEY_6	KEY_Y	KEY_H	KEY_B	KEY_SPACEBAR
+KEY_F7	KEY_7	KEY_U	KEY_J	KEY_N	KEY_None
+KEY_F8	KEY_8	KEY_I	KEY_K	KEY_M	KEY_None
+KEY_F9	KEY_9	KEY_O	KEY_L	KEY_Comma	KEY_None
+KEY_F10	KEY_0	KEY_P	KEY_Semicolon	KEY_FullStop	KEY_RightAlt
+KEY_F11	KEY_Subtraction	KEY_LSbrackets	KEY_Quotation	KEY_Slash	KEY_RightGUI
+KEY_F12	KEY_Equal	KEY_RSbrackets	KEY_None	KEY_None	KEY_Fn
+KEY_Delete	KEY_BACKSPACE	KEY_NonUS_WS	KEY_ENTER	KEY_RightShift	KEY_RightCTRL
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_BACKSPACE	KEY_LeftArrow	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_UpArrow	KEY_DownArrow	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_ENTER	KEY_RightArrow	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_PageUp	KEY_PageDown	KEY_Home	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_End	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_PrintScreen	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None
+KEY_None	KEY_None	KEY_None	KEY_None	KEY_None	KEY_None

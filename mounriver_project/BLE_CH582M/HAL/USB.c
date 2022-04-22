@@ -56,8 +56,8 @@ const UINT8 *pDescr;
 UINT8 HIDMouse[4] = { 0x0, 0x0, 0x0, 0x0 };
 UINT8 HIDKey[8] = { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
 
-extern uint8_t CustomKey[14][6];  // 其它键盘布局需修改此处
-extern uint8_t Extra_CustomKey[14][6];   // 其它键盘布局需修改此处
+extern uint8_t CustomKey[COL_SIZE][ROW_SIZE];         // 其它键盘布局需修改此处
+extern uint8_t Extra_CustomKey[COL_SIZE][ROW_SIZE];   // 其它键盘布局需修改此处
 
 /******** 用户自定义分配端点RAM ****************************************/
 __attribute__((aligned(4)))  UINT8 EP0_Databuf[64 + 64 + 64];   //ep0(64)+ep4_out(64)+ep4_in(64)
@@ -74,7 +74,6 @@ BOOL USB_Ready = FALSE;
 * Function Name  : USB_ProcessEvent
 * Description    : USB处理事件
 * Input          : task_id： 任务id, events: USB事件
-* Output         : None
 * Return         : tmosEvents
 *******************************************************************************/
 tmosEvents USB_ProcessEvent( tmosTaskID task_id, tmosEvents events )
@@ -117,7 +116,6 @@ tmosEvents USB_ProcessEvent( tmosTaskID task_id, tmosEvents events )
 * Function Name  : HAL_USBInit
 * Description    : USB初始化
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void HAL_USBInit( void )
@@ -135,7 +133,6 @@ void HAL_USBInit( void )
 * Function Name  : USB_DevTransProcess
 * Description    : USB中断传输处理
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void USB_DevTransProcess( void )
@@ -465,7 +462,6 @@ void USB_DevTransProcess( void )
 * Function Name  : DevEP1_OUT_Deal
 * Description    : 端点1数据处理(HID键盘-不使用)
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void DevEP1_OUT_Deal( UINT8 l )
@@ -483,7 +479,6 @@ void DevEP1_OUT_Deal( UINT8 l )
 * Function Name  : DevEP2_OUT_Deal
 * Description    : 端点2数据处理(HID鼠标-不使用)
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void DevEP2_OUT_Deal( UINT8 l )
@@ -501,10 +496,10 @@ void DevEP2_OUT_Deal( UINT8 l )
 * Function Name  : DevEP3_OUT_Deal
 * Description    : 端点3数据处理(与上位机通信)
 * Input          : None
-* Output         : None
 * Return         : None
 * Protocol       : address[0] 输入数据长度
 *                  address[1] 传输类型：E-错误 S-成功 C-改变按键层 X-改变额外按键层
+*                                      R-报告层信息 L-改变LED默认模式 D-改变默认蓝牙设备
 *                  address[2] 选中列数(address[1]为E或S则保留)
 *                  address[3] 数据1
 *                  address[4] 数据2
@@ -512,13 +507,17 @@ void DevEP2_OUT_Deal( UINT8 l )
 *******************************************************************************/
 void DevEP3_OUT_Deal( UINT8 l )
 {
-  UINT8 i;
+  UINT8 i, j;
   UINT8 length = 0;
 
   if (pEP3_OUT_DataBuf[0] != l) { // 接收长度错误
     pEP3_IN_DataBuf[0] = 4;
     pEP3_IN_DataBuf[1] = 'E';
     pEP3_IN_DataBuf[3] = USB_ERR_LENGTH;
+    { // 限时打印
+      OLED_PRINT("[USB ERR]");
+      tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+    }
     DevEP3_IN_Deal( 4 );
     return;
   }
@@ -535,6 +534,10 @@ void DevEP3_OUT_Deal( UINT8 l )
       FLASH_Write_KeyArray( );
       pEP3_IN_DataBuf[0] = 2;
       pEP3_IN_DataBuf[1] = 'S';
+      { // 限时打印
+        OLED_PRINT("[USB OK]");
+        tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+      }
       DevEP3_IN_Deal( 2 );    // 发送-成功
       break;
     case 'X':
@@ -544,12 +547,78 @@ void DevEP3_OUT_Deal( UINT8 l )
       FLASH_Write_KeyArray( );
       pEP3_IN_DataBuf[0] = 2;
       pEP3_IN_DataBuf[1] = 'S';
+      { // 限时打印
+        OLED_PRINT("[USB OK]");
+        tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+      }
       DevEP3_IN_Deal( 2 );    // 发送-成功
+      break;
+    case 'L':
+      if (pEP3_OUT_DataBuf[3] >= 0 && pEP3_OUT_DataBuf[3] <= 4) {
+        FLASH_Write_LEDStyle( pEP3_OUT_DataBuf[3] );
+        pEP3_IN_DataBuf[0] = 2;
+        pEP3_IN_DataBuf[1] = 'S';
+        { // 限时打印
+          OLED_PRINT("[USB OK]");
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+        }
+        DevEP3_IN_Deal( 2 );    // 发送-成功
+      } else {
+        pEP3_IN_DataBuf[0] = 4;
+        pEP3_IN_DataBuf[1] = 'E';
+        { // 限时打印
+          OLED_PRINT("[USB ERR]");
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+        }
+        pEP3_IN_DataBuf[3] = USB_DAT_INVALID; // 发送-数据不合法
+        DevEP3_IN_Deal( 4 );
+      }
+      break;
+    case 'D':
+      if (pEP3_OUT_DataBuf[3] >= 1 && pEP3_OUT_DataBuf[3] <= 6) {
+        FLASH_Write_DeviceID( pEP3_OUT_DataBuf[3] );
+        pEP3_IN_DataBuf[0] = 2;
+        pEP3_IN_DataBuf[1] = 'S';
+        { // 限时打印
+          OLED_PRINT("[USB OK]");
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+        }
+        DevEP3_IN_Deal( 2 );    // 发送-成功
+      } else {
+        pEP3_IN_DataBuf[0] = 4;
+        pEP3_IN_DataBuf[1] = 'E';
+        { // 限时打印
+          OLED_PRINT("[USB ERR]");
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+        }
+        pEP3_IN_DataBuf[3] = USB_DAT_INVALID; // 发送-数据不合法
+        DevEP3_IN_Deal( 4 );
+      }
+      break;
+    case 'R':
+      pEP3_IN_DataBuf[0] = 3 + ROW_SIZE * 2;
+      pEP3_IN_DataBuf[1] = 'R';
+      pEP3_IN_DataBuf[2] = pEP3_OUT_DataBuf[2];
+      for (j = 0; j < ROW_SIZE; j++) {
+        pEP3_IN_DataBuf[3 + j] = CustomKey[pEP3_OUT_DataBuf[2]][j];
+      }
+      for (j = 0; j < ROW_SIZE; j++) {
+        pEP3_IN_DataBuf[3 + ROW_SIZE + j] = Extra_CustomKey[pEP3_OUT_DataBuf[2]][j];
+      }
+      DevEP3_IN_Deal( pEP3_IN_DataBuf[0] );
+      if (pEP3_OUT_DataBuf[2] == COL_SIZE - 1) { // 限时打印
+        OLED_PRINT("[USB RPO]");
+        tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+      }
       break;
     default:
       pEP3_IN_DataBuf[0] = 4;
       pEP3_IN_DataBuf[1] = 'E';
       pEP3_IN_DataBuf[3] = USB_ERR_UNKNOWN;
+      { // 限时打印
+        OLED_PRINT("[USB ERR]");
+        tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+      }
       DevEP3_IN_Deal( 4 );
   }
 }
@@ -558,7 +627,6 @@ void DevEP3_OUT_Deal( UINT8 l )
 * Function Name  : DevEP4_OUT_Deal
 * Description    : 端点4数据处理(保留)
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void DevEP4_OUT_Deal( UINT8 l )

@@ -1,0 +1,13 @@
+﻿main.obj : error LNK2001: 无法解析的外部符号 usb_get_string_simple
+main.obj : error LNK2001: 无法解析的外部符号 usb_bulk_write
+main.obj : error LNK2001: 无法解析的外部符号 usb_bulk_read
+main.obj : error LNK2001: 无法解析的外部符号 usb_set_debug
+main.obj : error LNK2001: 无法解析的外部符号 usb_find_busses
+main.obj : error LNK2001: 无法解析的外部符号 usb_open
+main.obj : error LNK2001: 无法解析的外部符号 usb_release_interface
+main.obj : error LNK2001: 无法解析的外部符号 usb_get_busses
+main.obj : error LNK2001: 无法解析的外部符号 usb_find_devices
+main.obj : error LNK2001: 无法解析的外部符号 usb_init
+main.obj : error LNK2001: 无法解析的外部符号 usb_close
+main.obj : error LNK2001: 无法解析的外部符号 usb_claim_interface
+Y:\tp78-main\bin\tp78_libusb\x64\Release\libusb.exe : fatal error LNK1120: 12 个无法解析的外部命令

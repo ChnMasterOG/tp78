@@ -27,7 +27,6 @@ u32V RTCTigFlag;
  * Function Name  : RTC_SetTignTime
  * Description    : ≈‰÷√RTC¥•∑¢ ±º‰
  * Input          : 
- * Output         : None
  * Return         : None
  *******************************************************************************/
 void RTC_SetTignTime( u32 time )

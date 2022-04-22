@@ -18,6 +18,9 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\Hal\keyboard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\msvc\libusb.lib">
@@ -26,6 +29,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lusb0_usb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hal\keyboard.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

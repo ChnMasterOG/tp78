@@ -24,7 +24,6 @@ Mousestate* const PS2dat = (Mousestate*)HIDMouse;
 * Description    : PS/2协议等待CLK状态变化
 * Input          : wait_high - TRUE:等待CLK从低变高
 *                              FALSE:等待CLK从高变低
-* Output         : None
 * Return         : 成功返回0, 失败返回1
 *******************************************************************************/
 uint8_t PS2_WaitCLKState( BOOL wait_high )
@@ -50,7 +49,6 @@ uint8_t PS2_WaitCLKState( BOOL wait_high )
 * Function Name  : PS2_ReadByte
 * Description    : PS/2协议读一字节
 * Input          : dat - 将读取到的内容放到dat指针指向的空间中
-* Output         : None
 * Return         : 成功返回0, 失败返回1
 *******************************************************************************/
 uint8_t PS2_ReadByte(uint8_t* dat)
@@ -88,7 +86,6 @@ uint8_t PS2_ReadByte(uint8_t* dat)
 * Function Name  : PS2_WriteByte
 * Description    : PS/2协议写一字节
 * Input          : dat - 要写入的值
-* Output         : None
 * Return         : 成功返回0, 失败返回1
 *******************************************************************************/
 uint8_t PS2_WriteByte(uint8_t dat)
@@ -142,7 +139,6 @@ uint8_t PS2_WriteByte(uint8_t dat)
 * Function Name  : PS2_ReadMouseData
 * Description    : PS/2协议接收一次鼠标数据
 * Input          : dat - 将接收到的内容放到dat指针指向的空间中(dat指向的空间应当占4byte)
-* Output         : None
 * Return         : 成功返回0, 失败返回1
 *******************************************************************************/
 uint8_t PS2_ReadMouseData(Mousestate* dat)
@@ -158,7 +154,6 @@ uint8_t PS2_ReadMouseData(Mousestate* dat)
 * Function Name  : PS2_Config
 * Description    : 配置PS/2鼠标
 * Input          : reg - 配置值, res - 需要等待res的响应才算成功
-* Output         : None
 * Return         : 成功返回0, 失败返回1
 *******************************************************************************/
 uint8_t PS2_Config(uint8_t reg, uint8_t res)
@@ -175,7 +170,6 @@ uint8_t PS2_Config(uint8_t reg, uint8_t res)
 * Function Name  : PS2_En_Data_Report
 * Description    : 使能PS/2数据传输
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void PS2_En_Data_Report(void)
@@ -188,7 +182,6 @@ void PS2_En_Data_Report(void)
 * Function Name  : PS2_Dis_Data_Report
 * Description    : 禁止PS/2数据传输
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void PS2_Dis_Data_Report(void)
@@ -202,7 +195,6 @@ void PS2_Dis_Data_Report(void)
 * Function Name  : PS2_IT_handler
 * Description    : PS/2中断处理函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void PS2_IT_handler(void)
@@ -242,7 +234,6 @@ void PS2_IT_handler(void)
 * Function Name  : PS2_Init
 * Description    : 初始化PS/2鼠标
 * Input          : None
-* Output         : None
 * Return         : 成功返回0，失败返回1
 *******************************************************************************/
 uint8_t PS2_Init(char* buf, BOOL is_IT)

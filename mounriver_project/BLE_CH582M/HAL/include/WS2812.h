@@ -41,6 +41,8 @@
   extern UINT8 LED_BYTE_Buffer[LED_Number][3];
   extern WS2812_Style_Func led_style_func;
 
+  uint8_t FLASH_Read_LEDStyle( void );
+  void FLASH_Write_LEDStyle( uint8_t LED_Style_Number );
   void WS2812_PWM_Init( void );
   void WS2812_Style_Off( void );
   void WS2812_Style_Breath( void );

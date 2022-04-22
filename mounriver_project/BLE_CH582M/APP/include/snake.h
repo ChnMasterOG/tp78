@@ -10,8 +10,6 @@
   #define SNAKE_H
 
   #define MAX_SNAKE_LENGTH              30    // 最长蛇长
-  #define KEYBOARD_SNAKE_ROWCNT         6     // 键盘行数 - 其它键盘布局需修改此处
-  #define KEYBOARD_SNAKE_COLUMCNT       14    // 键盘列数 - 其它键盘布局需修改此处
 
   typedef enum {
     DirUp = 1,

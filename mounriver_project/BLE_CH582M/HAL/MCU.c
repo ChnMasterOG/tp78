@@ -439,16 +439,20 @@ void HAL_Init()
   tmos_start_task( halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME( BLE_CALIBRATION_PERIOD ) );    // 添加校准任务，单次校准耗时小于10ms
 #endif
   PRINT("%s\n", debug_info);
-  // 初始化OLED UI
+  /******* 初始化OLED UI *******/
   OLED_ShowString(2, 1, "L1");
-  OLED_ShowString(20, 1, "S0");
+  OLED_ShowChar(20, 1, 'S');
+  OLED_ShowNum(26, 1, FLASH_Read_LEDStyle( ), 1);
   OLED_ShowChar(38, 1, 'D');
+  FLASH_Read_DeviceID();
   OLED_ShowNum(44, 1, DeviceAddress[5], 1);
   OLED_ShowCapslock(56, 1, FALSE);
   OLED_DrawBMP(91, 0, 91 + 32, 3, (uint8_t*)EmptyBattery);  // 绘制空电池
   debug_info[7] = '\0';
+  { // 限时打印
   OLED_PRINT("%s", debug_info);
   tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+  }
 //  tmos_start_task( halTaskID, HAL_TEST_EVENT, 1600 );    // 添加测试任务
 }
 

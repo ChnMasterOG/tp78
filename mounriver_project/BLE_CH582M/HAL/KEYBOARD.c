@@ -11,11 +11,11 @@
 /* 彩蛋 */
 #include "snake.h"
 
-const uint32_t Row_Pin[] = {GPIO_Pin_7, GPIO_Pin_6, GPIO_Pin_5, GPIO_Pin_4, GPIO_Pin_3, GPIO_Pin_2};   //row 6 - 其它键盘布局需修改此处
-const uint32_t Colum_Pin[] = {GPIO_Pin_9, GPIO_Pin_7, GPIO_Pin_11, GPIO_Pin_12, GPIO_Pin_13, GPIO_Pin_4, GPIO_Pin_5,
-                              GPIO_Pin_6, GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3, GPIO_Pin_15, GPIO_Pin_14};   //colum 14 - 其它键盘布局需修改此处
+const uint32_t Row_Pin[ROW_SIZE] = {GPIO_Pin_7, GPIO_Pin_6, GPIO_Pin_5, GPIO_Pin_4, GPIO_Pin_3, GPIO_Pin_2};   //row 6 - 其它键盘布局需修改此处
+const uint32_t Colum_Pin[COL_SIZE] = {GPIO_Pin_9, GPIO_Pin_7, GPIO_Pin_11, GPIO_Pin_12, GPIO_Pin_13, GPIO_Pin_4, GPIO_Pin_5,
+                                      GPIO_Pin_6, GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3, GPIO_Pin_15, GPIO_Pin_14};   //colum 14 - 其它键盘布局需修改此处
 //row*colum = 6*14 = 84
-const uint8_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
+const uint8_t KeyArrary[COL_SIZE][ROW_SIZE] = {
         { KEY_ESCAPE,   KEY_GraveAccent,    KEY_TAB,        KEY_CapsLock,   KEY_LeftShift,  KEY_LeftCTRL }, //1
         { KEY_F1,       KEY_1,              KEY_Q,          KEY_A,          KEY_None,       KEY_LeftGUI  }, //2
         { KEY_F2,       KEY_2,              KEY_W,          KEY_S,          KEY_Z,          KEY_LeftAlt  }, //3
@@ -31,23 +31,23 @@ const uint8_t KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/size
         { KEY_F12,      KEY_Equal,          KEY_RSbrackets, KEY_None,       KEY_None,       KEY_Fn       }, //13
         { KEY_Delete,   KEY_BACKSPACE,      KEY_NonUS_WS,   KEY_ENTER,      KEY_RightShift, KEY_RightCTRL}, //14
 };  // 默认键盘布局 - 其它键盘布局需修改此处
-const uint8_t Extra_KeyArrary[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
+const uint8_t Extra_KeyArrary[COL_SIZE][ROW_SIZE] = {
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //1
         { KEY_None,     KEY_None,           KEY_BACKSPACE,  KEY_LeftArrow,  KEY_None,       KEY_None }, //2
         { KEY_None,     KEY_None,           KEY_UpArrow,    KEY_DownArrow,  KEY_None,       KEY_None }, //3
-        { KEY_None,     KEY_None,           KEY_Delete,     KEY_RightArrow, KEY_None,       KEY_None }, //4
+        { KEY_None,     KEY_None,           KEY_ENTER,      KEY_RightArrow, KEY_None,       KEY_None }, //4
         { KEY_None,     KEY_None,           KEY_PageUp,     KEY_PageDown,   KEY_Home,       KEY_None }, //5
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_End,        KEY_None }, //6
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //7
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //8
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //9
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //10
-        { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //11
+        { KEY_None,     KEY_None,           KEY_PrintScreen,KEY_None,       KEY_None,       KEY_None }, //11
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //12
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //13
         { KEY_None,     KEY_None,           KEY_None,       KEY_None,       KEY_None,       KEY_None }, //14
 };  // 额外默认键盘布局 - 其它键盘布局需修改此处
-const uint8_t Key_To_LEDNumber[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = {
+const uint8_t Key_To_LEDNumber[COL_SIZE][ROW_SIZE] = {
         { 61,   47,   33,   20,   8,    0   }, //1
         { 62,   48,   34,   21,   0xFF, 1   }, //2
         { 63,   49,   35,   22,   9,    2   }, //3
@@ -63,10 +63,10 @@ const uint8_t Key_To_LEDNumber[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pi
         { 73,   59,   45,   0xFF, 0xFF, 6   }, //13
         { 74,   60,   46,   32,   19,   7   }, //14
 };  // 矩阵键盘位置转LED编号
-uint8_t CustomKey[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)];  //自定义按键层
-uint8_t Extra_CustomKey[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)];   //自定义额外按键层
-uint8_t KeyMatrix[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = { 0 };  //按键矩阵-标记按下和未按下
-uint8_t Extra_KeyMatrix[sizeof(Colum_Pin)/sizeof(uint32_t)][sizeof(Row_Pin)/sizeof(uint32_t)] = { 0 };  //额外层按键矩阵-标记按下和未按下
+uint8_t CustomKey[COL_SIZE][ROW_SIZE];  //自定义按键层
+uint8_t Extra_CustomKey[COL_SIZE][ROW_SIZE];   //自定义额外按键层
+uint8_t KeyMatrix[COL_SIZE][ROW_SIZE] = { 0 };  //按键矩阵-标记按下和未按下
+uint8_t Extra_KeyMatrix[COL_SIZE][ROW_SIZE] = { 0 };  //额外层按键矩阵-标记按下和未按下
 uint32_t Row_Pin_ALL = 0, Colum_Pin_ALL = 0;
 
 uint8_t KEYBOARD_data_index = 2,
@@ -76,61 +76,62 @@ uint8_t KEYBOARD_data_index = 2,
         Fn_state = 0;
 Keyboardstate* const Keyboarddat = (Keyboardstate*)HIDKey;
 BOOL PaintedEggMode = FALSE;
-static uint8_t (*KeyArr_Ptr)[sizeof(Row_Pin)/sizeof(uint32_t)] = CustomKey;
+static uint8_t (*KeyArr_Ptr)[ROW_SIZE] = CustomKey;
 static uint16_t KeyArr_ChangeTimes = 0;
 
 /*******************************************************************************
 * Function Name  : FLASH_Read_KeyArray
 * Description    : 从Flash读取按键矩阵
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void FLASH_Read_KeyArray( void )
 {
-  EEPROM_READ( 0, CustomKey, sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t) );
-  EEPROM_READ( 1024, Extra_CustomKey, sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t) );
+  EEPROM_READ( 0, CustomKey, COL_SIZE*ROW_SIZE );
+  EEPROM_READ( 1024, Extra_CustomKey, COL_SIZE*ROW_SIZE );
 }
 
 /*******************************************************************************
 * Function Name  : FLASH_Write_KeyArray
 * Description    : 将按键矩阵写入Flash
 * Input          : None
-* Output         : None
 * Return         : 如果成功返回0
 *******************************************************************************/
 UINT8 FLASH_Write_KeyArray( void )
 {
   UINT8 s;
-  s = EEPROM_WRITE( 0, CustomKey, sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t) );
-  s |= EEPROM_WRITE( 1024, Extra_CustomKey, sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t) );
+  s = EEPROM_WRITE( 0, CustomKey, COL_SIZE*ROW_SIZE );
+  s |= EEPROM_WRITE( 1024, Extra_CustomKey, COL_SIZE*ROW_SIZE );
   return s;
 }
 
 /*******************************************************************************
-* Function Name  : KEYBOARD_ResetKey
-* Description    : 重置按键矩阵为默认布局
+* Function Name  : KEYBOARD_Reset
+* Description    : 重置FLASH
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
-void KEYBOARD_ResetKey( void )
+void KEYBOARD_Reset( void )
 {
-  memcpy(CustomKey, KeyArrary, sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t));
-  memcpy(Extra_CustomKey, Extra_KeyArrary, sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t));
+  uint8_t temp;
+  memcpy(CustomKey, KeyArrary, COL_SIZE*ROW_SIZE);
+  memcpy(Extra_CustomKey, Extra_KeyArrary, COL_SIZE*ROW_SIZE);
   FLASH_Write_KeyArray( );
+  temp = 0;
+  EEPROM_WRITE( 2048, &temp, 1 );   // default LED Style
+  temp = 1;
+  EEPROM_WRITE( 2049, &temp, 1 );   // default BLE Device
 }
 
 /*******************************************************************************
 * Function Name  : KEYBOARD_ChangeKey
 * Description    : 键盘交换2个按键
 * Input          : dst_key - 目标键, src_key - 原始键
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void KEYBOARD_ChangeKey( uint8_t dst_key, uint8_t src_key )
 {
-  uint8_t i = sizeof(Colum_Pin)/sizeof(uint32_t)*sizeof(Row_Pin)/sizeof(uint32_t);
+  uint8_t i = COL_SIZE*ROW_SIZE;
   uint8_t* memaddr = &CustomKey[0][0];
   while (i) {
     --i;
@@ -145,7 +146,6 @@ void KEYBOARD_ChangeKey( uint8_t dst_key, uint8_t src_key )
 * Function Name  : KEYBOARD_Custom_Function
 * Description    : 键盘定制化功能(检测Fn键触发的相关功能)
 * Input          : None
-* Output         : None
 * Return         : 如果不需要发送按键信息则返回0
 *******************************************************************************/
 UINT8 KEYBOARD_Custom_Function( void )
@@ -219,7 +219,7 @@ UINT8 KEYBOARD_Custom_Function( void )
         if ( Fn_cnt == 0x50 ) {
           Fn_cnt = 0;
           Fn_Mode = Fn_Mode_None;
-          KEYBOARD_ResetKey( );
+          KEYBOARD_Reset( );
           OLED_PRINT("Reset OK!");
           tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         }
@@ -306,7 +306,6 @@ UINT8 KEYBOARD_Custom_Function( void )
 * Function Name  : KEYBOARD_Init
 * Description    : 键盘初始化函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void KEYBOARD_Init( void )
@@ -314,14 +313,14 @@ void KEYBOARD_Init( void )
     uint8_t i;
     FLASH_Read_KeyArray( );   // Flash载入按键
     CustomKey[12][5] = KEY_Fn;   // 保证上电Fn键在对应位置 - 其它键盘布局需修改此处
-    for (i = 0; i < sizeof(Row_Pin)/sizeof(uint32_t); i++) {
+    for (i = 0; i < ROW_SIZE; i++) {
         Row_Pin_ALL |= Row_Pin[i];
     }
     Row_GPIO_(SetBits)( Row_Pin_ALL );
     Row_GPIO_(ModeCfg)( Row_Pin_ALL, GPIO_ModeOut_PP_20mA );
     Row_GPIO_(SetBits)( Row_Pin_ALL & (~Row_Pin[0]) );
 
-    for (i = 0; i < sizeof(Colum_Pin)/sizeof(uint32_t); i++) {
+    for (i = 0; i < COL_SIZE; i++) {
         Colum_Pin_ALL |= Colum_Pin[i];
     }
     Colum_GPIO_(SetBits)( Colum_Pin_ALL );
@@ -332,13 +331,13 @@ void KEYBOARD_Init( void )
 * Function Name  : KEYBOARD_Detection
 * Description    : 键盘检测按键信息函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void KEYBOARD_Detection( void )
 {
     static uint8_t current_row = 0;
     static BOOL press_Capslock = FALSE;
+    static BOOL press_NormalKey = FALSE;
     uint8_t current_colum, key_idx;
     if (KeyArr_ChangeTimes > 0 && KeyArr_ChangeTimes <= MAX_CHANGETIMES) {  // 进入CapsLock键盘布局改变计数等待
         if (KeyArr_ChangeTimes == MAX_CHANGETIMES) { // 计数值到达MAX_CHANGETIMES改变键盘布局
@@ -358,7 +357,7 @@ void KEYBOARD_Detection( void )
         KEYBOARD_data_ready = 1;  // 产生事件
         return;
     }
-    for (current_colum = 0; current_colum < sizeof(Colum_Pin)/sizeof(uint32_t); current_colum++) {    // 查询哪一列改变
+    for (current_colum = 0; current_colum < COL_SIZE; current_colum++) {    // 查询哪一列改变
         if (KeyMatrix[current_colum][current_row] == 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) == 0) {  // 按下
             if (KEYBOARD_data_index >= 8 && KeyArr_Ptr[current_colum][current_row] < KEY_LeftCTRL) continue;    // 超过6个普通按键上限
             KeyMatrix[current_colum][current_row] = 1;  // 矩阵状态变成按下
@@ -380,6 +379,7 @@ void KEYBOARD_Detection( void )
                     KeyArr_ChangeTimes = 1; // 键盘布局转换-开始计数
                 } else {
                     Keyboarddat->data[KEYBOARD_data_index++] = KeyArr_Ptr[current_colum][current_row];
+                    press_NormalKey = KeyArr_ChangeTimes > MAX_CHANGETIMES;
                 }
             }
         } else if (KeyMatrix[current_colum][current_row] != 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) != 0) {   // 弹起
@@ -397,16 +397,17 @@ void KEYBOARD_Detection( void )
                     if (KeyArr_ChangeTimes > MAX_CHANGETIMES) {
                         KeyArr_Ptr = CustomKey;
                         OLED_ShowString(2, 1, "L1");
-                    } else {
+                    }
+                    if (press_NormalKey == FALSE || KeyArr_ChangeTimes <= MAX_CHANGETIMES) {
                         if (KEYBOARD_data_index < 8) {
                             press_Capslock = TRUE;
                             Keyboarddat->data[KEYBOARD_data_index++] = KEY_CapsLock;
                         }
                     }
                     KeyArr_ChangeTimes = 0;
+                    press_NormalKey = FALSE;
                 } else {
                     for (key_idx = 2; key_idx < 8; key_idx++) {
-//                        if (Keyboarddat->data[key_idx] == KeyArr_Ptr[current_colum][current_row]) {
                         if (Keyboarddat->data[key_idx] == CustomKey[current_colum][current_row] ||
                             Keyboarddat->data[key_idx] == Extra_CustomKey[current_colum][current_row]) {  // 弹起按键2层都清除
                             memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
@@ -419,7 +420,7 @@ void KEYBOARD_Detection( void )
         }
     }
     Row_GPIO_(SetBits)( Row_Pin[current_row++] );
-    if (current_row >= sizeof(Row_Pin)/sizeof(uint32_t)) {
+    if (current_row >= ROW_SIZE) {
         current_row = 0;
     }
     Row_GPIO_(ResetBits)( Row_Pin[current_row] );
@@ -429,7 +430,6 @@ void KEYBOARD_Detection( void )
 * Function Name  : KEYBOARD_EnterPasskey
 * Description    : 键盘输入配对码
 * Input          : 指向配对码值的指针
-* Output         : None
 * Return         : 返回0表示输入完成
 *******************************************************************************/
 uint8_t KEYBOARD_EnterPasskey( uint32_t* key )

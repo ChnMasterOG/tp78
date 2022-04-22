@@ -21,7 +21,7 @@ static SnakePos PosDirToPos(SnakePos target, SnakeDir target_dir);
 static BOOL CheckOverlap( SnakePos target );
 static void ShowSnake( void );
 
-const uint8_t SnakeMatrix[KEYBOARD_SNAKE_COLUMCNT][KEYBOARD_SNAKE_ROWCNT] = {
+const uint8_t SnakeMatrix[COL_SIZE][ROW_SIZE] = {
   { 61,   47,   33,   20,   8,    0   }, //1
   { 62,   48,   34,   21,   9,    1   }, //2
   { 63,   49,   35,   22,   9,    2   }, //3
@@ -125,22 +125,22 @@ static SnakePos PosDirToPos(SnakePos target, SnakeDir target_dir)
 {
   switch (target_dir) {
     case DirUp:
-      if ( target.PosY == 0 ) target.PosY = KEYBOARD_SNAKE_ROWCNT-1;  // 返回最后一行
+      if ( target.PosY == 0 ) target.PosY = ROW_SIZE-1;  // 返回最后一行
       else --target.PosY;
       break;
     case DirDown:
-      if ( target.PosY == KEYBOARD_SNAKE_ROWCNT-1 ) target.PosY = 0;  // 返回第一行
+      if ( target.PosY == ROW_SIZE-1 ) target.PosY = 0;  // 返回第一行
       else ++target.PosY;
       break;
     case DirLeft:
-      if ( target.PosX == 0 ) target.PosX = KEYBOARD_SNAKE_COLUMCNT-1;  // 返回最后一列
+      if ( target.PosX == 0 ) target.PosX = COL_SIZE-1;  // 返回最后一列
       else {
         while ( SnakeMatrix[target.PosX-1][target.PosY] == SnakeMatrix[target.PosX][target.PosY] ) --target.PosX;
         --target.PosX;  // 第一列和第二列的LED一定不一样 故此设计
       }
       break;
     case DirRight:
-      if ( target.PosX == KEYBOARD_SNAKE_COLUMCNT-1 ) target.PosX = 0;  // 返回第一列
+      if ( target.PosX == COL_SIZE-1 ) target.PosX = 0;  // 返回第一列
       else {
         while ( SnakeMatrix[target.PosX+1][target.PosY] == SnakeMatrix[target.PosX][target.PosY] ) ++target.PosX;
         ++target.PosX;  // 最后一列和倒数第二列的LED一定不一样 故此设计
@@ -160,8 +160,8 @@ static SnakePos PosDirToPos(SnakePos target, SnakeDir target_dir)
 static void ProduceFood( void )
 {
 	do {
-	  FoodPos.PosX = (int)(rand() % KEYBOARD_SNAKE_COLUMCNT);
-	  FoodPos.PosY = (int)(rand() % KEYBOARD_SNAKE_ROWCNT);
+	  FoodPos.PosX = (int)(rand() % COL_SIZE);
+	  FoodPos.PosY = (int)(rand() % ROW_SIZE);
 	}	while( CheckOverlap( FoodPos ) || ComparePos(FoodPos, BodyPos[0]) );
 }
 

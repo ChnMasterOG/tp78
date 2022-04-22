@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : WS2812.c
  * Author             : ChnMasterOG
- * Version            : V1.1
- * Date               : 2021/1/16
+ * Version            : V1.2
+ * Date               : 2022/4/13
  * Description        : WS2812驱动源代码
  *******************************************************************************/
 
@@ -15,10 +15,56 @@ static uint8_t style_dir = 0;
 static uint32_t style_cnt = 0;
 
 /*******************************************************************************
+* Function Name  : FLASH_Read_LEDStyle
+* Description    : 从Flash读取LED样式
+* Input          : None
+* Return         : LED_Style_Number
+*******************************************************************************/
+uint8_t FLASH_Read_LEDStyle( void )
+{
+  uint8_t LED_Style_Number;
+  EEPROM_READ( 2048, &LED_Style_Number, 1 );
+  LED_Change_flag = 1;
+  switch (LED_Style_Number)
+  {
+    case 0:
+      led_style_func = WS2812_Style_Off;
+      break;
+    case 1:
+      led_style_func = WS2812_Style_Breath;
+      break;
+    case 2:
+      led_style_func = WS2812_Style_Waterful;
+      break;
+    case 3:
+      led_style_func = WS2812_Style_Touch;
+      break;
+    case 4:
+      led_style_func = WS2812_Style_Rainbow;
+      break;
+    default:
+      led_style_func = WS2812_Style_Off;
+      LED_Style_Number = 0;
+      break;
+  }
+  return LED_Style_Number;
+}
+
+/*******************************************************************************
+* Function Name  : FLASH_Write_LEDStyle
+* Description    : 将LED样式写入Flash
+* Input          : LED_Style_Number
+* Return         : None
+*******************************************************************************/
+void FLASH_Write_LEDStyle( uint8_t LED_Style_Number )
+{
+  EEPROM_WRITE( 2048, &LED_Style_Number, 1 );
+}
+
+/*******************************************************************************
 * Function Name  : WS2812_PWM_Init
 * Description    : 初始化PWM
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_PWM_Init( void )
@@ -47,7 +93,6 @@ void WS2812_PWM_Init( void )
 * Function Name  : WS2812_Style_Off
 * Description    : 关闭WS2812
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Style_Off( void )
@@ -60,7 +105,6 @@ void WS2812_Style_Off( void )
 * Function Name  : WS2812_Style_Breath
 * Description    : PWM驱动WS2812呼吸灯变化函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Style_Breath( void )
@@ -105,7 +149,6 @@ void WS2812_Style_Breath( void )
 * Function Name  : WS2812_Style_Waterful
 * Description    : PWM驱动WS2812流水灯变化函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Style_Waterful( void )
@@ -145,7 +188,6 @@ void WS2812_Style_Waterful( void )
 * Function Name  : WS2812_Style_Touch
 * Description    : PWM驱动WS2812触控呼吸灯变化函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Style_Touch( void )
@@ -180,7 +222,6 @@ void WS2812_Style_Touch( void )
 * Function Name  : WS2812_Style_Rainbow
 * Description    : PWM驱动WS2812彩虹灯变化函数
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Style_Rainbow( void )
@@ -244,7 +285,6 @@ void WS2812_Style_Rainbow( void )
 * Function Name  : WS2812_Style_Custom
 * Description    : PWM驱动WS2812自定义变化函数(先将RGB图案写入LED_BYTE_Buffer)
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Style_Custom( void )
@@ -275,7 +315,6 @@ void WS2812_Style_Custom( void )
 * Function Name  : WS2812发送RGB数据
 * Description    : DMA+PWM驱动WS2812
 * Input          : None
-* Output         : None
 * Return         : None
 *******************************************************************************/
 void WS2812_Send( void )
