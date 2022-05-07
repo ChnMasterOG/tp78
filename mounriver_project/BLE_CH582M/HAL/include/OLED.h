@@ -53,6 +53,7 @@
     void OLED_TP78Info(uint8_t *chr);
     void OLED_ShowCHinese(uint8_t x, uint8_t y, uint8_t no);
     void OLED_DrawBMP(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t* BMP);
+    void OLED_Clr(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
     void OLED_Fill(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
     void OLED_ShowOK(uint8_t x, uint8_t y, uint8_t s);
     void OLED_ShowCapslock(uint8_t x, uint8_t y, uint8_t s);

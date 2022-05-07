@@ -18,6 +18,7 @@
 tmosTaskID halTaskID=INVALID_TASK_ID;
 BOOL USB_CapsLock_LEDOn = FALSE, BLE_CapsLock_LEDOn = FALSE;
 BOOL priority_USB = TRUE;   // USB和蓝牙同时连接选择
+BOOL enable_BLE = TRUE;   // 使能或失能蓝牙
 
 static BOOL CapsLock_LEDOn_state = FALSE; // Caps Lock LED ON/OFF
 static BOOL connection_state[2] = { FALSE, FALSE };  // USB/BLE state
@@ -228,6 +229,12 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
       BATTERY_DrawBMP( );
     }
     BATTERY_DMA_ENABLE( );
+    // 判断充电信号
+    if ( BAT_chrg != BAT_IS_CHARGING ) {
+      BAT_chrg = BAT_IS_CHARGING;
+      if ( BAT_chrg ) OLED_DrawBMP(72, 0, 81, 4, (uint8_t*)ChargeBattery);
+      else OLED_Clr(72, 0, 81, 4);
+    }
     tmos_start_task( halTaskID, BATTERY_EVENT, MS1_TO_SYSTEM_TIME(5000) );  // 5s更新采样值
   }
 
@@ -319,7 +326,15 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
         connection_state[1] = BLE_Ready;
 //        HalLedSet(HAL_LED_1, BLE_Ready);
         if ( BLE_Ready ) OLED_ShowString(38, 0, "BLE");
-        else OLED_ShowString(38, 0, "   ");
+        else {
+          OLED_ShowString(38, 0, "   ");
+          if ( EnterPasskey_flag == TRUE ) {  // 打断输入配对状态
+            EnterPasskey_flag = FALSE;
+            BLE_Passkey = 0;
+            OLED_PRINT("Close!");
+            tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+          }
+        }
         if ( USB_Ready ^ BLE_Ready ) priority_USB = USB_Ready;
         // 同时出现USB和蓝牙时进行显示
         if ( USB_Ready && BLE_Ready ) OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);

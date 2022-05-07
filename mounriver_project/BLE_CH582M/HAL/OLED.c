@@ -338,6 +338,28 @@ void OLED_Fill(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
 }
 
 /**
+  * @brief  清空区域
+  * @param  uint8_t x0, uint8_t y0, uint8_tx1, uint8_t y1
+  *         x0为起始列坐标；y0为其实页坐标；x1为终止列坐标；y1位终止页坐标
+  * @retval 无
+  */
+void OLED_Clr(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
+{
+ //BMP大小((x1-x0+1)*(y1-y0+1))
+ unsigned int j=0;
+ unsigned char x,y;
+
+ for(y=y0;y<y1;y++)
+ {
+    OLED_Set_Pos(x0,y);
+    for(x=x0;x<x1;x++)
+    {
+        OLED_WR_Byte(0x00, OLED_DATA);       //逐点显示，先行后列
+    }
+ }
+}
+
+/**
   * @brief  OLED计算字符串/数字居中位置x坐标
   * @param  文字长度，显示区域起点/终点
   * @retval x坐标

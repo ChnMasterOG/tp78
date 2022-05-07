@@ -170,6 +170,9 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_Delete && Fn_Mode != Fn_Mode_PaintedEgg ) { // 彩蛋模式
       Fn_Mode = Fn_Mode_PaintedEgg;
       Fn_cnt = 0;
+    } else if ( Keyboarddat->Key1 == KEY_Equal && Fn_Mode != Fn_Mode_DisEnableBLE ) { // 使能/失能蓝牙
+      Fn_Mode = Fn_Mode_DisEnableBLE;
+      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_0 && Fn_Mode != Fn_Mode_PriorityUSBorBLE ) { // 设置优先蓝牙或USB
       Fn_Mode = Fn_Mode_PriorityUSBorBLE;
       Fn_cnt = 0;
@@ -242,6 +245,18 @@ UINT8 KEYBOARD_Custom_Function( void )
           Snake_Init();
         }
         PaintedEggMode = !PaintedEggMode;
+        break;
+      case Fn_Mode_DisEnableBLE:
+        Fn_Mode = Fn_Mode_None; // Fn+等号关闭/开启蓝牙
+        extern BOOL enable_BLE;
+        if ( !BLE_Ready ) {
+          enable_BLE = !enable_BLE;
+          bStatus_t status = GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &enable_BLE );
+          if ( status != SUCCESS ) OLED_PRINT("ERR %d", status);
+          else if ( enable_BLE ) OLED_PRINT("BLE ENA");
+          else OLED_PRINT("BLE DIS");
+          tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
+        }
         break;
       case Fn_Mode_PriorityUSBorBLE:  // Fn+0优先蓝牙或USB切换
         Fn_Mode = Fn_Mode_None;

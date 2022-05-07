@@ -527,6 +527,11 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
         // get connection handle
         hidEmuConnHandle = event->connectionHandle;
 
+        extern BOOL enable_BLE;
+        if ( enable_BLE == FALSE ) {
+          GAPRole_TerminateLink( hidEmuConnHandle );  // disconnect
+        }
+
 //        tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
 //        tmos_start_task( hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY); // 这里不注释连接会有问题
         BLE_Ready = TRUE;

@@ -10,6 +10,7 @@
 
 __attribute__((aligned(2))) UINT16 BAT_abcBuff[ADC_MAXBUFLEN];
 UINT32 BAT_adcVal = 0;
+BOOL BAT_chrg = FALSE;
 static UINT32 BAT_adcHistory = 0;
 static signed short RoughCalib_Value = 0;
 
@@ -24,6 +25,8 @@ void BATTERY_Init( void )
   uint8_t i;
 //  ADC_InterTSSampInit();
 //  RoughCalib_Value = ADC_DataCalib_Rough(); // 用于计算ADC内部偏差，记录到变量 RoughCalib_Value中
+  // bat charging io
+  GPIOB_ModeCfg( GPIO_Pin_14, GPIO_ModeIN_PU );
   // adc init
   GPIOA_ModeCfg( GPIO_Pin_8, GPIO_ModeIN_Floating );
   ADC_ExtSingleChSampInit( SampleFreq_3_2, ADC_PGA_0 );
