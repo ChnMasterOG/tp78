@@ -154,7 +154,7 @@ uint8_t PS2_ReadMouseData(Mousestate* dat)
 * Function Name  : PS2_Config
 * Description    : 配置PS/2鼠标
 * Input          : reg - 配置值, res - 需要等待res的响应才算成功
-* Return         : 成功返回0, 失败返回1
+* Return         : 成功返回0, 失败返回非0
 *******************************************************************************/
 uint8_t PS2_Config(uint8_t reg, uint8_t res)
 {
@@ -162,7 +162,8 @@ uint8_t PS2_Config(uint8_t reg, uint8_t res)
     sta = PS2_WriteByte(reg);
     if (sta != 0)	return 1;
     sta = PS2_ReadByte(&dat);
-    if (sta != 0 || dat != res)	return 1;
+    if (sta != 0) return 1;
+    else if (dat != res) return 2;
     return 0;
 }
 
