@@ -135,6 +135,7 @@
     #define Fn_Mode_None                  0x00
     #define Fn_Mode_Reset                 0x01
     #define Fn_Mode_ChangeKey             0x02
+    #define Fn_Mode_JumpBoot              0xB0
     #define Fn_Mode_PaintedEgg            0xC0
     #define Fn_Mode_DisEnableBLE          0xD0
     #define Fn_Mode_PriorityUSBorBLE      0xE0

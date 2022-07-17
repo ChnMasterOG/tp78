@@ -23,7 +23,7 @@ static uint32_t style_cnt = 0;
 uint8_t FLASH_Read_LEDStyle( void )
 {
   uint8_t LED_Style_Number;
-  EEPROM_READ( 2048, &LED_Style_Number, 1 );
+  EEPROM_READ( FLASH_ADDR_LEDStyle, &LED_Style_Number, 1 );
   LED_Change_flag = 1;
   switch (LED_Style_Number)
   {
@@ -58,7 +58,7 @@ uint8_t FLASH_Read_LEDStyle( void )
 *******************************************************************************/
 void FLASH_Write_LEDStyle( uint8_t LED_Style_Number )
 {
-  EEPROM_WRITE( 2048, &LED_Style_Number, 1 );
+  EEPROM_WRITE( FLASH_ADDR_LEDStyle, &LED_Style_Number, 1 );
 }
 
 /*******************************************************************************

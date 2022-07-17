@@ -28,6 +28,7 @@ extern "C"
 #include "BATTERY.h"
 #include "OLED.h"
 #include "WS2812.h"
+#include "ISP.h"
 
 /* hal task Event */
 #define   LED_BLINK_EVENT                               0x0001
@@ -46,7 +47,10 @@ extern "C"
 
 #define USB_MESSAGE              		0xB0    // USB message
 
-
+#define FLASH_ADDR_CustomKey                (8*1024)  // 从8K地址开始存放键盘布局
+#define FLASH_ADDR_Extra_CustomKey          (9*1024)  // 从9K地址开始存放键盘额外布局
+#define FLASH_ADDR_LEDStyle                 (10*1024)
+#define FLASH_ADDR_BLEDevice                (10*1024+1)
 
 /*********************************************************************
  * GLOBAL VARIABLES

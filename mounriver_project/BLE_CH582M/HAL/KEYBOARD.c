@@ -87,8 +87,8 @@ static uint16_t KeyArr_ChangeTimes = 0;
 *******************************************************************************/
 void FLASH_Read_KeyArray( void )
 {
-  EEPROM_READ( 0, CustomKey, COL_SIZE*ROW_SIZE );
-  EEPROM_READ( 1024, Extra_CustomKey, COL_SIZE*ROW_SIZE );
+  EEPROM_READ( FLASH_ADDR_CustomKey, CustomKey, COL_SIZE*ROW_SIZE );
+  EEPROM_READ( FLASH_ADDR_Extra_CustomKey, Extra_CustomKey, COL_SIZE*ROW_SIZE );
 }
 
 /*******************************************************************************
@@ -100,8 +100,8 @@ void FLASH_Read_KeyArray( void )
 UINT8 FLASH_Write_KeyArray( void )
 {
   UINT8 s;
-  s = EEPROM_WRITE( 0, CustomKey, COL_SIZE*ROW_SIZE );
-  s |= EEPROM_WRITE( 1024, Extra_CustomKey, COL_SIZE*ROW_SIZE );
+  s = EEPROM_WRITE( FLASH_ADDR_CustomKey, CustomKey, COL_SIZE*ROW_SIZE );
+  s |= EEPROM_WRITE( FLASH_ADDR_Extra_CustomKey, Extra_CustomKey, COL_SIZE*ROW_SIZE );
   return s;
 }
 
@@ -118,9 +118,9 @@ void KEYBOARD_Reset( void )
   memcpy(Extra_CustomKey, Extra_KeyArrary, COL_SIZE*ROW_SIZE);
   FLASH_Write_KeyArray( );
   temp = 0;
-  EEPROM_WRITE( 2048, &temp, 1 );   // default LED Style
+  EEPROM_WRITE( FLASH_ADDR_LEDStyle, &temp, 1 );   // default LED Style
   temp = 1;
-  EEPROM_WRITE( 2049, &temp, 1 );   // default BLE Device
+  EEPROM_WRITE( FLASH_ADDR_BLEDevice, &temp, 1 );   // default BLE Device
 }
 
 /*******************************************************************************
@@ -167,6 +167,9 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_C && Fn_Mode != Fn_Mode_ChangeKey ) { // 设置改键 - 先按Fn+C
       Fn_Mode = Fn_Mode_ChangeKey;
       Fn_cnt &= 0x0C;
+    } else if ( Keyboarddat->Key1 == KEY_B && Fn_Mode != Fn_Mode_JumpBoot ) { // 跳转BOOT模式
+      Fn_Mode = Fn_Mode_JumpBoot;
+      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_Delete && Fn_Mode != Fn_Mode_PaintedEgg ) { // 彩蛋模式
       Fn_Mode = Fn_Mode_PaintedEgg;
       Fn_cnt = 0;
@@ -236,6 +239,10 @@ UINT8 KEYBOARD_Custom_Function( void )
           tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
           KEYBOARD_ChangeKey( dst_key, src_key );
         }
+        break;
+      case Fn_Mode_JumpBoot:  // Fn+B跳转BOOT
+        Fn_Mode = Fn_Mode_None;
+        APPJumpBoot();
         break;
       case Fn_Mode_PaintedEgg:  // Fn+Delete彩蛋
         Fn_Mode = Fn_Mode_None;

@@ -209,7 +209,7 @@ static hidDevCB_t hidEmuHidCBs =
 void FLASH_Read_DeviceID( void )
 {
   uint8_t DeviceID;
-  EEPROM_READ( 2049, &DeviceID, 1 );
+  EEPROM_READ( FLASH_ADDR_BLEDevice, &DeviceID, 1 );
   DeviceAddress[5] = DeviceID - 1 >= 6 ? 1 : DeviceID;
 }
 
@@ -221,7 +221,7 @@ void FLASH_Read_DeviceID( void )
 *******************************************************************************/
 void FLASH_Write_DeviceID( uint8_t DeviceID )
 {
-  EEPROM_WRITE( 2049, &DeviceID, 1 );
+  EEPROM_WRITE( FLASH_ADDR_BLEDevice, &DeviceID, 1 );
 }
 
 /*********************************************************************

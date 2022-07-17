@@ -6,6 +6,7 @@
 C_SRCS += \
 ../HAL/BATTERY.c \
 ../HAL/BLE.c \
+../HAL/ISP.c \
 ../HAL/KEY.c \
 ../HAL/KEYBOARD.c \
 ../HAL/LED.c \
@@ -21,6 +22,7 @@ C_SRCS += \
 OBJS += \
 ./HAL/BATTERY.o \
 ./HAL/BLE.o \
+./HAL/ISP.o \
 ./HAL/KEY.o \
 ./HAL/KEYBOARD.o \
 ./HAL/LED.o \
@@ -36,6 +38,7 @@ OBJS += \
 C_DEPS += \
 ./HAL/BATTERY.d \
 ./HAL/BLE.d \
+./HAL/ISP.d \
 ./HAL/KEY.d \
 ./HAL/KEYBOARD.d \
 ./HAL/LED.d \
@@ -51,6 +54,6 @@ C_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 HAL/%.o: ../HAL/%.c
-	@	@	riscv-none-embed-gcc -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g -I"Y:\tp78-main\mounriver_project\BLE_CH582M\Startup" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\HAL\include" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\APP\include" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\Profile\include" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\StdPeriphDriver\inc" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\Ld" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\LIB" -I"Y:\tp78-main\mounriver_project\BLE_CH582M\RVMSIS" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
+	@	@	riscv-none-embed-gcc -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g -I"E:\tp78\mounriver_project\BLE_CH582M\Startup" -I"E:\tp78\mounriver_project\BLE_CH582M\HAL\include" -I"E:\tp78\mounriver_project\BLE_CH582M\APP\include" -I"E:\tp78\mounriver_project\BLE_CH582M\Profile\include" -I"E:\tp78\mounriver_project\BLE_CH582M\StdPeriphDriver\inc" -I"E:\tp78\mounriver_project\BLE_CH582M\Ld" -I"E:\tp78\mounriver_project\BLE_CH582M\LIB" -I"E:\tp78\mounriver_project\BLE_CH582M\RVMSIS" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
 	@	@
 
