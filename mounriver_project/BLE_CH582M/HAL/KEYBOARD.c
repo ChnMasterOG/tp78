@@ -167,6 +167,9 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_C && Fn_Mode != Fn_Mode_ChangeKey ) { // 设置改键 - 先按Fn+C
       Fn_Mode = Fn_Mode_ChangeKey;
       Fn_cnt &= 0x0C;
+    } else if ( Keyboarddat->Key1 == KEY_R && Fn_Mode != Fn_Mode_SoftReset ) { // 软件复位模式
+      Fn_Mode = Fn_Mode_SoftReset;
+      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_B && Fn_Mode != Fn_Mode_JumpBoot ) { // 跳转BOOT模式
       Fn_Mode = Fn_Mode_JumpBoot;
       Fn_cnt = 0;
@@ -239,6 +242,10 @@ UINT8 KEYBOARD_Custom_Function( void )
           tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
           KEYBOARD_ChangeKey( dst_key, src_key );
         }
+        break;
+      case Fn_Mode_SoftReset:  // Fn+R软件复位
+        Fn_Mode = Fn_Mode_None;
+        SoftReset();
         break;
       case Fn_Mode_JumpBoot:  // Fn+B跳转BOOT
         Fn_Mode = Fn_Mode_None;

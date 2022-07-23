@@ -12,5 +12,6 @@
   #include "CH58x_common.h"
 
   void APPJumpBoot(void);
+  void SoftReset(void);
 
 #endif

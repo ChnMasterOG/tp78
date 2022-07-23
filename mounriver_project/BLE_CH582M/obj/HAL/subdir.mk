@@ -54,6 +54,6 @@ C_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 HAL/%.o: ../HAL/%.c
-	@	@	riscv-none-embed-gcc -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g -I"E:\tp78\mounriver_project\BLE_CH582M\Startup" -I"E:\tp78\mounriver_project\BLE_CH582M\HAL\include" -I"E:\tp78\mounriver_project\BLE_CH582M\APP\include" -I"E:\tp78\mounriver_project\BLE_CH582M\Profile\include" -I"E:\tp78\mounriver_project\BLE_CH582M\StdPeriphDriver\inc" -I"E:\tp78\mounriver_project\BLE_CH582M\Ld" -I"E:\tp78\mounriver_project\BLE_CH582M\LIB" -I"E:\tp78\mounriver_project\BLE_CH582M\RVMSIS" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
+	@	@	riscv-none-embed-gcc -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections  -g -I"E:\Project\tp78\mounriver_project\BLE_CH582M\Startup" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\APP\include" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\Profile\include" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\StdPeriphDriver\inc" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\Ld" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\LIB" -I"E:\Project\tp78\mounriver_project\BLE_CH582M\RVMSIS" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
 	@	@
 
