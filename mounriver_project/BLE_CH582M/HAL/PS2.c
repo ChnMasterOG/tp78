@@ -17,6 +17,7 @@ uint8_t PS2_bit_cnt = 0,
         PS2_byte = 0,
         PS2_high_cnt = 0,
         PS2_data_ready = 0;
+BOOL enable_TP = TRUE;   // 使能或失能小红点
 Mousestate* const PS2dat = (Mousestate*)HIDMouse;
 
 /*******************************************************************************

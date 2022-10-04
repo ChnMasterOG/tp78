@@ -173,11 +173,24 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_B && Fn_Mode != Fn_Mode_JumpBoot ) { // 跳转BOOT模式
       Fn_Mode = Fn_Mode_JumpBoot;
       Fn_cnt = 0;
+    } else if ( Keyboarddat->Key1 == KEY_Subtraction && Fn_Mode != Fn_Mode_VolumeDown ) { // 音量减模式
+      Fn_Mode = Fn_Mode_VolumeDown;
+      HIDVolume |= Volume_Decr;
+      HID_ProcessFunc_v.volume_func();
+      Fn_cnt = 0;
+    } else if ( Keyboarddat->Key1 == KEY_Equal && Fn_Mode != Fn_Mode_VolumeUp ) { // 音量加模式
+      Fn_Mode = Fn_Mode_VolumeUp;
+      HIDVolume |= Volume_Incr;
+      HID_ProcessFunc_v.volume_func();
+      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_Delete && Fn_Mode != Fn_Mode_PaintedEgg ) { // 彩蛋模式
       Fn_Mode = Fn_Mode_PaintedEgg;
       Fn_cnt = 0;
-    } else if ( Keyboarddat->Key1 == KEY_Equal && Fn_Mode != Fn_Mode_DisEnableBLE ) { // 使能/失能蓝牙
+    } else if ( Keyboarddat->Key1 == KEY_GraveAccent && Fn_Mode != Fn_Mode_DisEnableBLE ) { // 使能/失能蓝牙
       Fn_Mode = Fn_Mode_DisEnableBLE;
+      Fn_cnt = 0;
+    } else if ( Keyboarddat->Key1 == KEY_T && Fn_Mode != Fn_Mode_DisEnableTP ) { // 使能/失能小红点
+      Fn_Mode = Fn_Mode_DisEnableTP;
       Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_0 && Fn_Mode != Fn_Mode_PriorityUSBorBLE ) { // 设置优先蓝牙或USB
       Fn_Mode = Fn_Mode_PriorityUSBorBLE;
@@ -251,6 +264,16 @@ UINT8 KEYBOARD_Custom_Function( void )
         Fn_Mode = Fn_Mode_None;
         APPJumpBoot();
         break;
+      case Fn_Mode_VolumeDown:  // Fn+减号减小音量 - 松开停止
+        Fn_Mode = Fn_Mode_None;
+        HIDVolume &= ~Volume_Decr;
+        HID_ProcessFunc_v.volume_func();
+        break;
+      case Fn_Mode_VolumeUp:  // Fn+加号增加音量
+        Fn_Mode = Fn_Mode_None;
+        HIDVolume &= ~Volume_Incr;
+        HID_ProcessFunc_v.volume_func();
+        break;
       case Fn_Mode_PaintedEgg:  // Fn+Delete彩蛋
         Fn_Mode = Fn_Mode_None;
         if (PaintedEggMode == FALSE) {
@@ -261,8 +284,7 @@ UINT8 KEYBOARD_Custom_Function( void )
         PaintedEggMode = !PaintedEggMode;
         break;
       case Fn_Mode_DisEnableBLE:
-        Fn_Mode = Fn_Mode_None; // Fn+等号关闭/开启蓝牙
-        extern BOOL enable_BLE;
+        Fn_Mode = Fn_Mode_None; // Fn+波浪号关闭/开启蓝牙
         if ( !BLE_Ready ) {
           enable_BLE = !enable_BLE;
           bStatus_t status = GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &enable_BLE );
@@ -271,6 +293,13 @@ UINT8 KEYBOARD_Custom_Function( void )
           else OLED_PRINT("BLE DIS");
           tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         }
+        break;
+      case Fn_Mode_DisEnableTP:
+        Fn_Mode = Fn_Mode_None; // Fn+T关闭/开启小红点
+        enable_TP = !enable_TP;
+        if ( enable_TP ) OLED_PRINT("TP ENA");
+        else OLED_PRINT("TP DIS");
+        tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         break;
       case Fn_Mode_PriorityUSBorBLE:  // Fn+0优先蓝牙或USB切换
         Fn_Mode = Fn_Mode_None;
@@ -493,4 +522,3 @@ uint8_t KEYBOARD_EnterPasskey( uint32_t* key )
   }
   return 1;
 }
-

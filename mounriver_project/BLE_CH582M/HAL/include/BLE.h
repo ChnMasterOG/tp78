@@ -33,6 +33,7 @@ extern "C"
 #define START_SEND_PASSKEY_EVT                        0x0040
 #define START_MOUSE_REPORT_EVT                        0x1000
 #define START_KEYBOARD_REPORT_EVT                     0x2000
+#define START_VOL_REPORT_EVT                          0x4000
 /*********************************************************************
  * MACROS
  */

@@ -19,6 +19,7 @@
 #include "scanparamservice.h"
 #include "devinfoservice.h"
 #include "hiddev.h"
+
 #include "BLE.h"
 
 /*********************************************************************

@@ -16,9 +16,19 @@
     #define CapsLockLED     0x02
     #define ScrollLockLED   0x04
 
+    #define Volume_Play     (1 << 0)
+    #define Volume_Next     (1 << 1)
+    #define Volume_Prev     (1 << 2)
+    #define Volume_Incr     (1 << 3)
+    #define Volume_Decr     (1 << 4)
+    #define Volume_Mute     (1 << 5)
+    #define Volume_Pause    (1 << 6)
+    #define Volume_Stop     (1 << 7)
+
     #define START_USB_EVENT       0x0001
     #define USB_MOUSE_EVENT       0x0002
     #define USB_KEYBOARD_EVENT    0x0004
+    #define USB_VOL_EVENT         0x0008
     #define USB_TEST_EVENT        0x1000
 
     #define USB_ERR_LENGTH        0x01
@@ -38,6 +48,7 @@
     extern const UINT8 *pDescr;
     extern UINT8 HIDMouse[4];
     extern UINT8 HIDKey[8];
+    extern UINT8 HIDVolume;
 
     extern tmosTaskID usbTaskID;
     extern BOOL USB_Ready;

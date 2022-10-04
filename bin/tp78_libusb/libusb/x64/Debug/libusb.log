@@ -13,5 +13,5 @@ main.obj : error LNK2019: 无法解析的外部符号 usb_set_debug，该符号�
 main.obj : error LNK2019: 无法解析的外部符号 usb_find_busses，该符号在函数 "bool __cdecl find_my_device(unsigned int,unsigned int)" (?find_my_device@@YA_NII@Z) 中被引用
 main.obj : error LNK2019: 无法解析的外部符号 usb_find_devices，该符号在函数 "bool __cdecl find_my_device(unsigned int,unsigned int)" (?find_my_device@@YA_NII@Z) 中被引用
 main.obj : error LNK2019: 无法解析的外部符号 usb_get_busses，该符号在函数 "bool __cdecl find_my_device(unsigned int,unsigned int)" (?find_my_device@@YA_NII@Z) 中被引用
-..\msvc\libusb.lib : warning LNK4272: 库计算机类型“x86”与目标计算机类型“x64”冲突
-Y:\tp78-main\bin\tp78_libusb\x64\Debug\libusb.exe : fatal error LNK1120: 12 个无法解析的外部命令
+E:\tp78\bin\tp78_libusb\msvc\libusb.lib : warning LNK4272: 库计算机类型“x86”与目标计算机类型“x64”冲突
+E:\tp78\bin\tp78_libusb\x64\Debug\libusb.exe : fatal error LNK1120: 12 个无法解析的外部命令

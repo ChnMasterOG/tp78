@@ -318,7 +318,7 @@ int main()
 	}
 
 	//注销接口，释放资源，和usb_claim_interface搭配使用。
-	usb_release_interface(my_device, 0);
+	usb_release_interface(my_device, 3);
 	usb_close(my_device);
 	std::cout << "USB设备已关闭！" << endl;
 
@@ -359,7 +359,7 @@ bool find_my_device(UINT32 VID, UINT32 PID)
 				usb_get_string_simple(my_device, device->descriptor.iProduct, str, sizeof(str));
 				std::cout << "产品名字 : " << str << endl;
 
-				int ret = usb_claim_interface(my_device, 2);
+				int ret = usb_claim_interface(my_device, 3);
 
 				// 获取端点的地址
 				int ep = device->config->interface->altsetting->endpoint->bEndpointAddress;

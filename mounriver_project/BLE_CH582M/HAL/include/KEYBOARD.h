@@ -137,8 +137,10 @@
     #define Fn_Mode_ChangeKey             0x02
     #define Fn_Mode_JumpBoot              0xB0
     #define Fn_Mode_SoftReset             0xB1
-    #define Fn_Mode_PaintedEgg            0xC0
+    #define Fn_Mode_VolumeUp              0xC0
+    #define Fn_Mode_VolumeDown            0xC1
     #define Fn_Mode_DisEnableBLE          0xD0
+    #define Fn_Mode_DisEnableTP           0xD1
     #define Fn_Mode_PriorityUSBorBLE      0xE0
     #define Fn_Mode_SelectDevice1         0xE1
     #define Fn_Mode_SelectDevice2         0xE2
@@ -151,6 +153,7 @@
     #define Fn_Mode_LED_Style3            0xF2
     #define Fn_Mode_LED_Style4            0xF3
     #define Fn_Mode_LED_Style5            0xF4
+    #define Fn_Mode_PaintedEgg            0xFE
     #define Fn_Mode_GiveUp                0xFF
 
     typedef union {

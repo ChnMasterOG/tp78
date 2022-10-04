@@ -100,6 +100,9 @@
 #ifndef HAL_WS2812_PWM
 #define HAL_WS2812_PWM              TRUE   // WS2812 PWMÇý¶¯
 #endif
+#ifndef SW_PAINTEDEGG
+#define SW_PAINTEDEGG               TRUE   // ²Êµ°
+#endif
 #ifndef TEM_SAMPLE
 #define TEM_SAMPLE									TRUE
 #endif

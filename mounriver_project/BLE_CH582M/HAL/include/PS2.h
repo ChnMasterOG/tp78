@@ -62,6 +62,7 @@
 
   extern Mousestate* const PS2dat;
   extern uint8_t PS2_byte_cnt, PS2_data_ready;
+  extern BOOL enable_TP;
 
 	//declare functions
   uint8_t PS2_ReadByte(uint8_t* dat);

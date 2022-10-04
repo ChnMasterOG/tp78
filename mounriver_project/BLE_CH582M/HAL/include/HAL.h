@@ -52,17 +52,41 @@ extern "C"
 #define FLASH_ADDR_LEDStyle                 (10*1024)
 #define FLASH_ADDR_BLEDevice                (10*1024+1)
 
-/*********************************************************************
- * GLOBAL VARIABLES
- */
-extern tmosTaskID halTaskID;
-extern BOOL USB_CapsLock_LEDOn, BLE_CapsLock_LEDOn;
+typedef struct HID_ProcessFunc
+{
+    void (*keyboard_func)();  // 按键处理函数
+    void (*mouse_func)();     // 鼠标处理函数
+    void (*volume_func)();    // 音量处理函数
+}HID_ProcessFunc_s;
 
-typedef struct  tag_uart_package
+typedef struct HW_ProcessFunc
+{
+    void (*battery_func)();   // 电量处理函数
+    void (*ws2812_func)();    // 背光LED处理函数
+}HW_ProcessFunc_s;
+
+typedef struct SW_ProcessFunc
+{
+    void (*paintedegg_func)();        // 彩蛋处理函数
+    void (*oled_capslock_func)();     // 大小写状态OLED处理函数
+    void (*oled_UBstatus_func)();     // USB或BLE状态OLED处理函数
+}SW_ProcessFunc_s;
+
+typedef struct tag_uart_package
 {
   tmos_event_hdr_t hdr;
   uint8            *pData;
 } uartPacket_t;
+
+/*********************************************************************
+ * GLOBAL VARIABLES
+ */
+extern BOOL enable_BLE;
+extern BOOL priority_USB;
+extern tmosTaskID halTaskID;
+extern BOOL USB_CapsLock_LEDOn, BLE_CapsLock_LEDOn;
+extern HID_ProcessFunc_s HID_ProcessFunc_v;
+extern SW_ProcessFunc_s SW_ProcessFunc_v;
 
 /*********************************************************************
  * GLOBAL FUNCTIONS
