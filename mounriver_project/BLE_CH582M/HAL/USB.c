@@ -17,7 +17,7 @@ const UINT8 MyDevDescr[] = { 0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DevEP0SIZ
                              0x01, 0x02, 0x00, 0x01
                            };
 // 配置描述符
-const UINT8 MyCfgDescr[] = { 0x09, 0x02, 0x6B, 0x00, 0x04, 0x01, 0x00, 0x80, 0x32,            //配置描述符: 4个接口
+const UINT8 MyCfgDescr[] = { 0x09, 0x02, 0x6B, 0x00, 0x04, 0x01, 0x00, 0xA0, 0x32,            //配置描述符: 4个接口
                              0x09, 0x04, 0x00, 0x00, 0x01, 0x03, 0x01, 0x01, 0x00,            //接口描述符,键盘：接口编号0
                              0x09, 0x21, 0x11, 0x01, 0x00, 0x01, 0x22, 0x3e, 0x00,            //HID类描述符：下级描述符KeyRepDesc
                              0x07, 0x05, 0x81, 0x03, 0x08, 0x00, 0x0A,                        //端点描述符：端点地址0x81 即端点1
@@ -322,7 +322,6 @@ void USB_DevTransProcess( void )
                 {
                   pDescr = VolumeRepDesc;                               //数据准备上传
                   len = sizeof( VolumeRepDesc );                        //如果有更多接口，该标准位应该在最后一个接口配置完成后有效
-                  USB_Ready = TRUE;
 //                  tmos_start_task(usbTaskID, USB_TEST_EVENT, MS1_TO_SYSTEM_TIME(500));
                 }
                 else
