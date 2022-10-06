@@ -11,12 +11,12 @@
 
   #define ADC_MAXBUFLEN       10
 
-  #define BAT_MINADCVAL       3413  // 3.5V/2
+  #define BAT_MINADCVAL       3706  // 3.8V/2
   #define BAT_MAXADCVAL       3998  // 4.1V/2
 
-  #define BAT_25PERCENT_VAL   3559  // 25%
-  #define BAT_50PERCENT_VAL   3705  // 50%
-  #define BAT_75PERCENT_VAL   3851  // 75%
+  #define BAT_25PERCENT_VAL   (3*BAT_MINADCVAL/4+BAT_MAXADCVAL/4)  // 25%
+  #define BAT_50PERCENT_VAL   (BAT_MINADCVAL/2+BAT_MAXADCVAL/2)  // 50%
+  #define BAT_75PERCENT_VAL   (BAT_MINADCVAL/4+3*BAT_MAXADCVAL/4)  // 75%
 
   #define BAT_FLOATING_VAL    50    // ADC浮动超过该值则警告
 
