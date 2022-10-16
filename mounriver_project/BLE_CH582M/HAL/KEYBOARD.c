@@ -394,7 +394,7 @@ void KEYBOARD_Init( void )
 void KEYBOARD_Detection( void )
 {
     static uint8_t current_row = 0;
-    static BOOL press_Capslock = FALSE;
+    static uint8_t press_Capslock = 0;  // 大于0表示CapsLock按下
     static BOOL press_NormalKey = FALSE;
     uint8_t current_colum, key_idx;
     if (KeyArr_ChangeTimes > 0 && KeyArr_ChangeTimes <= MAX_CHANGETIMES) {  // 进入CapsLock键盘布局改变计数等待
@@ -404,16 +404,17 @@ void KEYBOARD_Detection( void )
         }
         ++KeyArr_ChangeTimes; // 键盘计数值递增
     } else if (press_Capslock) {  // CapsLock被按下
-        press_Capslock = FALSE;
-        for (key_idx = 2; key_idx < 8; key_idx++) {
-            if (Keyboarddat->data[key_idx] == KEY_CapsLock) {
-                memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
-                Keyboarddat->Key6 = 0;
-            }
+        if (--press_Capslock == 0) {  // CapsLock按下持续时间到达
+          for (key_idx = 2; key_idx < 8; key_idx++) {
+              if (Keyboarddat->data[key_idx] == KEY_CapsLock) {
+                  memcpy(&Keyboarddat->data[key_idx], &Keyboarddat->data[key_idx] + 1, 7 - key_idx);
+                  Keyboarddat->Key6 = 0;
+              }
+          }
+          KEYBOARD_data_index--;
+          KEYBOARD_data_ready = 1;  // 产生事件
+          return;
         }
-        KEYBOARD_data_index--;
-        KEYBOARD_data_ready = 1;  // 产生事件
-        return;
     }
     for (current_colum = 0; current_colum < COL_SIZE; current_colum++) {    // 查询哪一列改变
         if (KeyMatrix[current_colum][current_row] == 0 && Colum_GPIO_(ReadPortPin)( Colum_Pin[current_colum] ) == 0) {  // 按下
@@ -458,7 +459,7 @@ void KEYBOARD_Detection( void )
                     }
                     if (press_NormalKey == FALSE || KeyArr_ChangeTimes <= MAX_CHANGETIMES) {
                         if (KEYBOARD_data_index < 8) {
-                            press_Capslock = TRUE;
+                            press_Capslock = CAPSLOCK_HOLDING_TIMES;
                             Keyboarddat->data[KEYBOARD_data_index++] = KEY_CapsLock;
                         }
                     }

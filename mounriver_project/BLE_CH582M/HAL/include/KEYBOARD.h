@@ -18,7 +18,8 @@
     #define COL_SIZE        14   // 键盘列数 - 其它键盘布局需修改此处
 
     #define MAX_PRESS_COUNT 15   // 8个特殊键+6个一般键+1个Fn键
-    #define MAX_CHANGETIMES 12   // 按下Caplock改变键盘布局检测次数
+    #define MAX_CHANGETIMES 24   // 按下Capslock改变键盘布局检测次数
+    #define CAPSLOCK_HOLDING_TIMES  4 // Capslock按下持续时间
 
     //special
     #define KEY_None    0x00

@@ -29,6 +29,7 @@
     #define USB_MOUSE_EVENT       0x0002
     #define USB_KEYBOARD_EVENT    0x0004
     #define USB_VOL_EVENT         0x0008
+    #define USB_CONNECT_EVENT     0x0010
     #define USB_TEST_EVENT        0x1000
 
     #define USB_ERR_LENGTH        0x01

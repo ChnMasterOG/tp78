@@ -8,7 +8,7 @@
 
 /********************************** (C) COPYRIGHT *******************************
  *  key-board pins:   PB10 & PB11 --- USB1; [PA0 ~ PA7 & PA9 & PA11 ~ PA15] & [PB2 ~ PB7] --- KeyBoard
- *                    PB13 & PB12 --- PS/2 Mouse; PB9 & PB8 --- OLED; PA10 --- W2812(TMR1)
+ *                    PB13 & PB12 --- PS/2 Mouse; PB9 & PB8 --- OLED; PA10 --- WS2812(TMR1)
  *                    PA8 & PB14 --- Battery
  *  core-board pins:  PB0 --- LED; PB1 --- KEY; PB20 & PB21 --- R/TXD3_
  ********************************* (C) COPYRIGHT ********************************/
