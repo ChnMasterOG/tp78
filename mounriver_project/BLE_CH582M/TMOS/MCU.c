@@ -1,9 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : MCU.c
- * Author             : ChnMasterOG
+ * Author             : ChnMasterOG, WCH
  * Version            : V1.2
  * Date               : 2022/1/26
  * Description        : 硬件任务处理函数及BLE和硬件初始化
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 /******************************************************************************/
@@ -15,13 +16,23 @@
 /* 彩蛋 */
 #include "snake.h"
 
+/*HID data*/
+UINT8 HID_DATA[HID_DATA_LENGTH] = { 0x0, 0x0, 0x0, 0x0, 0x0,
+                                    0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                    0x2, 0x0 }; // bit1~bit4: mouse data, bit6~bit13: key data, bit15: vol data
+/*鼠标键盘数据*/
+UINT8* HIDMouse = &HID_DATA[1];
+UINT8* HIDKey = &HID_DATA[6];
+/*音量控制数据*/
+UINT8* HIDVolume = &HID_DATA[15];
+
 tmosTaskID halTaskID = INVALID_TASK_ID;
-BOOL USB_CapsLock_LEDOn = FALSE, BLE_CapsLock_LEDOn = FALSE;
-BOOL priority_USB = TRUE;   // USB和蓝牙同时连接选择
+BOOL USB_CapsLock_LEDOn = FALSE, BLE_CapsLock_LEDOn = FALSE, RF_CapsLock_LEDOn = FALSE;
+BOOL priority_USB = TRUE;   // USB和蓝牙/RF同时连接选择
 BOOL enable_BLE = TRUE;   // 使能或失能蓝牙
 
 static BOOL CapsLock_LEDOn_state = FALSE; // Caps Lock LED ON/OFF
-static BOOL connection_state[2] = { FALSE, FALSE };  // USB/BLE state
+static BOOL connection_state[3] = { FALSE, FALSE, FALSE };  // USB/BLE/RF state
 static uint32_t EP_counter = 0;  // 彩蛋计数器
 
 /*******************************************************************************
@@ -46,18 +57,22 @@ __attribute__((weak)) void HID_KEYBOARD_Process(void)
     else {
       if ( KEYBOARD_Custom_Function() ) { // 带有Fn键处理信息则不产生键盘事件
         if ( USB_Ready == TRUE && priority_USB == TRUE ) {
-          tmos_start_task( usbTaskID, USB_KEYBOARD_EVENT, 2 );  // USB键盘事件
+          tmos_set_event( usbTaskID, USB_KEYBOARD_EVENT );  // USB键盘事件
         } else if ( BLE_Ready == TRUE ) {
-          tmos_start_task( hidEmuTaskId, START_KEYBOARD_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  // 蓝牙键盘事件 2ms处理
+          tmos_set_event( hidEmuTaskId, START_KEYBOARD_REPORT_EVT );  // 蓝牙键盘事件
+        } else if ( RF_Ready == TRUE ) {
+          tmos_set_event( RFTaskId, SBP_RF_KEYBOARD_REPORT_EVT );  // RF键盘事件
         }
       }
       if (KEYBOARD_mouse_ready != 0) { // 发送键盘鼠标数据
         KEYBOARD_mouse_ready = 0;
         tmos_memset(&HIDMouse[1], 0, 3);   // 只按左中右键没有其他操作
         if ( USB_Ready == TRUE && priority_USB == TRUE ) {
-          tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
+          tmos_set_event( usbTaskID, USB_MOUSE_EVENT );  //USB鼠标事件
         } else if ( BLE_Ready == TRUE ) {
-          tmos_start_task( hidEmuTaskId, START_MOUSE_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙鼠标事件 2ms处理
+          tmos_set_event( hidEmuTaskId, START_MOUSE_REPORT_EVT );  //蓝牙鼠标事件
+        } else if ( RF_Ready == TRUE ) {
+          tmos_set_event( RFTaskId, SBP_RF_MOUSE_REPORT_EVT );  // RF键盘事件
         }
       }
     }
@@ -74,13 +89,15 @@ __attribute__((weak)) void HID_PS2TP_Process(void)
 {
   if (PS2_data_ready != 0 && enable_TP == TRUE) {    // 发送小红点鼠标数据
     PS2_data_ready = 0;
-    if (PS2_byte_cnt == 3) {  // 接收完数据报
+    if ( PS2_byte_cnt == 3 ) {  // 接收完数据报
       PS2_byte_cnt = 0;
       HIDMouse[2] = -HIDMouse[2]; // 反转Y轴
-      if (USB_Ready == TRUE && priority_USB == TRUE) {
-        tmos_start_task( usbTaskID, USB_MOUSE_EVENT, 2 );  //USB鼠标事件
-      } else if (BLE_Ready == TRUE) {
-        tmos_start_task( hidEmuTaskId, START_MOUSE_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙鼠标事件 2ms处理
+      if ( USB_Ready == TRUE && priority_USB == TRUE ) {
+        tmos_set_event( usbTaskID, USB_MOUSE_EVENT );  //USB鼠标事件
+      } else if ( BLE_Ready == TRUE ) {
+        tmos_set_event( hidEmuTaskId, START_MOUSE_REPORT_EVT );  //蓝牙鼠标事件
+      } else if ( RF_Ready == TRUE ) {
+        tmos_set_event( RFTaskId, SBP_RF_MOUSE_REPORT_EVT );  // RF键盘事件
       }
     }
     PS2_En_Data_Report();
@@ -95,10 +112,12 @@ __attribute__((weak)) void HID_PS2TP_Process(void)
 *******************************************************************************/
 __attribute__((weak)) void HID_VOL_Process(void)
 {
-  if (USB_Ready == TRUE && priority_USB == TRUE) {
-    tmos_start_task( usbTaskID, USB_VOL_EVENT, 2 );  //USB音量事件
-  } else if (BLE_Ready == TRUE) {
-    //tmos_start_task( hidEmuTaskId, START_VOL_REPORT_EVT, MS1_TO_SYSTEM_TIME(2) );  //蓝牙音量事件 2ms处理
+  if ( USB_Ready == TRUE && priority_USB == TRUE ) {
+    tmos_set_event( usbTaskID, USB_VOL_EVENT );  //USB音量事件
+  } else if ( BLE_Ready == TRUE ) {
+    //tmos_set_event( hidEmuTaskId, START_VOL_REPORT_EVT );  //蓝牙音量事件
+  } else if ( RF_Ready == TRUE ) {
+    tmos_set_event( RFTaskId, SBP_RF_VOL_REPORT_EVT );  // RF键盘事件
   }
 }
 
@@ -142,12 +161,15 @@ __attribute__((weak)) void SW_OLED_Capslock_Process(void)
   } else if ( BLE_Ready && !priority_USB && CapsLock_LEDOn_state != BLE_CapsLock_LEDOn ) {
     CapsLock_LEDOn_state = BLE_CapsLock_LEDOn;
     OLED_ShowCapslock(56, 1, CapsLock_LEDOn_state);
+  } else if ( RF_Ready && !priority_USB && CapsLock_LEDOn_state != RF_CapsLock_LEDOn ) {
+    CapsLock_LEDOn_state = RF_CapsLock_LEDOn;
+    OLED_ShowCapslock(56, 1, CapsLock_LEDOn_state);
   }
 }
 
 /*******************************************************************************
 * Function Name  : SW_OLED_UBStatus_Process
-* Description    : USB或BLE状态OLED处理函数(检测USB/蓝牙连接状态：连接状态改变OLED显示)
+* Description    : USB或BLE状态OLED处理函数(检测USB/蓝牙/RF连接状态：连接状态改变OLED显示)
 * Input          : 无
 * Return         : 无
 *******************************************************************************/
@@ -158,8 +180,8 @@ __attribute__((weak)) void SW_OLED_UBStatus_Process(void)
     if ( USB_Ready ) OLED_ShowString(8, 0, "USB");
     else OLED_ShowString(8, 0, "   ");
     if ( USB_Ready ^ BLE_Ready ) priority_USB = USB_Ready;
-    // 同时出现USB和蓝牙时进行显示
-    if ( USB_Ready && BLE_Ready ) OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);
+    // 同时出现USB和蓝牙/RF时进行显示
+    if ( USB_Ready && (BLE_Ready || RF_Ready) ) OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);
     else {
       OLED_ShowOK(26, 0, FALSE);
       OLED_ShowOK(56, 0, FALSE);
@@ -180,6 +202,17 @@ __attribute__((weak)) void SW_OLED_UBStatus_Process(void)
     if ( USB_Ready ^ BLE_Ready ) priority_USB = USB_Ready;
     // 同时出现USB和蓝牙时进行显示
     if ( USB_Ready && BLE_Ready ) OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);
+    else {
+      OLED_ShowOK(26, 0, FALSE);
+      OLED_ShowOK(56, 0, FALSE);
+    }
+  } else if (connection_state[2] != RF_Ready) {
+    connection_state[2] = RF_Ready;
+    if ( RF_Ready ) OLED_ShowString(41, 0, "RF");
+    else OLED_ShowString(41, 0, "  ");
+    if ( USB_Ready ^ RF_Ready ) priority_USB = USB_Ready;
+    // 同时出现USB和RF时进行显示
+    if ( USB_Ready && RF_Ready ) OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);
     else {
       OLED_ShowOK(26, 0, FALSE);
       OLED_ShowOK(56, 0, FALSE);
@@ -561,6 +594,9 @@ void HAL_Init()
 #endif
 #if (defined HAL_WS2812_PWM) && (HAL_WS2812_PWM == TRUE)
   WS2812_PWM_Init( );
+#endif
+#if (defined HAL_RF) && (HAL_RF == TRUE)
+  FLASH_Read_RForBLE( );
 #endif
 #if (defined HAL_LED) && (HAL_LED == TRUE)
   debug_info[7] = '\0';

@@ -1,9 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : KEY.c
-* Author             : ChnMasterOG
+* Author             : ChnMasterOG, WCH
 * Version            : V1.0
 * Date               : 2021/12/7
 * Description        : 
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 

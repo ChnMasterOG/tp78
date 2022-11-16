@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : CONFIG.h
- * Author             : WCH
+ * Author             : ChnMasterOG, WCH
  * Version            : V1.10
- * Date               : 2019/11/05
+ * Date               : 2022/11/13
  * Description        : 配置说明及默认值，建议在工程配置里的预处理中修改当前值
  *******************************************************************************/
 
@@ -99,6 +99,9 @@
 #endif
 #ifndef HAL_WS2812_PWM
 #define HAL_WS2812_PWM              TRUE   // WS2812 PWM驱动
+#endif
+#ifndef HAL_RF
+#define HAL_RF                      TRUE   // RF 2.4G
 #endif
 #ifndef SW_PAINTEDEGG
 #define SW_PAINTEDEGG               TRUE   // 彩蛋

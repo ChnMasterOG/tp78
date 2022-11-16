@@ -1,10 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : hiddev.c
-* Author             : ChnMasterOG
+* Author             : ChnMasterOG, WCH
 * Version            : V1.1
 * Date               : 2022/2/27
 * Description        : HID 设备任务处理程序
-            
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 

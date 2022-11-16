@@ -1,9 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
-* Author             : ChnMasterOG
-* Version            : V1.0
-* Date               : 2021/12/06
-* Description        : TP78小红点+蓝牙键盘应用主函数及任务系统初始化
+* Author             : ChnMasterOG, WCH
+* Version            : V1.1
+* Date               : 2022/11/13
+* Description        : TP78小红点+蓝牙+2.4G三模键盘应用主函数及任务系统初始化
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 /********************************** (C) COPYRIGHT *******************************
@@ -59,7 +60,7 @@ int main( void )
   PWR_DCDCCfg( ENABLE );
 #endif
   SetSysClock( CLK_SOURCE_PLL_60MHz );
-  FLASH_ROM_LOCK( 0 );  // unlock flsah
+  FLASH_ROM_LOCK( 0 );  // unlock flash
 #if (defined (HAL_SLEEP)) && (HAL_SLEEP == TRUE)
   GPIOA_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );
   GPIOB_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );
@@ -73,9 +74,14 @@ int main( void )
   PRINT("%s\n",VER_LIB);
   CH57X_BLEInit( );
 	HAL_Init( );
-	GAPRole_PeripheralInit( );
-	HidDev_Init( ); 
-	HidEmu_Init( );
+	if (RF_Ready == FALSE) {
+	  GAPRole_PeripheralInit( );
+	  HidDev_Init( );
+	  HidEmu_Init( );
+	} else {
+	  RF_RoleInit();
+	  RF_Init();
+	}
   tmos_start_task( halTaskID, MAIN_CIRCULATION_EVENT, 10 ); // 主循环
   tmos_start_task( halTaskID, WS2812_EVENT, 10 );  // 背光控制
   Main_Circulation();

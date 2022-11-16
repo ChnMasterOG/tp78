@@ -4,6 +4,7 @@
 * Version            : V1.0
 * Date               : 2022/1/28
 * Description        :
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 #ifndef SNAKE_H

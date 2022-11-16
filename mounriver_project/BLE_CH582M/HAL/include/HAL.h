@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : HAL.h
-* Author             : WCH
-* Version            : V1.0
-* Date               : 2016/05/05
+* Author             : ChnMasterOG, WCH
+* Version            : V1.1
+* Date               : 2022/11/13
 * Description        : 
 *******************************************************************************/
 
@@ -24,6 +24,7 @@ extern "C"
 #include "USB.h"
 #include "PS2.h"
 #include "BLE.h"
+#include "RF_PHY.h"
 #include "KEYBOARD.h"
 #include "BATTERY.h"
 #include "OLED.h"
@@ -31,26 +32,32 @@ extern "C"
 #include "ISP.h"
 
 /* hal task Event */
-#define   LED_BLINK_EVENT                               0x0001
-#define   KEY_EVENT			                                0x0002
-#define   MAIN_CIRCULATION_EVENT                        0x0004
-#define   BATTERY_EVENT                                 0x0008
-#define   WS2812_EVENT                                  0x0010
-#define   OLED_EVENT                                    0x0020
-#define   HAL_REG_INIT_EVENT		                        0x2000
-#define   HAL_TEST_EVENT		                            0x4000
+#define LED_BLINK_EVENT                     0x0001
+#define KEY_EVENT                           0x0002
+#define MAIN_CIRCULATION_EVENT              0x0004
+#define BATTERY_EVENT                       0x0008
+#define WS2812_EVENT                        0x0010
+#define OLED_EVENT                          0x0020
+#define HAL_REG_INIT_EVENT                  0x2000
+#define HAL_TEST_EVENT                      0x4000
 
 // hal sys_message
-#define MESSAGE_UART                0xA0    // UART message
-#define UART0_MESSAGE             (MESSAGE_UART|0 )    // UART0 message
-#define UART1_MESSAGE             (MESSAGE_UART|1 )    // UART1 message
+#define MESSAGE_UART                        0xA0    // UART message
+#define UART0_MESSAGE                       (MESSAGE_UART|0 )    // UART0 message
+#define UART1_MESSAGE                       (MESSAGE_UART|1 )    // UART1 message
 
-#define USB_MESSAGE              		0xB0    // USB message
+#define USB_MESSAGE              		        0xB0    // USB message
 
-#define FLASH_ADDR_CustomKey                (8*1024)  // 从8K地址开始存放键盘布局
-#define FLASH_ADDR_Extra_CustomKey          (9*1024)  // 从9K地址开始存放键盘额外布局
-#define FLASH_ADDR_LEDStyle                 (10*1024)
-#define FLASH_ADDR_BLEDevice                (10*1024+1)
+#define HID_MOUSE_DATA_LENGTH               4
+#define HID_KEYBOARD_DATA_LENGTH            8
+#define HID_VOLUME_DATA_LENGTH              1
+#define HID_DATA_LENGTH                     16
+
+#define FLASH_ADDR_CustomKey                (8*1024)      // 从8K地址开始存放键盘布局，map空余空间：0x4~0x210C
+#define FLASH_ADDR_Extra_CustomKey          (9*1024)      // 从9K地址开始存放键盘额外布局
+#define FLASH_ADDR_LEDStyle                 (10*1024)     // 背光样式
+#define FLASH_ADDR_BLEDevice                (10*1024+1)   // 蓝牙默认连接设备编号
+#define FLASH_ADDR_RForBLE                  (10*1024+2)   // 启动默认RF模式或者BLE模式
 
 typedef struct HID_ProcessFunc
 {
@@ -81,10 +88,15 @@ typedef struct tag_uart_package
 /*********************************************************************
  * GLOBAL VARIABLES
  */
+extern UINT8 HID_DATA[HID_DATA_LENGTH];
+extern UINT8* HIDMouse;
+extern UINT8* HIDKey;
+extern UINT8* HIDVolume;
+
 extern BOOL enable_BLE;
 extern BOOL priority_USB;
 extern tmosTaskID halTaskID;
-extern BOOL USB_CapsLock_LEDOn, BLE_CapsLock_LEDOn;
+extern BOOL USB_CapsLock_LEDOn, BLE_CapsLock_LEDOn, RF_CapsLock_LEDOn;
 extern HID_ProcessFunc_s HID_ProcessFunc_v;
 extern SW_ProcessFunc_s SW_ProcessFunc_v;
 

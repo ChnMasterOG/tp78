@@ -27,6 +27,7 @@ TMOS/BLE.o: ../TMOS/BLE.c \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/PS2.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BLE.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
+ E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RF_PHY.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BATTERY.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h \
@@ -94,6 +95,8 @@ E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/PS2.h:
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BLE.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
+
+E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RF_PHY.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h:
 

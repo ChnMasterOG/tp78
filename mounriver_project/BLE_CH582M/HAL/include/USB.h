@@ -47,9 +47,6 @@
     extern UINT8 SetupReqCode;
     extern UINT16 SetupReqLen;
     extern const UINT8 *pDescr;
-    extern UINT8 HIDMouse[4];
-    extern UINT8 HIDKey[8];
-    extern UINT8 HIDVolume;
 
     extern tmosTaskID usbTaskID;
     extern BOOL USB_Ready;

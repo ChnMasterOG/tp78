@@ -1,9 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : USB.c
- * Author             : ChnMasterOG
+ * Author             : ChnMasterOG, WCH
  * Version            : V1.1
  * Date               : 2022/2/24
  * Description        : USB驱动源文件
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 #include "HAL.h"
@@ -57,11 +58,6 @@ UINT8 DevConfig;
 UINT8 SetupReqCode;
 UINT16 SetupReqLen;
 const UINT8 *pDescr;
-/*鼠标键盘数据*/
-UINT8 HIDMouse[4] = { 0x0, 0x0, 0x0, 0x0 };
-UINT8 HIDKey[8] = { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
-/*音量控制数据*/
-UINT8 HIDVolume = 0x0;
 
 extern uint8_t CustomKey[COL_SIZE][ROW_SIZE];         // 其它键盘布局需修改此处
 extern uint8_t Extra_CustomKey[COL_SIZE][ROW_SIZE];   // 其它键盘布局需修改此处
@@ -93,22 +89,22 @@ tmosEvents USB_ProcessEvent( tmosTaskID task_id, tmosEvents events )
 
   if ( events & USB_MOUSE_EVENT )
   {
-    memcpy(pEP2_IN_DataBuf, HIDMouse, 4);
-    DevEP2_IN_Deal( 4 );
+    memcpy(pEP2_IN_DataBuf, HIDMouse, HID_MOUSE_DATA_LENGTH);
+    DevEP2_IN_Deal( HID_MOUSE_DATA_LENGTH );
     return events ^ USB_MOUSE_EVENT;
   }
 
   if ( events & USB_KEYBOARD_EVENT )
   {
-    memcpy(pEP1_IN_DataBuf, HIDKey, 8);
-    DevEP1_IN_Deal( 8 );
+    memcpy(pEP1_IN_DataBuf, HIDKey, HID_KEYBOARD_DATA_LENGTH);
+    DevEP1_IN_Deal( HID_KEYBOARD_DATA_LENGTH );
     return events ^ USB_KEYBOARD_EVENT;
   }
 
   if ( events & USB_VOL_EVENT )
   {
-    memcpy(pEP3_IN_DataBuf, &HIDVolume, 1);
-    DevEP3_IN_Deal( 1 );
+    memcpy(pEP3_IN_DataBuf, HIDVolume, HID_VOLUME_DATA_LENGTH);
+    DevEP3_IN_Deal( HID_VOLUME_DATA_LENGTH );
     return events ^ USB_VOL_EVENT;
   }
 

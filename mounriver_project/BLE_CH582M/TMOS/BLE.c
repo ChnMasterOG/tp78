@@ -1,10 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : BLE.c
-* Author             : ChnMasterOG
+* Author             : ChnMasterOG, WCH
 * Version            : V1.3
 * Date               : 2022/2/26
 * Description        : 蓝牙键鼠应用程序，初始化广播连接参数，然后广播，直至连接主机
 * Ref                : https://software-dl.ti.com/lprf/simplelink_cc2640r2_latest/docs/blestack/ble_user_guide/html/ble-stack-3.x-guide/index.html
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 
@@ -26,16 +27,16 @@
 #define MOUSE_BUTTON_NONE           0x00
 
 // HID mouse input report length
-#define HID_MOUSE_IN_RPT_LEN        4
+#define HID_MOUSE_IN_RPT_LEN        HID_MOUSE_DATA_LENGTH
 
 // HID keyboard input report length
-#define HID_KEYBOARD_IN_RPT_LEN     8
+#define HID_KEYBOARD_IN_RPT_LEN     HID_KEYBOARD_DATA_LENGTH
 
 // HID LED output report length
 #define HID_LED_OUT_RPT_LEN         1
 
 // HID VOL input report length
-#define HID_VOL_IN_RPT_LEN          1
+#define HID_VOL_IN_RPT_LEN          HID_VOLUME_DATA_LENGTH
 
 /*********************************************************************
  * CONSTANTS
@@ -224,7 +225,11 @@ void FLASH_Read_DeviceID( void )
 *******************************************************************************/
 void FLASH_Write_DeviceID( uint8_t DeviceID )
 {
-  EEPROM_WRITE( FLASH_ADDR_BLEDevice, &DeviceID, 1 );
+  uint8_t check;
+  do {
+    EEPROM_WRITE( FLASH_ADDR_BLEDevice, &DeviceID, 1 );
+    EEPROM_READ( FLASH_ADDR_BLEDevice, &check, 1 );
+  } while (check != DeviceID);
 }
 
 /*********************************************************************
@@ -412,7 +417,7 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
   if ( events & START_VOL_REPORT_EVT )
   {
     HidDev_Report( HID_RPT_ID_VOL_IN, HID_REPORT_TYPE_INPUT,
-                   HID_VOL_IN_RPT_LEN, &HIDVolume );     // HID音量report
+                   HID_VOL_IN_RPT_LEN, HIDVolume );     // HID音量report
     return ( events ^ START_VOL_REPORT_EVT );
   }
 

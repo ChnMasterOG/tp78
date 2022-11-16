@@ -4,6 +4,7 @@
  * Version            : V1.1
  * Date               : 2022/3/20
  * Description        : OLED 9.1寸 I2C驱动源文件
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 #include <stdarg.h>

@@ -4,6 +4,7 @@
  * Version            : V1.2
  * Date               : 2022/1/26
  * Description        : PS/2驱动源文件
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 #include "HAL.h"
@@ -18,7 +19,7 @@ uint8_t PS2_bit_cnt = 0,
         PS2_high_cnt = 0,
         PS2_data_ready = 0;
 BOOL enable_TP = TRUE;   // 使能或失能小红点
-Mousestate* const PS2dat = (Mousestate*)HIDMouse;
+Mousestate* const PS2dat = (Mousestate*)&HID_DATA[1];
 
 /*******************************************************************************
 * Function Name  : PS2_WaitCLKState

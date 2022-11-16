@@ -4,6 +4,7 @@
 * Version            : V1.0
 * Date               : 2022/7/17
 * Description        : 跳转BOOT便于ISP下载-源文件
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 #include "HAL.h"

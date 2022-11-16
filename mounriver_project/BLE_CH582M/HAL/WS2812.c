@@ -4,6 +4,7 @@
  * Version            : V1.2
  * Date               : 2022/4/13
  * Description        : WS2812Çý¶¯Ô´´úÂë
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 #include "HAL.h"
@@ -58,7 +59,11 @@ uint8_t FLASH_Read_LEDStyle( void )
 *******************************************************************************/
 void FLASH_Write_LEDStyle( uint8_t LED_Style_Number )
 {
-  EEPROM_WRITE( FLASH_ADDR_LEDStyle, &LED_Style_Number, 1 );
+  uint8_t check;
+  do {
+    EEPROM_WRITE( FLASH_ADDR_LEDStyle, &LED_Style_Number, 1 );
+    EEPROM_READ( FLASH_ADDR_LEDStyle, &check, 1 );
+  } while (check != LED_Style_Number);
 }
 
 /*******************************************************************************

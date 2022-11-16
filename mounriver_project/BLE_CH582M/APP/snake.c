@@ -4,6 +4,7 @@
 * Version            : V1.0
 * Date               : 2022/1/27
 * Description        : Ã∞≥‘…ﬂ”Œœ∑
+* SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 
 #include <stdlib.h>

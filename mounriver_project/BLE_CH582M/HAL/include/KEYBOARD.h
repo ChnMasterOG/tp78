@@ -138,6 +138,7 @@
     #define Fn_Mode_ChangeKey             0x02
     #define Fn_Mode_JumpBoot              0xB0
     #define Fn_Mode_SoftReset             0xB1
+    #define Fn_Mode_RForBLE               0xB2
     #define Fn_Mode_VolumeUp              0xC0
     #define Fn_Mode_VolumeDown            0xC1
     #define Fn_Mode_DisEnableBLE          0xD0

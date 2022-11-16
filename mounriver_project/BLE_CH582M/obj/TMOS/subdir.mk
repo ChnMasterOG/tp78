@@ -5,15 +5,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../TMOS/BLE.c \
-../TMOS/MCU.c 
+../TMOS/MCU.c \
+../TMOS/RF_PHY.c 
 
 OBJS += \
 ./TMOS/BLE.o \
-./TMOS/MCU.o 
+./TMOS/MCU.o \
+./TMOS/RF_PHY.o 
 
 C_DEPS += \
 ./TMOS/BLE.d \
-./TMOS/MCU.d 
+./TMOS/MCU.d \
+./TMOS/RF_PHY.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

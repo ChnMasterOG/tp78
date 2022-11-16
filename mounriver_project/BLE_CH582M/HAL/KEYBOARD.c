@@ -4,6 +4,7 @@
  * Version            : V1.5
  * Date               : 2022/3/19
  * Description        : 机械键盘驱动源文件
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 #include "HAL.h"
@@ -74,7 +75,7 @@ uint8_t KEYBOARD_data_index = 2,
         KEYBOARD_mouse_ready = 0,
         LED_Change_flag = 0,
         Fn_state = 0;
-Keyboardstate* const Keyboarddat = (Keyboardstate*)HIDKey;
+Keyboardstate* const Keyboarddat = (Keyboardstate*)&HID_DATA[6];
 BOOL PaintedEggMode = FALSE;
 static uint8_t (*KeyArr_Ptr)[ROW_SIZE] = CustomKey;
 static uint16_t KeyArr_ChangeTimes = 0;
@@ -121,6 +122,8 @@ void KEYBOARD_Reset( void )
   EEPROM_WRITE( FLASH_ADDR_LEDStyle, &temp, 1 );   // default LED Style
   temp = 1;
   EEPROM_WRITE( FLASH_ADDR_BLEDevice, &temp, 1 );   // default BLE Device
+  temp = 0;
+  EEPROM_WRITE( FLASH_ADDR_RForBLE, &temp, 1 );   // default BLE mode
 }
 
 /*******************************************************************************
@@ -170,17 +173,20 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_R && Fn_Mode != Fn_Mode_SoftReset ) { // 软件复位模式
       Fn_Mode = Fn_Mode_SoftReset;
       Fn_cnt = 0;
+    } else if ( Keyboarddat->Key1 == KEY_N && Fn_Mode != Fn_Mode_RForBLE ) { // 切换RF模式或BLE模式
+      Fn_Mode = Fn_Mode_RForBLE;
+      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_B && Fn_Mode != Fn_Mode_JumpBoot ) { // 跳转BOOT模式
       Fn_Mode = Fn_Mode_JumpBoot;
       Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_Subtraction && Fn_Mode != Fn_Mode_VolumeDown ) { // 音量减模式
       Fn_Mode = Fn_Mode_VolumeDown;
-      HIDVolume |= Volume_Decr;
+      HIDVolume[0] |= Volume_Decr;
       HID_ProcessFunc_v.volume_func();
       Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_Equal && Fn_Mode != Fn_Mode_VolumeUp ) { // 音量加模式
       Fn_Mode = Fn_Mode_VolumeUp;
-      HIDVolume |= Volume_Incr;
+      HIDVolume[0] |= Volume_Incr;
       HID_ProcessFunc_v.volume_func();
       Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_Delete && Fn_Mode != Fn_Mode_PaintedEgg ) { // 彩蛋模式
@@ -260,18 +266,24 @@ UINT8 KEYBOARD_Custom_Function( void )
         Fn_Mode = Fn_Mode_None;
         SoftReset();
         break;
+      case Fn_Mode_RForBLE:  // Fn+N切换RF或BLE模式后软件复位
+        Fn_Mode = Fn_Mode_None;
+        if (RF_Ready == TRUE) FLASH_Write_RForBLE(0);
+        else FLASH_Write_RForBLE(1);
+        SoftReset();
+        break;
       case Fn_Mode_JumpBoot:  // Fn+B跳转BOOT
         Fn_Mode = Fn_Mode_None;
         APPJumpBoot();
         break;
       case Fn_Mode_VolumeDown:  // Fn+减号减小音量 - 松开停止
         Fn_Mode = Fn_Mode_None;
-        HIDVolume &= ~Volume_Decr;
+        HIDVolume[0] &= ~Volume_Decr;
         HID_ProcessFunc_v.volume_func();
         break;
       case Fn_Mode_VolumeUp:  // Fn+加号增加音量
         Fn_Mode = Fn_Mode_None;
-        HIDVolume &= ~Volume_Incr;
+        HIDVolume[0] &= ~Volume_Incr;
         HID_ProcessFunc_v.volume_func();
         break;
       case Fn_Mode_PaintedEgg:  // Fn+Delete彩蛋
@@ -285,7 +297,7 @@ UINT8 KEYBOARD_Custom_Function( void )
         break;
       case Fn_Mode_DisEnableBLE:
         Fn_Mode = Fn_Mode_None; // Fn+波浪号关闭/开启蓝牙
-        if ( !BLE_Ready ) {
+        if ( !BLE_Ready && !RF_Ready ) {
           enable_BLE = !enable_BLE;
           bStatus_t status = GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &enable_BLE );
           if ( status != SUCCESS ) OLED_PRINT("ERR %d", status);
@@ -301,16 +313,17 @@ UINT8 KEYBOARD_Custom_Function( void )
         else OLED_PRINT("TP DIS");
         tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         break;
-      case Fn_Mode_PriorityUSBorBLE:  // Fn+0优先蓝牙或USB切换
+      case Fn_Mode_PriorityUSBorBLE:  // Fn+0优先蓝牙/RF或USB切换
         Fn_Mode = Fn_Mode_None;
         extern BOOL priority_USB;
         priority_USB = !priority_USB;
-        if ( USB_Ready && BLE_Ready ) {
+        if ( USB_Ready && (BLE_Ready || RF_Ready) ) {
           OLED_ShowOK(26 + priority_USB * 30, 0, FALSE);
           OLED_ShowOK(26 + !priority_USB * 30, 0, TRUE);
         }
         if ( priority_USB ) OLED_PRINT("PRI USB");
-        else OLED_PRINT("PRI BLE");
+        else if ( !RF_Ready ) OLED_PRINT("PRI BLE");
+        else OLED_PRINT("PRI RF");
         tmos_start_task( halTaskID, OLED_EVENT, MS1_TO_SYSTEM_TIME(3000) );
         break;
       case Fn_Mode_SelectDevice1 ... Fn_Mode_SelectDevice6: // 按Fn+1~6切换设备
