@@ -4,6 +4,7 @@
  * Version            : V1.2
  * Date               : 2022/1/26
  * Description        : 硬件任务处理函数及BLE和硬件初始化
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
@@ -525,6 +526,13 @@ tmosEvents HAL_ProcessEvent( tmosTaskID task_id, tmosEvents events )
     OLED_PRINT("");
 #endif
     return events ^ OLED_EVENT;
+  }
+
+  // USB Ready事件
+  if ( events & USB_READY_EVENT )
+  {
+    USB_Ready = TRUE;
+    return events ^ USB_READY_EVENT;
   }
 
   // 硬件初始化事件

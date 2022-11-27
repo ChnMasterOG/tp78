@@ -19,6 +19,7 @@ extern "C" {
 #define SBP_RF_KEYBOARD_REPORT_EVT   0x8
 #define SBP_RF_MOUSE_REPORT_EVT      0x10
 #define SBP_RF_VOL_REPORT_EVT        0x20
+#define SBP_RF_JUMPBOOT_REPORT_EVT   0x40
 #define SBP_RF_CHANNEL_HOP_TX_EVT    (1 << 3)
 #define SBP_RF_CHANNEL_HOP_RX_EVT    (1 << 4)
 

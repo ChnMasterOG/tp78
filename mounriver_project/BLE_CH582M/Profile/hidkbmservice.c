@@ -4,6 +4,7 @@
 * Version            : V1.0
 * Date               : 2021/12/4
 * Description        : 键鼠服务源文件
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 

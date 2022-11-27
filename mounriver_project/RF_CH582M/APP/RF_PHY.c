@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : main.c
- * Author             : WCH
+ * Author             : ChnMasterOG, WCH
  * Version            : V1.0
- * Date               : 2020/08/06
+ * Date               : 2022/11/08
  * Description        :
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
 /******************************************************************************/
@@ -60,14 +60,19 @@ void RF_2G4StatusCallBack(uint8_t sta, uint8_t crc, uint8_t *rxBuf)
                 PRINT("tx recv,rssi:%d\n", (int8_t)rxBuf[0]);
                 PRINT("len:%d-", rxBuf[1]);
                 if (rxBuf[1] <= sizeof(HID_dat)) {
-                    for(i = 0; i < rxBuf[1]; i++) {
-                        PRINT("%x ", rxBuf[i + 2]);
-                        *((uint8_t*)&HID_dat + i) = rxBuf[i + 2];
+                    if (rxBuf[2] == 0x7A) {   //jump to boot
+                        PRINT("jump to boot\n");
+                        APPJumpBoot();
+                    } else {
+                        for(i = 0; i < rxBuf[1]; i++) {
+                            PRINT("%x ", rxBuf[i + 2]);
+                            *((uint8_t*)&HID_dat + i) = rxBuf[i + 2];
+                        }
+                        if (USB_Ready == TRUE) {
+                            tmos_set_event(usbTaskID, 1<<HID_dat.label);
+                        }
+                        PRINT("\n");
                     }
-                    if (USB_Ready == TRUE) {
-                        tmos_set_event(usbTaskID, 1<<HID_dat.label);
-                    }
-                    PRINT("\n");
                 } else {
                     PRINT("receive err!\n");
                 }
@@ -94,14 +99,19 @@ void RF_2G4StatusCallBack(uint8_t sta, uint8_t crc, uint8_t *rxBuf)
                 PRINT("rx recv, rssi: %d\n", (int8_t)rxBuf[0]);
                 PRINT("len:%d-", rxBuf[1]);
                 if (rxBuf[1] <= sizeof(HID_dat)) {
-                    for(i = 0; i < rxBuf[1]; i++) {
-                        PRINT("%x ", rxBuf[i + 2]);
-                        *((uint8_t*)&HID_dat + i) = rxBuf[i + 2];
+                    if (rxBuf[2] == 0x7A) {   //jump to boot
+                        PRINT("jump to boot\n");
+                        APPJumpBoot();
+                    } else {
+                        for(i = 0; i < rxBuf[1]; i++) {
+                            PRINT("%x ", rxBuf[i + 2]);
+                            *((uint8_t*)&HID_dat + i) = rxBuf[i + 2];
+                        }
+                        if (USB_Ready == TRUE) {
+                            tmos_set_event(usbTaskID, 1<<HID_dat.label);
+                        }
+                        PRINT("\n");
                     }
-                    if (USB_Ready == TRUE) {
-                        tmos_set_event(usbTaskID, 1<<HID_dat.label);
-                    }
-                    PRINT("\n");
                 } else {
                     PRINT("receive err!\n");
                 }

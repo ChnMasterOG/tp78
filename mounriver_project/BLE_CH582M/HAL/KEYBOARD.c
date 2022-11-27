@@ -4,6 +4,7 @@
  * Version            : V1.5
  * Date               : 2022/3/19
  * Description        : 机械键盘驱动源文件
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
@@ -176,6 +177,9 @@ UINT8 KEYBOARD_Custom_Function( void )
     } else if ( Keyboarddat->Key1 == KEY_N && Fn_Mode != Fn_Mode_RForBLE ) { // 切换RF模式或BLE模式
       Fn_Mode = Fn_Mode_RForBLE;
       Fn_cnt = 0;
+    } else if ( Keyboarddat->Key1 == KEY_M && Fn_Mode != Fn_Mode_RFJumptoBoot ) { // RF发送0x7A让接收器进BOOT
+      Fn_Mode = Fn_Mode_RFJumptoBoot;
+      Fn_cnt = 0;
     } else if ( Keyboarddat->Key1 == KEY_B && Fn_Mode != Fn_Mode_JumpBoot ) { // 跳转BOOT模式
       Fn_Mode = Fn_Mode_JumpBoot;
       Fn_cnt = 0;
@@ -271,6 +275,12 @@ UINT8 KEYBOARD_Custom_Function( void )
         if (RF_Ready == TRUE) FLASH_Write_RForBLE(0);
         else FLASH_Write_RForBLE(1);
         SoftReset();
+        break;
+      case Fn_Mode_RFJumptoBoot:  // Fn+M发送0x7A让接收器进BOOT
+        Fn_Mode = Fn_Mode_None;
+        if (RF_Ready == TRUE) {
+          tmos_set_event( RFTaskId, SBP_RF_JUMPBOOT_REPORT_EVT );  // RF JUMPBOOT事件
+        }
         break;
       case Fn_Mode_JumpBoot:  // Fn+B跳转BOOT
         Fn_Mode = Fn_Mode_None;

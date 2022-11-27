@@ -38,6 +38,7 @@ extern "C"
 #define BATTERY_EVENT                       0x0008
 #define WS2812_EVENT                        0x0010
 #define OLED_EVENT                          0x0020
+#define USB_READY_EVENT                     0x0040
 #define HAL_REG_INIT_EVENT                  0x2000
 #define HAL_TEST_EVENT                      0x4000
 

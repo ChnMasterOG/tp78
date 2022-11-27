@@ -4,6 +4,7 @@
  * Version            : V1.1
  * Date               : 2022/2/24
  * Description        : USB驱动源文件
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
@@ -459,10 +460,11 @@ void USB_DevTransProcess( void )
     if ( R8_USB_MIS_ST & RB_UMS_SUSPEND )
     {
       USB_Ready = FALSE;
+      tmos_clear_event( halTaskID, USB_READY_EVENT );
     }   // 挂起
     else
     {
-      USB_Ready = TRUE;
+      tmos_start_task( halTaskID, USB_READY_EVENT, 20 );
     }   // 唤醒
     R8_USB_INT_FG = RB_UIF_SUSPEND;
   }

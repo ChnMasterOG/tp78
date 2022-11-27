@@ -4,6 +4,7 @@
 * Version            : V1.1
 * Date               : 2022/11/13
 * Description        : TP78小红点+蓝牙+2.4G三模键盘应用主函数及任务系统初始化
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * SPDX-License-Identifier: GPL-3.0
 *******************************************************************************/
 

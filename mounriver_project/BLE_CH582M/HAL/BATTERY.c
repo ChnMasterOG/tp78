@@ -4,6 +4,7 @@
  * Version            : V1.1
  * Date               : 2022/1/26
  * Description        : 电池ADC采样源文件
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 

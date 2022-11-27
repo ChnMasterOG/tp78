@@ -24,6 +24,7 @@ HAL/USB.o: ../HAL/USB.c \
  E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/USB.h \
  E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/LED.h \
  E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/KEY.h \
+ E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/ISP.h \
  E:\Project\tp78\mounriver_project\RF_CH582M\APP\include/RF_PHY.h
 
 E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/HAL.h:
@@ -75,5 +76,7 @@ E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/USB.h:
 E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/LED.h:
 
 E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/KEY.h:
+
+E:\Project\tp78\mounriver_project\RF_CH582M\HAL\include/ISP.h:
 
 E:\Project\tp78\mounriver_project\RF_CH582M\APP\include/RF_PHY.h:

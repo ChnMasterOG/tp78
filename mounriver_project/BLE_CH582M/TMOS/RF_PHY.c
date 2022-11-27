@@ -4,6 +4,7 @@
  * Version            : V1.0
  * Date               : 2022/11/13
  * Description        : RF 2.4G应用程序
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
@@ -18,6 +19,7 @@
  */
 tmosTaskID RFTaskId;
 BOOL RF_Ready = FALSE;
+uint8_t JUMP_BOOT_DATA[1] = {0x7A}; // 规定发送0x7A接收器进BOOT
 uint8_t TX_DATA[2] = {0xff, 0xff};
 
 /*********************************************************************
@@ -192,6 +194,12 @@ uint16_t RF_ProcessEvent(uint8_t task_id, uint16_t events)
         RF_Shut();
         RF_Tx(HIDVolume - 1, HID_VOLUME_DATA_LENGTH + 1, 0xFF, 0xFF);
         return events ^ SBP_RF_VOL_REPORT_EVT;
+    }
+    if (events & SBP_RF_JUMPBOOT_REPORT_EVT)
+    {
+        RF_Shut();
+        RF_Tx(JUMP_BOOT_DATA, 1, 0xFF, 0xFF);
+        return events ^ SBP_RF_JUMPBOOT_REPORT_EVT;
     }
     return 0;
 }

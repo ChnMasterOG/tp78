@@ -160,7 +160,7 @@ void OLED_Clear(void)
 	{  
 		OLED_WR_Byte(0xb0 + i, OLED_CMD);          //设置页地址（0~7）
 		OLED_WR_Byte(0x00, OLED_CMD);              //设置显示位置—列低地址
-		OLED_WR_Byte(0x10, OLED_CMD);              //设置显示位置—列高地址   
+		OLED_WR_Byte(0x10, OLED_CMD);              //设置显示位置—列高地址
 		for(n=0;n<128;n++) OLED_WR_Byte(0, OLED_DATA); 
 	}                                            //更新显示
 }
@@ -246,7 +246,7 @@ void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr)
 {
 	uint8_t j=0;
 	while(chr[j]!='\0')                         //该位不为空则打印
-	{	
+	{
 		OLED_ShowChar(x, y, chr[j]);        			//从第x列第y页打印字符
 		if ( SIZE == 16 ) x += 8;                 //字宽8列 打印完跳8列
 		else x += 6;                              //字宽6列 打印完跳6列

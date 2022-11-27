@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../HAL/ISP.c \
 ../HAL/MCU.c \
 ../HAL/RTC.c \
 ../HAL/SLEEP.c \
 ../HAL/USB.c 
 
 OBJS += \
+./HAL/ISP.o \
 ./HAL/MCU.o \
 ./HAL/RTC.o \
 ./HAL/SLEEP.o \
 ./HAL/USB.o 
 
 C_DEPS += \
+./HAL/ISP.d \
 ./HAL/MCU.d \
 ./HAL/RTC.d \
 ./HAL/SLEEP.d \

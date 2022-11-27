@@ -4,6 +4,7 @@
  * Version            : V1.0
  * Date               : 2022/11/14
  * Description        :
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: GPL-3.0
  *******************************************************************************/
 
