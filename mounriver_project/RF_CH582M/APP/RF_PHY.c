@@ -17,7 +17,6 @@
  * GLOBAL TYPEDEFS
  */
 tmosTaskID RFtaskID;
-uint8_t TX_DATA[2] = {0xff, 0xff};
 uint8_t CAPSLOCK_DATA[2] = {3, 0};
 
 /*********************************************************************
@@ -56,6 +55,7 @@ void RF_2G4StatusCallBack(uint8_t sta, uint8_t crc, uint8_t *rxBuf)
             }
             else
             {
+#if 0
                 uint8_t i;
                 PRINT("tx recv,rssi:%d\n", (int8_t)rxBuf[0]);
                 PRINT("len:%d-", rxBuf[1]);
@@ -76,6 +76,7 @@ void RF_2G4StatusCallBack(uint8_t sta, uint8_t crc, uint8_t *rxBuf)
                 } else {
                     PRINT("receive err!\n");
                 }
+#endif
             }
             break;
         }
@@ -172,18 +173,17 @@ uint16_t RF_ProcessEvent(uint8_t task_id, uint16_t events)
     {
         uint8_t state;
         RF_Shut();
-        state = RF_Rx(TX_DATA, 2, 0xFF, 0xFF);
+        state = RF_Rx(CAPSLOCK_DATA, 2, 0xFF, 0xFF);
         PRINT("RX mode.state = %x\n", state);
         return events ^ SBP_RF_RF_RX_EVT;
     }
-    if(events & SBP_RF_TX_CAPSLOCK_EVT)
+    if(events & SBP_RF_CAPSLOCK_TX_EVT)
     {
         uint8_t state;
         RF_Shut();
-        CAPSLOCK_DATA[1] = USB_CapsLock_LEDOn;
-        state = RF_Rx(TX_DATA, 2, 0xFF, 0xFF);
+        state = RF_Rx(CAPSLOCK_DATA, 2, 0xFF, 0xFF);
         PRINT("RX mode.state = %x\n", state);
-        return events ^ SBP_RF_TX_CAPSLOCK_EVT;
+        return events ^ SBP_RF_CAPSLOCK_TX_EVT;
     }
     return 0;
 }
@@ -205,14 +205,14 @@ void RF_Init(void)
     rfConfig.accessAddress = 0x71764129; // 禁止使用0x55555555以及0xAAAAAAAA ( 建议不超过24次位反转，且不超过连续的6个0或1 )
     rfConfig.CRCInit = 0x555555;
     rfConfig.Channel = 8;
-    rfConfig.Frequency = 2480000;
-    rfConfig.LLEMode = LLE_MODE_BASIC | LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
+    rfConfig.Frequency = 2400000;
+    rfConfig.LLEMode = LLE_MODE_AUTO | LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
     rfConfig.rfStatusCB = RF_2G4StatusCallBack;
     rfConfig.RxMaxlen = 251;
     state = RF_Config(&rfConfig);
     PRINT("rf 2.4g init: %x\n", state);
     { // RX mode
-        state = RF_Rx(TX_DATA, 2, 0xFF, 0xFF);
+        state = RF_Rx(CAPSLOCK_DATA, 2, 0xFF, 0xFF);
         PRINT("RX mode.state = %x\n", state);
     }
 

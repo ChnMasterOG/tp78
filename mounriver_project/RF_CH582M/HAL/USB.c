@@ -71,8 +71,6 @@ __attribute__((aligned(4)))  UINT8 EP3_Databuf[64 + 64];        //ep3_out(64)+ep
 tmosTaskID usbTaskID=INVALID_TASK_ID;
 // USB ready flag
 BOOL USB_Ready = FALSE;
-// USB CapsLock LED flag
-BOOL USB_CapsLock_LEDOn = FALSE;
 
 /*******************************************************************************
 * Function Name  : USB_ProcessEvent
@@ -189,12 +187,12 @@ void USB_DevTransProcess( void )
           if ( SetupReqCode == 0x09 )
           {
             if ( pEP0_DataBuf[1] ) {
-              USB_CapsLock_LEDOn = FALSE;    // Light off Caps Lock LED
-              tmos_start_task(RFtaskID, SBP_RF_TX_CAPSLOCK_EVT, 10);
+                CAPSLOCK_DATA[1] = 0;    // Light off Caps Lock LED
+                tmos_start_task(RFtaskID, SBP_RF_CAPSLOCK_TX_EVT, 10);
             }
             else if ( pEP0_DataBuf[1] == 0 ) {
-              USB_CapsLock_LEDOn = TRUE;     // Light on Caps Lock LED
-              tmos_start_task(RFtaskID, SBP_RF_TX_CAPSLOCK_EVT, 10);
+                CAPSLOCK_DATA[1] = 1;     // Light on Caps Lock LED
+                tmos_start_task(RFtaskID, SBP_RF_CAPSLOCK_TX_EVT, 10);
             }
           }
         }

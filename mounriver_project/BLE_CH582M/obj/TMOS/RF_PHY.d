@@ -1,7 +1,6 @@
 TMOS/RF_PHY.o: ../TMOS/RF_PHY.c \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\LIB/CH58xBLE_LIB.H \
- E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RF_PHY.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/HAL.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RTC.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/config.h \
@@ -29,19 +28,17 @@ TMOS/RF_PHY.o: ../TMOS/RF_PHY.c \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/PS2.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BLE.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h \
+ E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h \
+ E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RF_PHY.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BATTERY.h \
- E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h \
- E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/WS2812.h \
  E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/ISP.h
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\LIB/CH58xBLE_LIB.H:
-
-E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RF_PHY.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/HAL.h:
 
@@ -97,15 +94,15 @@ E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BLE.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/CONFIG.h:
 
+E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h:
+
+E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h:
+
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/RF_PHY.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/KEYBOARD.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/BATTERY.h:
-
-E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLED.h:
-
-E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/OLEDFONT.h:
 
 E:\Project\tp78\mounriver_project\BLE_CH582M\HAL\include/WS2812.h:
 

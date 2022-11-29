@@ -72,7 +72,7 @@ int main(void)
     HAL_Init();
     RF_RoleInit();
     RF_Init();
-    HAL_USBInit();  //这里必须先初始化RF后初始化USB
+    HAL_USBInit();
     Main_Circulation();
 }
 

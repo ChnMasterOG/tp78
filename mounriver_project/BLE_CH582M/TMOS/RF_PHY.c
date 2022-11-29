@@ -11,7 +11,6 @@
 /******************************************************************************/
 /* 头文件包含 */
 #include "CONFIG.h"
-#include "RF_PHY.h"
 #include "HAL.h"
 
 /*********************************************************************
@@ -221,8 +220,8 @@ void RF_Init(void)
     rfConfig.accessAddress = 0x71764129; // 禁止使用0x55555555以及0xAAAAAAAA ( 建议不超过24次位反转，且不超过连续的6个0或1 )
     rfConfig.CRCInit = 0x555555;
     rfConfig.Channel = 8;
-    rfConfig.Frequency = 2480000;
-    rfConfig.LLEMode = LLE_MODE_BASIC | LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
+    rfConfig.Frequency = 2400000;
+    rfConfig.LLEMode = LLE_MODE_AUTO | LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
     rfConfig.rfStatusCB = RF_2G4StatusCallBack;
     rfConfig.RxMaxlen = 251;
     state = RF_Config(&rfConfig);

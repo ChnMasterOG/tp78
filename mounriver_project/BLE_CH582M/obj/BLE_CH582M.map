@@ -7846,7 +7846,7 @@ OUTPUT(BLE_CH582M.elf elf32-littleriscv)
  .debug_line    0x0000000000010f13      0x45c ./APP/main.o
  .debug_line    0x000000000001136f      0x9b2 ./APP/snake.o
 
-.debug_str      0x0000000000000000     0x4c5d
+.debug_str      0x0000000000000000     0x4c34
  .debug_str     0x0000000000000000     0x1588 ./TMOS/BLE.o
                                        0x166a (size before relaxing)
  .debug_str     0x0000000000001588      0x7b6 ./TMOS/MCU.o
@@ -7867,38 +7867,39 @@ OUTPUT(BLE_CH582M.elf elf32-littleriscv)
                                         0x90c (size before relaxing)
  .debug_str     0x0000000000002afa       0x6d ./StdPeriphDriver/CH58x_usbdev.o
                                         0x863 (size before relaxing)
- .debug_str     0x0000000000002b67       0x50 ./Startup/startup_CH583.o
- .debug_str     0x0000000000002bb7      0x937 ./Profile/battservice.o
+ .debug_str     0x0000000000002b67       0x27 ./Startup/startup_CH583.o
+                                         0x58 (size before relaxing)
+ .debug_str     0x0000000000002b8e      0x937 ./Profile/battservice.o
                                        0x1438 (size before relaxing)
- .debug_str     0x00000000000034ee      0x2cd ./Profile/devinfoservice.o
+ .debug_str     0x00000000000034c5      0x2cd ./Profile/devinfoservice.o
                                         0x715 (size before relaxing)
- .debug_str     0x00000000000037bb      0x4f2 ./Profile/hiddev.o
+ .debug_str     0x0000000000003792      0x4f2 ./Profile/hiddev.o
                                        0x1b9e (size before relaxing)
- .debug_str     0x0000000000003cad      0x5b1 ./Profile/hidkbmservice.o
+ .debug_str     0x0000000000003c84      0x5b1 ./Profile/hidkbmservice.o
                                         0xa88 (size before relaxing)
- .debug_str     0x000000000000425e      0x225 ./Profile/scanparamservice.o
+ .debug_str     0x0000000000004235      0x225 ./Profile/scanparamservice.o
                                         0xc66 (size before relaxing)
- .debug_str     0x0000000000004483       0xab ./HAL/BATTERY.o
+ .debug_str     0x000000000000445a       0xab ./HAL/BATTERY.o
                                         0xffc (size before relaxing)
- .debug_str     0x000000000000452e       0x23 ./HAL/ISP.o
+ .debug_str     0x0000000000004505       0x23 ./HAL/ISP.o
                                         0xe08 (size before relaxing)
- .debug_str     0x0000000000004551      0x19c ./HAL/KEYBOARD.o
+ .debug_str     0x0000000000004528      0x19c ./HAL/KEYBOARD.o
                                        0x114f (size before relaxing)
- .debug_str     0x00000000000046ed      0x131 ./HAL/OLED.o
+ .debug_str     0x00000000000046c4      0x131 ./HAL/OLED.o
                                         0xaaf (size before relaxing)
- .debug_str     0x000000000000481e       0x12 ./HAL/OLEDFONT.o
+ .debug_str     0x00000000000047f5       0x12 ./HAL/OLEDFONT.o
                                         0x13d (size before relaxing)
- .debug_str     0x0000000000004830       0xcb ./HAL/PS2.o
+ .debug_str     0x0000000000004807       0xcb ./HAL/PS2.o
                                        0x117b (size before relaxing)
- .debug_str     0x00000000000048fb       0x40 ./HAL/RTC.o
+ .debug_str     0x00000000000048d2       0x40 ./HAL/RTC.o
                                         0xe4a (size before relaxing)
- .debug_str     0x000000000000493b      0x146 ./HAL/USB.o
+ .debug_str     0x0000000000004912      0x146 ./HAL/USB.o
                                        0x11ed (size before relaxing)
- .debug_str     0x0000000000004a81       0xcd ./HAL/WS2812.o
+ .debug_str     0x0000000000004a58       0xcd ./HAL/WS2812.o
                                         0xff4 (size before relaxing)
- .debug_str     0x0000000000004b4e       0x5a ./APP/main.o
+ .debug_str     0x0000000000004b25       0x5a ./APP/main.o
                                        0x10cc (size before relaxing)
- .debug_str     0x0000000000004ba8       0xb5 ./APP/snake.o
+ .debug_str     0x0000000000004b7f       0xb5 ./APP/snake.o
                                         0xed7 (size before relaxing)
 
 .comment        0x0000000000000000       0x33

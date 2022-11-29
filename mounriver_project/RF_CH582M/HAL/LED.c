@@ -56,10 +56,12 @@ void HalLedOnOff(uint8_t leds, uint8_t mode);
 void HAL_LedInit(void)
 {
     /* Initialize all LEDs to OFF */
-    LED1_DDR;
+    GPIOB_SetBits(LED1_BV);
+    GPIOB_ModeCfg(LED1_BV, GPIO_ModeOut_PP_5mA);
+//    LED1_DDR;
     HalLedSet(HAL_LED_ALL, HAL_LED_MODE_OFF);
     // just test
-    HalLedBlink(HAL_LED_1, 10, 30, 4000);
+    HalLedBlink(HAL_LED_1, 5, 30, 750);
     /* Initialize sleepActive to FALSE */
     HalLedStatusControl.sleepActive = FALSE;
 }
