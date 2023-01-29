@@ -337,6 +337,9 @@ void WS2812_Send( void )
     led_style_func( ); // 调用变化函数
   }
 
+  TMR1_Disable();
+  TMR1_PWMActDataWidth(0);
+  TMR1_Enable();  // CH582M BUG
   TMR1_DMACfg( ENABLE, (UINT16) (UINT32) LED_DMA_Buffer, (UINT16) (UINT32) (LED_DMA_Buffer + LED_Number*24 + 42), Mode_Single );  // 启用DMA转换，从内存到外设
 }
 
