@@ -116,7 +116,7 @@ __attribute__((weak)) void HID_VOL_Process(void)
   if ( USB_Ready == TRUE && priority_USB == TRUE ) {
     tmos_set_event( usbTaskID, USB_VOL_EVENT );  //USB音量事件
   } else if ( BLE_Ready == TRUE ) {
-    //tmos_set_event( hidEmuTaskId, START_VOL_REPORT_EVT );  //蓝牙音量事件
+    tmos_set_event( hidEmuTaskId, START_VOL_REPORT_EVT );  //蓝牙音量事件
   } else if ( RF_Ready == TRUE ) {
     tmos_set_event( RFTaskId, SBP_RF_VOL_REPORT_EVT );  // RF键盘事件
   }

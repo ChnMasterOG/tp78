@@ -417,8 +417,11 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
 
   if ( events & START_VOL_REPORT_EVT )
   {
+    UINT8 _hidvol[2] = { 0 }, i = 0;
+    if (((UINT8)*HIDVolume & Volume_Decr) && i < 2) _hidvol[i++] = 0xEA;
+    if (((UINT8)*HIDVolume & Volume_Incr) && i < 2) _hidvol[i++] = 0xE9;
     HidDev_Report( HID_RPT_ID_VOL_IN, HID_REPORT_TYPE_INPUT,
-                   HID_VOL_IN_RPT_LEN, HIDVolume );     // HIDÒôÁ¿report
+                   2, _hidvol );     // HIDÒôÁ¿report (for PC)
     return ( events ^ START_VOL_REPORT_EVT );
   }
 
